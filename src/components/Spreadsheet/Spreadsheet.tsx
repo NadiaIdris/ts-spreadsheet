@@ -2,10 +2,11 @@ import { useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import { ICell } from "../Cell";
+import CellHeader from "../CellHeader";
 
 interface SpreadsheetProps {
-  rows?: number;
   columns?: number;
+  rows?: number;
 }
 
 const ALPHABET = [
@@ -52,11 +53,29 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   console.log(grid);
   return (
     <Grid>
-      {spreadsheetState.map((row, rowIdx) => {
-        return row.map((column, columnIdx) => (
-          <Cell key={`${rowIdx}/${columnIdx}`}></Cell>
-        ));
-      })}
+      {spreadsheetState.map((row, rowIdx) => (
+        <>
+          {rowIdx === 0 && (
+            <>
+              {row.map((column, columnIdx) => (
+                <CellHeader
+                  key={`${rowIdx - 1}/${columnIdx}`}
+                  value={ALPHABET[columnIdx]}
+                />
+              ))}
+            </>
+          )}
+
+          {row.map((column, columnIdx) => (
+            <Cell
+              key={`${rowIdx}/${columnIdx}`}
+              isEditing={column.isEditing}
+              isSelected={column.isSelected}
+              value={column.value}
+            />
+          ))}
+        </>
+      ))}
     </Grid>
   );
 };

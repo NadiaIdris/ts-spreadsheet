@@ -1,13 +1,13 @@
 import styled from "styled-components";
 
 interface ICell {
-  isSelected: boolean;
   isEditing: boolean;
+  isSelected: boolean;
   value: string;
 }
 
-const Cell = () => {
-  return <OneCell></OneCell>;
+const Cell = ({ isEditing, isSelected, value }: ICell) => {
+  return <OneCell value={value}></OneCell>;
 };
 
 export default Cell;
