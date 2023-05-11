@@ -52,31 +52,36 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   console.log(grid);
   return (
-    <Grid>
+    <Flex>
       {spreadsheetState.map((row, rowIdx) => (
         <>
           {/* Add column headers */}
           {rowIdx === 0 && (
-            <>
+            <div style={{ display: "flex" }}>
+              {/* First cell in cell header has no value (it's empty). */}
+              <CellHeader isFirstColumnCell key={`cell-0`} value="" />
+              {/* Rest of the cell headers will have alphabet letters as headers. */}
               {row.map((column, columnIdx) => (
                 <CellHeader
                   key={`${rowIdx - 1}/${columnIdx}`}
                   value={ALPHABET[columnIdx]}
                 />
               ))}
-            </>
+            </div>
           )}
-          <>
+          <div style={{ display: "flex" }}>
             {row.map((column, columnIdx) => {
               return (
                 <>
-                  {/* Add row headers */}
+                  {/* Add row headers. */}
                   {columnIdx === 0 && (
                     <CellHeader
+                      isFirstColumnCell
                       key={`${rowIdx + 1}/${columnIdx}`}
                       value={String(rowIdx + 1)}
                     />
                   )}
+                  {/* Add the rest of row items.  */}
                   <Cell
                     key={`${rowIdx}/${columnIdx}`}
                     isEditing={column.isEditing}
@@ -86,16 +91,16 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                 </>
               );
             })}
-          </>
+          </div>
         </>
       ))}
-    </Grid>
+    </Flex>
   );
 };
 
 export default Spreadsheet;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
+const Flex = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
