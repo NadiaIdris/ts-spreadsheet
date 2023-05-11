@@ -55,6 +55,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     <Grid>
       {spreadsheetState.map((row, rowIdx) => (
         <>
+          {/* Add column headers */}
           {rowIdx === 0 && (
             <>
               {row.map((column, columnIdx) => (
@@ -65,15 +66,27 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
               ))}
             </>
           )}
-
-          {row.map((column, columnIdx) => (
-            <Cell
-              key={`${rowIdx}/${columnIdx}`}
-              isEditing={column.isEditing}
-              isSelected={column.isSelected}
-              value={column.value}
-            />
-          ))}
+          <>
+            {row.map((column, columnIdx) => {
+              return (
+                <>
+                  {/* Add row headers */}
+                  {columnIdx === 0 && (
+                    <CellHeader
+                      key={`${rowIdx + 1}/${columnIdx}`}
+                      value={String(rowIdx + 1)}
+                    />
+                  )}
+                  <Cell
+                    key={`${rowIdx}/${columnIdx}`}
+                    isEditing={column.isEditing}
+                    isSelected={column.isSelected}
+                    value={column.value}
+                  />
+                </>
+              );
+            })}
+          </>
         </>
       ))}
     </Grid>

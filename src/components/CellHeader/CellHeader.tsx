@@ -5,7 +5,7 @@ interface CellHeaderProps {
 }
 
 const CellHeader = ({ value }: CellHeaderProps) => {
-  return <OneCell readOnly type="text" value={value} ></OneCell>;
+  return <OneCell readOnly type="text" value={value}></OneCell>;
 };
 
 export default CellHeader;
