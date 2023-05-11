@@ -1,14 +1,20 @@
-import React from 'react';
-import './App.css';
-import Spreadsheet from './components/Spreadsheet';
+import styled from "styled-components";
+import Spreadsheet from "./components/Spreadsheet";
 
 function App() {
   return (
-    <div className="App">
-      <h1>Spreadsheet</h1>
+    <div>
+      <H1>Spreadsheet</H1>
       <Spreadsheet />
     </div>
   );
 }
 
 export default App;
+
+const H1 = styled.h1`
+  font-size: 2em;
+  font-weight: bold;
+  margin: 20px;
+  color: #149820;
+`;

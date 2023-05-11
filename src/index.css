@@ -3,3 +3,7 @@
   margin: 0;
   padding: 0;
 }
+
+:root {
+  --color-border-spreadsheet: #d7e2ee;
+}

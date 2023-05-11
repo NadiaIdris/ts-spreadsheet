@@ -14,7 +14,7 @@ export default Cell;
 export type { ICell };
 
 const OneCell = styled.input`
-  border: 1px solid lightgray;
+  border: 1px solid var(--color-border-spreadsheet);
   max-width: 100%;
   min-width: 20px;
   padding: 5px;
