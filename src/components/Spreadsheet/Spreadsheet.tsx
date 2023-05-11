@@ -66,6 +66,4 @@ export default Spreadsheet;
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(10, 1fr);
-  border: 1px solid black;
 `;
