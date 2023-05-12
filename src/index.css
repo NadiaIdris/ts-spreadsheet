@@ -8,5 +8,7 @@
 :root {
   --color-border-spreadsheet: #334958;
   --color-text-header: #4E6C82;
+  --color-text-cell-not-focused: #708A9C;
   --color-text-cell: #05ec00;
+  --color-white: #fff;
 }

@@ -5,6 +5,9 @@ interface ICell {
   isEditing: boolean;
   isSelected: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onDoubleClick: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   rowIdx: number;
   value: string;
 }
@@ -14,6 +17,9 @@ const Cell = ({
   isEditing,
   isSelected,
   onChange,
+  onClick,
+  onDoubleClick,
+  onKeyDown,
   rowIdx,
   value,
 }: ICell) => {
@@ -22,6 +28,10 @@ const Cell = ({
       data-columnidx={columnIdx}
       onChange={onChange}
       data-rowidx={rowIdx}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      onKeyDown={onKeyDown}
+      readOnly={isEditing ? false : true}
       value={value}
     />
   );
@@ -38,11 +48,13 @@ const OneCell = styled.input`
   max-width: 100%;
   min-width: 20px;
   padding: 5px;
+  color: var(--color-text-cell-not-focused);
 
   &:focus {
-    border-radius: 5px;
+    border-radius: 2px;
     outline: 2px solid var(--color-text-cell);
+    outline-offset: -2px;
     z-index: 10;
-    color: 
+    color: var(--color-white);
   }
 `;

@@ -38,6 +38,8 @@ const ALPHABET = [
   "Z",
 ];
 
+// TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
+
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   const grid: ICell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: columns }, () => {
@@ -55,13 +57,45 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     event: React.ChangeEvent<HTMLInputElement>,
     rowIdx: number
   ) => {
-    console.log(event.target.value);
-    console.log(event.target);
-    const { rowidx, columnidx } = event.target.dataset;
-    const row = spreadsheetState.find(() => rowIdx === Number(rowidx));
-    const cell = row?.find(() => columnIdx === Number(columnidx));
-    console.log("cell --> ", cell)
+    console.log("cell value changed event.target.value-->", event.target.value)
+    setSpreadsheetState((prevState) => {
+      const newState = [...prevState];
+      newState[rowIdx][columnIdx].value = event.target.value;
+      return newState;
+    });
   };
+
+  const handleCellClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    const { columnidx, rowidx } = event.currentTarget.dataset;
+    setSpreadsheetState((previousState) => {
+      const newState = [...previousState];
+      newState[Number(rowidx)][Number(columnidx)].isSelected = true;
+      return newState;
+    });
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    const { columnidx, rowidx } = event.currentTarget.dataset;
+    setSpreadsheetState((previousState) => {
+      const newState = [...previousState];
+      newState[Number(rowidx)][Number(columnidx)].isEditing = true;
+      return newState;
+    });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => { 
+    const { columnidx, rowidx } = event.currentTarget.dataset;
+    if (event.key === "Enter") { 
+      console.log("Enter key pressed")
+      setSpreadsheetState(previousState => { 
+        const newState = [ ...previousState ]; 
+        newState[ Number(rowidx) ][ Number(columnidx) ].isEditing = true;
+        newState[Number(rowidx)][Number(columnidx)].isSelected = true;
+        return newState; 
+      })
+    }
+  };
+
   return (
     <Flex>
       {spreadsheetState.map((row, rowIdx) => (
@@ -102,6 +136,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onChange={(event) =>
                       handleCellValueChange(columnIdx, event, rowIdx)
                     }
+                    onClick={(event: React.MouseEvent<HTMLInputElement>) => handleCellClick(event)}
+                    onDoubleClick={(
+                      event: React.MouseEvent<HTMLInputElement>
+                    ) => handleDoubleClick(event)}
+                    onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event)}
                     rowIdx={rowIdx}
                     value={column.value}
                   />
