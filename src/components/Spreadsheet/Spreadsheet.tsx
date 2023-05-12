@@ -55,12 +55,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     <Flex>
       {spreadsheetState.map((row, rowIdx) => (
         <>
-          {/* Add column headers */}
+          {/* Add row of column headers */}
           {rowIdx === 0 && (
             <div style={{ display: "flex" }}>
-              {/* First cell in cell header has no value (it's empty). */}
+              {/* First cell in row has no value (it's empty). */}
               <CellHeader isFirstColumnCell key={`cell-0`} value="" />
-              {/* Rest of the cell headers will have alphabet letters as headers. */}
+              {/* Rest of the cell headers will have alphabet letters as header values. */}
               {row.map((column, columnIdx) => (
                 <CellHeader
                   key={`${rowIdx - 1}/${columnIdx}`}
@@ -69,6 +69,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
               ))}
             </div>
           )}
+          {/* Add rest of the rows */}
           <div style={{ display: "flex" }}>
             {row.map((column, columnIdx) => {
               return (

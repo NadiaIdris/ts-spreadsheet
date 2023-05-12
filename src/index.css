@@ -2,8 +2,10 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  background-color: #1D2C37;
 }
 
 :root {
-  --color-border-spreadsheet: #d7e2ee;
+  --color-border-spreadsheet: #334958;
+  --color-header-text: #4E6C82;
 }
