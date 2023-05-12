@@ -7,5 +7,6 @@
 
 :root {
   --color-border-spreadsheet: #334958;
-  --color-header-text: #4E6C82;
+  --color-text-header: #4E6C82;
+  --color-text-cell: #05ec00;
 }

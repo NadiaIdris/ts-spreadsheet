@@ -50,27 +50,38 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   );
   const [spreadsheetState, setSpreadsheetState] = useState<ICell[][]>(grid);
 
-  console.log(grid);
+  const handleCellValueChange = (
+    columnIdx: number,
+    event: React.ChangeEvent<HTMLInputElement>,
+    rowIdx: number
+  ) => {
+    console.log(event.target.value);
+    console.log(event.target);
+    const { rowidx, columnidx } = event.target.dataset;
+    const row = spreadsheetState.find(() => rowIdx === Number(rowidx));
+    const cell = row?.find(() => columnIdx === Number(columnidx));
+    console.log("cell --> ", cell)
+  };
   return (
     <Flex>
       {spreadsheetState.map((row, rowIdx) => (
         <>
           {/* Add row of column headers */}
           {rowIdx === 0 && (
-            <div style={{ display: "flex" }}>
+            <div key={`row-column-headers`} style={{ display: "flex" }}>
               {/* First cell in row has no value (it's empty). */}
               <CellHeader isFirstColumnCell key={`cell-0`} value="" />
               {/* Rest of the cell headers will have alphabet letters as header values. */}
               {row.map((column, columnIdx) => (
                 <CellHeader
-                  key={`${rowIdx - 1}/${columnIdx}`}
+                  key={`cell-header-${rowIdx}/${columnIdx}`}
                   value={ALPHABET[columnIdx]}
                 />
               ))}
             </div>
           )}
           {/* Add rest of the rows */}
-          <div style={{ display: "flex" }}>
+          <div key={`row-${rowIdx}`} style={{ display: "flex" }}>
             {row.map((column, columnIdx) => {
               return (
                 <>
@@ -78,15 +89,20 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {columnIdx === 0 && (
                     <CellHeader
                       isFirstColumnCell
-                      key={`${rowIdx + 1}/${columnIdx}`}
+                      key={`row-header-${rowIdx}/${columnIdx}`}
                       value={String(rowIdx + 1)}
                     />
                   )}
                   {/* Add the rest of row items.  */}
                   <Cell
-                    key={`${rowIdx}/${columnIdx}`}
+                    columnIdx={columnIdx}
                     isEditing={column.isEditing}
                     isSelected={column.isSelected}
+                    key={`cell-${rowIdx}/${columnIdx}`}
+                    onChange={(event) =>
+                      handleCellValueChange(columnIdx, event, rowIdx)
+                    }
+                    rowIdx={rowIdx}
                     value={column.value}
                   />
                 </>

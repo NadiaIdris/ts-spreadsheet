@@ -1,13 +1,30 @@
 import styled from "styled-components";
 
 interface ICell {
+  columnIdx: number;
   isEditing: boolean;
   isSelected: boolean;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  rowIdx: number;
   value: string;
 }
 
-const Cell = ({ isEditing, isSelected, value }: ICell) => {
-  return <OneCell value={value}></OneCell>;
+const Cell = ({
+  columnIdx,
+  isEditing,
+  isSelected,
+  onChange,
+  rowIdx,
+  value,
+}: ICell) => {
+  return (
+    <OneCell
+      data-columnidx={columnIdx}
+      onChange={onChange}
+      data-rowidx={rowIdx}
+      value={value}
+    />
+  );
 };
 
 export default Cell;
@@ -24,7 +41,8 @@ const OneCell = styled.input`
 
   &:focus {
     border-radius: 5px;
-    outline: 2px solid #05EC00;
+    outline: 2px solid var(--color-text-cell);
     z-index: 10;
+    color: 
   }
 `;

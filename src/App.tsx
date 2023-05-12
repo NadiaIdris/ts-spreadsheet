@@ -25,8 +25,10 @@ export default App;
 const H1 = styled.input`
   font-size: 2em;
   font-weight: bold;
-  margin: 20px;
   color: #149820;
   border: none;
   outline: none;
+  width: 100%;
+  display: flex;
+  padding: 20px;
 `;

@@ -25,7 +25,7 @@ const OneCell = styled.input<{ isFirstColumnCell: boolean }>`
   min-width: 20px;
   padding: 5px;
   text-align: center;
-  color: var(--color-header-text);
+  color: var(--color-text-header);
   font-weight: bold;
   font-size: 0.65em;
 
