@@ -84,6 +84,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleCellClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    console.log("handleCellClick was called")
     const { columnidx, rowidx } = event.currentTarget.dataset;
     changeCellState(
       { isSelected: true, isEditing: false },

@@ -24,33 +24,21 @@ const Cell = ({
   rowIdx,
   value,
 }: ICell) => {
-  const onChangeHander = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(event.target.value);
-    },
-    [onChange]
-  );
+  const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value);
+  };
 
-  const onClickHandler = useCallback(
-    (event: React.MouseEvent<HTMLInputElement>) => {
-      onClick(event);
-    },
-    [onClick]
-  );
+  const onClickHandler = (event: React.MouseEvent<HTMLInputElement>) => {
+    onClick(event);
+  };
 
-  const onDoubleClickHandler = useCallback(
-    (event: React.MouseEvent<HTMLInputElement>) => {
-      onDoubleClick(event);
-    },
-    [onDoubleClick]
-  );
+  const onDoubleClickHandler = (event: React.MouseEvent<HTMLInputElement>) => {
+    onDoubleClick(event);
+  };
 
-  const onKeyDownHandler = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      onKeyDown(event);
-    },
-    [onKeyDown]
-  );
+  const onKeyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown(event);
+  };
 
   return (
     <OneCell
