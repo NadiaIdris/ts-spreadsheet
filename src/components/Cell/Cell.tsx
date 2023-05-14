@@ -1,13 +1,13 @@
-import { useCallback } from "react";
 import styled from "styled-components";
 
 interface ICell {
   columnIdx: number;
   isEditing: boolean | undefined;
   isSelected: boolean | undefined;
+  onBlur: () => void;
   onChange: (newValue: string) => void;
-  onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
-  onDoubleClick: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onClick: () => void;
+  onDoubleClick: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   rowIdx: number;
   value: string | undefined;
@@ -17,6 +17,7 @@ const Cell = ({
   columnIdx,
   isEditing,
   isSelected,
+  onBlur,
   onChange,
   onClick,
   onDoubleClick,
@@ -28,26 +29,15 @@ const Cell = ({
     onChange(event.target.value);
   };
 
-  const onClickHandler = (event: React.MouseEvent<HTMLInputElement>) => {
-    onClick(event);
-  };
-
-  const onDoubleClickHandler = (event: React.MouseEvent<HTMLInputElement>) => {
-    onDoubleClick(event);
-  };
-
-  const onKeyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    onKeyDown(event);
-  };
-
   return (
     <OneCell
       data-columnidx={columnIdx}
       onChange={onChangeHander}
       data-rowidx={rowIdx}
-      onClick={onClickHandler}
-      onDoubleClick={onDoubleClickHandler}
-      onKeyDown={onKeyDownHandler}
+      onBlur={onBlur}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      onKeyDown={onKeyDown}
       readOnly={isEditing ? false : true}
       value={value}
     />

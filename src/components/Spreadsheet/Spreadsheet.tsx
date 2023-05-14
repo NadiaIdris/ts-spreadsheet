@@ -58,6 +58,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
 
+  // TODO: is it possible to make this function a custom hook?
   const changeCellState = (
     cellUpdate: OneCell,
     columnIdx: number,
@@ -75,6 +76,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     ]);
   };
 
+  const handleCellBlur = (columnIdx: number, rowIdx: number) => {
+    changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
+  };
+
   const handleCellValueChange = (
     columnIdx: number,
     newValue: string,
@@ -83,40 +88,25 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     changeCellState({ value: newValue }, columnIdx, rowIdx);
   };
 
-  const handleCellClick = (event: React.MouseEvent<HTMLInputElement>) => {
-    console.log("handleCellClick was called")
-    const { columnidx, rowidx } = event.currentTarget.dataset;
-    changeCellState(
-      { isSelected: true, isEditing: false },
-      Number(columnidx),
-      Number(rowidx)
-    );
-    // setSpreadsheetState((previousState) => {
-    //   const newState = [...previousState];
-    //   newState[Number(rowidx)][Number(columnidx)].isSelected = true;
-    //   return newState;
-    // });
+  const handleCellClick = (columnIdx: number, rowIdx: number) => {
+    changeCellState({ isSelected: true, isEditing: false }, columnIdx, rowIdx);
   };
 
-  const handleDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
-    const { columnidx, rowidx } = event.currentTarget.dataset;
-    setSpreadsheetState((previousState) => {
-      const newState = [...previousState];
-      newState[Number(rowidx)][Number(columnidx)].isEditing = true;
-      return newState;
-    });
+  const handleDoubleClick = (columnIdx: number, rowIdx: number) => {
+    changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const { columnidx, rowidx } = event.currentTarget.dataset;
+  const handleKeyDown = (columnIdx: number, event: React.KeyboardEvent<HTMLInputElement>, rowIdx: number) => {
     if (event.key === "Enter") {
       console.log("Enter key pressed");
-      setSpreadsheetState((previousState) => {
-        const newState = [...previousState];
-        newState[Number(rowidx)][Number(columnidx)].isEditing = true;
-        newState[Number(rowidx)][Number(columnidx)].isSelected = true;
-        return newState;
-      });
+      const currentCell = spreadsheetState[rowIdx][columnIdx];
+      if (currentCell.isSelected && currentCell.isEditing) {
+        // TODO: do the following:
+        // Set the current cell isEditing to false and isSelected to false.
+        // Add focus to the cell below.
+      } else if (currentCell.isSelected && !currentCell.isEditing) {
+        // Set the current cell isEditing to true.
+      }
     }
   };
 
@@ -157,12 +147,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     isEditing={column.isEditing}
                     isSelected={column.isSelected}
                     key={`cell-${rowIdx}/${columnIdx}`}
+                    onBlur={() => handleCellBlur(columnIdx, rowIdx)}
                     onChange={(newValue) =>
                       handleCellValueChange(columnIdx, newValue, rowIdx)
                     }
-                    onClick={handleCellClick}
-                    onDoubleClick={handleDoubleClick}
-                    onKeyDown={handleKeyDown}
+                    onClick={() => handleCellClick(columnIdx, rowIdx)}
+                    onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
+                    onKeyDown={(event) => handleKeyDown(columnIdx, event, rowIdx)}
                     rowIdx={rowIdx}
                     value={column.value}
                   />
