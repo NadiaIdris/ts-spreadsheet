@@ -40,38 +40,61 @@ const ALPHABET = [
 
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
 
+interface OneCell {
+  isEditing?: boolean;
+  isSelected?: boolean;
+  value?: string;
+}
+
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
-  const grid: ICell[][] = Array.from({ length: rows }, () =>
+  const grid: OneCell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: columns }, () => {
       return {
         isSelected: false,
         isEditing: false,
         value: "",
-      } as ICell;
+      } as OneCell;
     })
   );
-  const [spreadsheetState, setSpreadsheetState] = useState<ICell[][]>(grid);
+  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
+
+  const changeCellState = (
+    cellUpdate: OneCell,
+    columnIdx: number,
+    rowIdx: number
+  ) => {
+    const newRow = [
+      ...spreadsheetState[rowIdx].slice(0, columnIdx),
+      { ...spreadsheetState[rowIdx][columnIdx], ...cellUpdate },
+      ...spreadsheetState[rowIdx].slice(columnIdx + 1),
+    ];
+    setSpreadsheetState((spreadsheet) => [
+      ...spreadsheet.slice(0, rowIdx),
+      newRow,
+      ...spreadsheet.slice(rowIdx + 1),
+    ]);
+  };
 
   const handleCellValueChange = (
     columnIdx: number,
-    event: React.ChangeEvent<HTMLInputElement>,
+    newValue: string,
     rowIdx: number
   ) => {
-    console.log("cell value changed event.target.value-->", event.target.value)
-    setSpreadsheetState((prevState) => {
-      const newState = [...prevState];
-      newState[rowIdx][columnIdx].value = event.target.value;
-      return newState;
-    });
+    changeCellState({ value: newValue }, columnIdx, rowIdx);
   };
 
   const handleCellClick = (event: React.MouseEvent<HTMLInputElement>) => {
     const { columnidx, rowidx } = event.currentTarget.dataset;
-    setSpreadsheetState((previousState) => {
-      const newState = [...previousState];
-      newState[Number(rowidx)][Number(columnidx)].isSelected = true;
-      return newState;
-    });
+    changeCellState(
+      { isSelected: true, isEditing: false },
+      Number(columnidx),
+      Number(rowidx)
+    );
+    // setSpreadsheetState((previousState) => {
+    //   const newState = [...previousState];
+    //   newState[Number(rowidx)][Number(columnidx)].isSelected = true;
+    //   return newState;
+    // });
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -83,16 +106,16 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     });
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => { 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const { columnidx, rowidx } = event.currentTarget.dataset;
-    if (event.key === "Enter") { 
-      console.log("Enter key pressed")
-      setSpreadsheetState(previousState => { 
-        const newState = [ ...previousState ]; 
-        newState[ Number(rowidx) ][ Number(columnidx) ].isEditing = true;
+    if (event.key === "Enter") {
+      console.log("Enter key pressed");
+      setSpreadsheetState((previousState) => {
+        const newState = [...previousState];
+        newState[Number(rowidx)][Number(columnidx)].isEditing = true;
         newState[Number(rowidx)][Number(columnidx)].isSelected = true;
-        return newState; 
-      })
+        return newState;
+      });
     }
   };
 
@@ -133,14 +156,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     isEditing={column.isEditing}
                     isSelected={column.isSelected}
                     key={`cell-${rowIdx}/${columnIdx}`}
-                    onChange={(event) =>
-                      handleCellValueChange(columnIdx, event, rowIdx)
+                    onChange={(newValue) =>
+                      handleCellValueChange(columnIdx, newValue, rowIdx)
                     }
-                    onClick={(event: React.MouseEvent<HTMLInputElement>) => handleCellClick(event)}
-                    onDoubleClick={(
-                      event: React.MouseEvent<HTMLInputElement>
-                    ) => handleDoubleClick(event)}
-                    onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event)}
+                    onClick={handleCellClick}
+                    onDoubleClick={handleDoubleClick}
+                    onKeyDown={handleKeyDown}
                     rowIdx={rowIdx}
                     value={column.value}
                   />

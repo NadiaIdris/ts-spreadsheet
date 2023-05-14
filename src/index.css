@@ -6,9 +6,11 @@
 }
 
 :root {
+  --color-background: #1D2C37;
   --color-border-spreadsheet: #334958;
   --color-text-header: #4E6C82;
-  --color-text-cell-not-focused: #708A9C;
+  --color-text-cell-not-focused: #8ca4b3;
   --color-text-cell: #05ec00;
   --color-white: #fff;
+  --color-hover-cell: #17222B;
 }

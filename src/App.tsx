@@ -34,3 +34,8 @@ const H1 = styled.input`
   display: flex;
   padding: 20px;
 `;
+
+
+const AppContainer = styled.div`
+  // background-color: var(--color-background);
+`;

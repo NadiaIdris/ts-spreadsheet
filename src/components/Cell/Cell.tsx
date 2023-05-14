@@ -1,15 +1,16 @@
+import { useCallback } from "react";
 import styled from "styled-components";
 
 interface ICell {
   columnIdx: number;
-  isEditing: boolean;
-  isSelected: boolean;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isEditing: boolean | undefined;
+  isSelected: boolean | undefined;
+  onChange: (newValue: string) => void;
   onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
   onDoubleClick: (event: React.MouseEvent<HTMLInputElement>) => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   rowIdx: number;
-  value: string;
+  value: string | undefined;
 }
 
 const Cell = ({
@@ -23,14 +24,42 @@ const Cell = ({
   rowIdx,
   value,
 }: ICell) => {
+  const onChangeHander = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.target.value);
+    },
+    [onChange]
+  );
+
+  const onClickHandler = useCallback(
+    (event: React.MouseEvent<HTMLInputElement>) => {
+      onClick(event);
+    },
+    [onClick]
+  );
+
+  const onDoubleClickHandler = useCallback(
+    (event: React.MouseEvent<HTMLInputElement>) => {
+      onDoubleClick(event);
+    },
+    [onDoubleClick]
+  );
+
+  const onKeyDownHandler = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      onKeyDown(event);
+    },
+    [onKeyDown]
+  );
+
   return (
     <OneCell
       data-columnidx={columnIdx}
-      onChange={onChange}
+      onChange={onChangeHander}
       data-rowidx={rowIdx}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
-      onKeyDown={onKeyDown}
+      onClick={onClickHandler}
+      onDoubleClick={onDoubleClickHandler}
+      onKeyDown={onKeyDownHandler}
       readOnly={isEditing ? false : true}
       value={value}
     />
@@ -49,12 +78,19 @@ const OneCell = styled.input`
   min-width: 20px;
   padding: 5px;
   color: var(--color-text-cell-not-focused);
+  transition: background-color 0.1s ease-in-out;
 
   &:focus {
+    background-color: var(--color-hover-cell);
     border-radius: 2px;
     outline: 2px solid var(--color-text-cell);
     outline-offset: -2px;
     z-index: 10;
     color: var(--color-white);
+  }
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--color-hover-cell);
   }
 `;
