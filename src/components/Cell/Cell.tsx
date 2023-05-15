@@ -1,3 +1,4 @@
+import React, { ForwardedRef, forwardRef } from "react";
 import styled from "styled-components";
 
 interface ICell {
@@ -13,36 +14,42 @@ interface ICell {
   value: string | undefined;
 }
 
-const Cell = ({
-  columnIdx,
-  isEditing,
-  isSelected,
-  onBlur,
-  onChange,
-  onClick,
-  onDoubleClick,
-  onKeyDown,
-  rowIdx,
-  value,
-}: ICell) => {
-  const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
-  };
+const Cell = forwardRef(
+  (
+    {
+      columnIdx,
+      isEditing,
+      isSelected,
+      onBlur,
+      onChange,
+      onClick,
+      onDoubleClick,
+      onKeyDown,
+      rowIdx,
+      value,
+    }: ICell,
+    ref: ForwardedRef<HTMLInputElement>
+  ) => {
+    const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.target.value);
+    };
 
-  return (
-    <OneCell
-      data-columnidx={columnIdx}
-      onChange={onChangeHander}
-      data-rowidx={rowIdx}
-      onBlur={onBlur}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
-      onKeyDown={onKeyDown}
-      readOnly={isEditing ? false : true}
-      value={value}
-    />
-  );
-};
+    return (
+      <OneCell
+        data-columnidx={columnIdx}
+        onChange={onChangeHander}
+        data-rowidx={rowIdx}
+        onBlur={onBlur}
+        onClick={onClick}
+        onDoubleClick={onDoubleClick}
+        onKeyDown={onKeyDown}
+        readOnly={isEditing ? false : true}
+        ref={ref}
+        value={value}
+      />
+    );
+  }
+);
 
 export default Cell;
 export type { ICell };

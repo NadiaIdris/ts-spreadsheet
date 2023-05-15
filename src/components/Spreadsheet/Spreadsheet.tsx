@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { MutableRefObject, useRef, useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import { ICell } from "../Cell";
@@ -57,6 +57,20 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
+  // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
+  // cell refs as we create them below(<Cell />) using ref prop and passing it a ref callback.
+  const spreadSheetRef: MutableRefObject<Map<string, HTMLInputElement> | null> =
+    useRef(new Map());
+  // Ref callback which will be passed to the <Cell /> component. This callback will be called
+  // immediately after the component is mounted or unmounted with the element argument.
+  const handleAddRef = (
+    element: HTMLInputElement,
+    columnIdx: number,
+    rowIdx: number
+  ) => {
+    // Add the element to the Map.
+    spreadSheetRef.current?.set(`${rowIdx}/${columnIdx}`, element);
+  };
 
   // TODO: is it possible to make this function a custom hook?
   const changeCellState = (
@@ -96,17 +110,33 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
   };
 
-  const handleKeyDown = (columnIdx: number, event: React.KeyboardEvent<HTMLInputElement>, rowIdx: number) => {
+  const handleKeyDown = (
+    columnIdx: number,
+    event: React.KeyboardEvent<HTMLInputElement>,
+    rowIdx: number
+  ) => {
     if (event.key === "Enter") {
       console.log("Enter key pressed");
       const currentCell = spreadsheetState[rowIdx][columnIdx];
+      const { columnidx, rowidx } = event.currentTarget.dataset;
       if (currentCell.isSelected && currentCell.isEditing) {
         // TODO: do the following:
-        // Set the current cell isEditing to false and isSelected to false.
+        // Set the current cell isEditing to false and isSelected to false (onBlur callback takes care of this).
         // Add focus to the cell below.
+
+        // Set the cell below isSelected to true.
+
+        console.log("columnidx -->", columnidx, "rowidx -->", rowidx);
       } else if (currentCell.isSelected && !currentCell.isEditing) {
         // Set the current cell isEditing to true.
+        changeCellState({ isEditing: true }, columnIdx, rowIdx);
       }
+    }
+
+    if (event.key === "Tab") {
+      console.log("Tab key pressed");
+      // Update the state of the next cell to isSelected: true.
+      changeCellState({ isSelected: true }, columnIdx + 1, rowIdx);
     }
   };
 
@@ -153,7 +183,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     }
                     onClick={() => handleCellClick(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
-                    onKeyDown={(event) => handleKeyDown(columnIdx, event, rowIdx)}
+                    onKeyDown={(event) =>
+                      handleKeyDown(columnIdx, event, rowIdx)
+                    }
+                    ref={(element: HTMLInputElement) =>
+                      handleAddRef(element, columnIdx, rowIdx)
+                    }
                     rowIdx={rowIdx}
                     value={column.value}
                   />
