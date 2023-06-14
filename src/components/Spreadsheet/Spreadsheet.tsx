@@ -57,9 +57,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
+  const formatKeyOfSpreadsheetRefMap = (rowIdx: number, columnIdx: number) =>
+    `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
   // cell refs as we create them below(<Cell />) using ref prop and passing it a ref callback.
-  const spreadSheetRef: MutableRefObject<Map<string, HTMLInputElement> | null> =
+  const spreadSheetRefMap: MutableRefObject<Map<string, HTMLInputElement> | null> =
     useRef(new Map());
   // Ref callback which will be passed to the <Cell /> component. This callback will be called
   // immediately after the component is mounted or unmounted with the element argument.
@@ -69,7 +71,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     // Add the element to the Map.
-    spreadSheetRef.current?.set(`${rowIdx}/${columnIdx}`, element);
+    spreadSheetRefMap.current?.set(
+      formatKeyOfSpreadsheetRefMap(rowIdx, columnIdx),
+      element
+    );
   };
 
   // TODO: is it possible to make this function a custom hook?
@@ -116,14 +121,20 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     if (event.key === "Enter") {
-      console.log("Enter key pressed");
+      // console.log("Enter key pressed");
       const currentCell = spreadsheetState[rowIdx][columnIdx];
       const { columnidx, rowidx } = event.currentTarget.dataset;
       if (currentCell.isSelected && currentCell.isEditing) {
-        // TODO: do the following:
-        // Set the current cell isEditing to false and isSelected to false (onBlur callback takes care of this).
+        // onBlur callback sets the current cell isEditing and isSelected to false (we don't need to write any extra code for this).
         // Add focus to the cell below.
-
+        spreadSheetRefMap.current
+          ?.get(formatKeyOfSpreadsheetRefMap(rowIdx + 1, columnIdx))
+          ?.focus();
+        changeCellState(
+          { isEditing: false, isSelected: true },
+          columnIdx,
+          rowIdx + 1
+        );
         // Set the cell below isSelected to true.
 
         console.log("columnidx -->", columnidx, "rowidx -->", rowidx);
@@ -144,7 +155,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     <Flex>
       {spreadsheetState.map((row, rowIdx) => (
         <>
-          {/* Add row of column headers */}
+          {/* Add column headers */}
           {rowIdx === 0 && (
             <div key={`row-column-headers`} style={{ display: "flex" }}>
               {/* First cell in row has no value (it's empty). */}
