@@ -9,6 +9,7 @@ interface ICell {
   onChange: (newValue: string) => void;
   onClick: () => void;
   onDoubleClick: () => void;
+  onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   rowIdx: number;
   value: string | undefined;
@@ -24,6 +25,7 @@ const Cell = forwardRef(
       onChange,
       onClick,
       onDoubleClick,
+      onFocus,
       onKeyDown,
       rowIdx,
       value,
@@ -32,6 +34,9 @@ const Cell = forwardRef(
   ) => {
     const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(event.target.value);
+    };
+    const onKeyDownHandler = (event: any) => {
+      onKeyDown(event);
     };
 
     return (
@@ -42,7 +47,8 @@ const Cell = forwardRef(
         onBlur={onBlur}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
-        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onKeyDown={onKeyDownHandler}
         readOnly={isEditing ? false : true}
         ref={ref}
         value={value}

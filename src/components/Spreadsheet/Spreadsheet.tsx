@@ -1,7 +1,6 @@
 import { MutableRefObject, useRef, useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
-import { ICell } from "../Cell";
 import CellHeader from "../CellHeader";
 
 interface SpreadsheetProps {
@@ -57,12 +56,14 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
-  const formatKeyOfSpreadsheetRefMap = (rowIdx: number, columnIdx: number) =>
+  const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
   // cell refs as we create them below(<Cell />) using ref prop and passing it a ref callback.
-  const spreadSheetRefMap: MutableRefObject<Map<string, HTMLInputElement> | null> =
-    useRef(new Map());
+  const spreadSheetRefMap: MutableRefObject<Map<
+    string,
+    HTMLInputElement
+  > | null> = useRef(new Map());
   // Ref callback which will be passed to the <Cell /> component. This callback will be called
   // immediately after the component is mounted or unmounted with the element argument.
   const handleAddRef = (
@@ -72,7 +73,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   ) => {
     // Add the element to the Map.
     spreadSheetRefMap.current?.set(
-      formatKeyOfSpreadsheetRefMap(rowIdx, columnIdx),
+      formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx),
       element
     );
   };
@@ -83,20 +84,35 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     columnIdx: number,
     rowIdx: number
   ) => {
-    const newRow = [
-      ...spreadsheetState[rowIdx].slice(0, columnIdx),
-      { ...spreadsheetState[rowIdx][columnIdx], ...cellUpdate },
-      ...spreadsheetState[rowIdx].slice(columnIdx + 1),
-    ];
-    setSpreadsheetState((spreadsheet) => [
-      ...spreadsheet.slice(0, rowIdx),
-      newRow,
-      ...spreadsheet.slice(rowIdx + 1),
-    ]);
+    console.log("changeCellState got called");
+    // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
+    setSpreadsheetState((spreadsheet) => {
+      const newRow = [
+        ...spreadsheetState[rowIdx].slice(0, columnIdx),
+        { ...spreadsheetState[rowIdx][columnIdx], ...cellUpdate },
+        ...spreadsheetState[rowIdx].slice(columnIdx + 1),
+      ];
+      return [
+        ...spreadsheet.slice(0, rowIdx),
+        newRow,
+        ...spreadsheet.slice(rowIdx + 1),
+      ];
+    });
   };
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
+    console.log(
+      "Onblur got called. columnIdx: ",
+      columnIdx,
+      " rowIdx: ",
+      rowIdx
+    );
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
+  };
+
+  // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
+  const handleCellFocus = (columnIdx: number, rowIdx: number) => {
+    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
   const handleCellValueChange = (
@@ -104,11 +120,18 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     newValue: string,
     rowIdx: number
   ) => {
-    changeCellState({ value: newValue }, columnIdx, rowIdx);
+    changeCellState(
+      { isSelected: true, isEditing: true, value: newValue },
+      columnIdx,
+      rowIdx
+    );
   };
 
   const handleCellClick = (columnIdx: number, rowIdx: number) => {
-    changeCellState({ isSelected: true, isEditing: false }, columnIdx, rowIdx);
+    console.log("Onclick got called");
+    const cell = spreadsheetState[rowIdx][columnIdx];
+    if (cell.isEditing) return;
+    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
   const handleDoubleClick = (columnIdx: number, rowIdx: number) => {
@@ -121,33 +144,56 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     if (event.key === "Enter") {
-      // console.log("Enter key pressed");
+      event.preventDefault();
+      console.log("Enter key pressed");
       const currentCell = spreadsheetState[rowIdx][columnIdx];
       const { columnidx, rowidx } = event.currentTarget.dataset;
       if (currentCell.isSelected && currentCell.isEditing) {
-        // onBlur callback sets the current cell isEditing and isSelected to false (we don't need to write any extra code for this).
-        // Add focus to the cell below.
+        // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
+        // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
         spreadSheetRefMap.current
-          ?.get(formatKeyOfSpreadsheetRefMap(rowIdx + 1, columnIdx))
+          ?.get(formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx + 1))
           ?.focus();
+        // Set the cell below state (isSelected to true).
         changeCellState(
           { isEditing: false, isSelected: true },
           columnIdx,
           rowIdx + 1
         );
-        // Set the cell below isSelected to true.
-
-        console.log("columnidx -->", columnidx, "rowidx -->", rowidx);
       } else if (currentCell.isSelected && !currentCell.isEditing) {
         // Set the current cell isEditing to true.
         changeCellState({ isEditing: true }, columnIdx, rowIdx);
       }
     }
 
+    if (event.key === "ArrowRight") {
+      console.log("ArrowRight key pressed");
+      // Update focus.
+      spreadSheetRefMap.current
+        ?.get(formatKeyOfSpreadsheetRefMap(columnIdx + 1, rowIdx))
+        ?.focus();
+      // Update spreadsheet state (change new cell state).
+      // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
+      // changeCellState(
+      //   { isEditing: false, isSelected: true },
+      //   columnIdx + 1,
+      //   rowIdx
+      // );
+    }
+
     if (event.key === "Tab") {
+      // Add preventDefault, so that the input field doesn't add animation when tabbing.
+      event.preventDefault();
       console.log("Tab key pressed");
+      spreadSheetRefMap.current
+        ?.get(formatKeyOfSpreadsheetRefMap(columnIdx + 1, rowIdx))
+        ?.focus();
       // Update the state of the next cell to isSelected: true.
-      changeCellState({ isSelected: true }, columnIdx + 1, rowIdx);
+      // changeCellState(
+      //   { isEditing: false, isSelected: true },
+      //   columnIdx + 1,
+      //   rowIdx
+      // );
     }
   };
 
@@ -194,6 +240,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     }
                     onClick={() => handleCellClick(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
+                    onFocus={() => handleCellFocus(columnIdx, rowIdx)}
                     onKeyDown={(event) =>
                       handleKeyDown(columnIdx, event, rowIdx)
                     }
