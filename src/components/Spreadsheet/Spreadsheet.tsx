@@ -55,17 +55,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       } as OneCell;
     })
   );
-  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(
-    Array.from({ length: rows }, () =>
-      Array.from({ length: columns }, () => {
-        return {
-          isSelected: false,
-          isEditing: false,
-          value: "",
-        } as OneCell;
-      })
-    )
-  );
+  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -161,7 +151,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     );
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
-    // TODO: uncomment the code below?
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
@@ -175,10 +164,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     event: KeyboardEvent,
     rowIdx: number
   ) => {
+    const currentCell = spreadsheetState[rowIdx][columnIdx];
+
     if (event.key === "Enter") {
       event.preventDefault();
       console.log("Enter key pressed");
-      const currentCell = spreadsheetState[rowIdx][columnIdx];
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
@@ -199,33 +189,37 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       }
     }
 
-    if (event.key === "ArrowRight") {
-      console.log(`%cArrowRight key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-      // Update focus.
+    if (event.key === "ArrowRight" && currentCell.isEditing === false) {
+      console.log(
+        `%cArrowRight key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`
+      );
       moveFocusTo(columnIdx + 1, rowIdx);
-      // Update spreadsheet state (change new cell state).
-      // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
-      // changeCellState(
-      //   { isEditing: false, isSelected: true },
-      //   columnIdx + 1,
-      //   rowIdx
-      // );
+      // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+    }
+
+    if (event.key === "ArrowLeft" && currentCell.isEditing === false) {
+      moveFocusTo(columnIdx - 1, rowIdx);
+      // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+    }
+
+    if (event.key === "ArrowUp") {
+      moveFocusTo(columnIdx, rowIdx - 1);
+      // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+    }
+
+    if (event.key === "ArrowDown") {
+      moveFocusTo(columnIdx, rowIdx + 1);
+      // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
     }
 
     if (event.key === "Tab") {
-      // Add preventDefault, so that the input field doesn't add animation when tabbing.
+      // Add preventDefault, so that the input field doesn't add animation when "Tab" focuses input field.
       event.preventDefault();
       console.log(
         `%cTab key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
         "color: #FF5C00"
       );
       moveFocusTo(columnIdx + 1, rowIdx);
-      // Update the state of the next cell to isSelected: true.
-      // changeCellState(
-      //   { isEditing: false, isSelected: true },
-      //   columnIdx + 1,
-      //   rowIdx
-      // );
     }
   };
 
