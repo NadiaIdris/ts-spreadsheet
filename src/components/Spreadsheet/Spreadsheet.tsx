@@ -55,7 +55,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       } as OneCell;
     })
   );
-  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
+  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(
+    Array.from({ length: rows }, () =>
+      Array.from({ length: columns }, () => {
+        return {
+          isSelected: false,
+          isEditing: false,
+          value: "",
+        } as OneCell;
+      })
+    )
+  );
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -84,13 +94,16 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     columnIdx: number,
     rowIdx: number
   ) => {
-    console.log("changeCellState got called");
+    console.log(
+      `%cchangeCellState got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+      "background: #222; color: #DA3C8E"
+    );
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     setSpreadsheetState((spreadsheet) => {
       const newRow = [
-        ...spreadsheetState[rowIdx].slice(0, columnIdx),
-        { ...spreadsheetState[rowIdx][columnIdx], ...cellUpdate },
-        ...spreadsheetState[rowIdx].slice(columnIdx + 1),
+        ...spreadsheet[rowIdx].slice(0, columnIdx),
+        { ...spreadsheet[rowIdx][columnIdx], ...cellUpdate },
+        ...spreadsheet[rowIdx].slice(columnIdx + 1),
       ];
       return [
         ...spreadsheet.slice(0, rowIdx),
@@ -102,16 +115,18 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
     console.log(
-      "Onblur got called. columnIdx: ",
-      columnIdx,
-      " rowIdx: ",
-      rowIdx
+      `%cOnblur got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+      "background: #222; color: #A1E53C"
     );
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
   const handleCellFocus = (columnIdx: number, rowIdx: number) => {
+    console.log(
+      `%cOnfocus got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+      "background: #222; color: #00C2FF"
+    );
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
@@ -127,10 +142,26 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     );
   };
 
+  const moveFocusTo = (columnIdx: number, rowIdx: number) => {
+    const spreadSheetRefCellKey = formatKeyOfSpreadsheetRefMap(
+      columnIdx,
+      rowIdx
+    );
+    if (spreadSheetRefMap.current?.has(spreadSheetRefCellKey)) {
+      const nextCell = spreadSheetRefMap.current.get(spreadSheetRefCellKey);
+      nextCell?.focus();
+      nextCell?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   const handleCellClick = (columnIdx: number, rowIdx: number) => {
-    console.log("Onclick got called");
+    console.log(
+      `%cOnclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+      "color: #E78A00"
+    );
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
+    // TODO: uncomment the code below?
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
@@ -140,20 +171,18 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleKeyDown = (
     columnIdx: number,
-    event: React.KeyboardEvent<HTMLInputElement>,
+    // event: React.KeyboardEvent<HTMLInputElement>,
+    event: KeyboardEvent,
     rowIdx: number
   ) => {
     if (event.key === "Enter") {
       event.preventDefault();
       console.log("Enter key pressed");
       const currentCell = spreadsheetState[rowIdx][columnIdx];
-      const { columnidx, rowidx } = event.currentTarget.dataset;
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
-        spreadSheetRefMap.current
-          ?.get(formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx + 1))
-          ?.focus();
+        moveFocusTo(columnIdx, rowIdx + 1);
         // Set the cell below state (isSelected to true).
         changeCellState(
           { isEditing: false, isSelected: true },
@@ -162,16 +191,18 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         );
       } else if (currentCell.isSelected && !currentCell.isEditing) {
         // Set the current cell isEditing to true.
-        changeCellState({ isEditing: true }, columnIdx, rowIdx);
+        changeCellState(
+          { isEditing: true, isSelected: true },
+          columnIdx,
+          rowIdx
+        );
       }
     }
 
     if (event.key === "ArrowRight") {
-      console.log("ArrowRight key pressed");
+      console.log(`%cArrowRight key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
       // Update focus.
-      spreadSheetRefMap.current
-        ?.get(formatKeyOfSpreadsheetRefMap(columnIdx + 1, rowIdx))
-        ?.focus();
+      moveFocusTo(columnIdx + 1, rowIdx);
       // Update spreadsheet state (change new cell state).
       // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
       // changeCellState(
@@ -184,10 +215,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     if (event.key === "Tab") {
       // Add preventDefault, so that the input field doesn't add animation when tabbing.
       event.preventDefault();
-      console.log("Tab key pressed");
-      spreadSheetRefMap.current
-        ?.get(formatKeyOfSpreadsheetRefMap(columnIdx + 1, rowIdx))
-        ?.focus();
+      console.log(
+        `%cTab key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+        "color: #FF5C00"
+      );
+      moveFocusTo(columnIdx + 1, rowIdx);
       // Update the state of the next cell to isSelected: true.
       // changeCellState(
       //   { isEditing: false, isSelected: true },
@@ -241,7 +273,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onClick={() => handleCellClick(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
                     onFocus={() => handleCellFocus(columnIdx, rowIdx)}
-                    onKeyDown={(event) =>
+                    onKeyDown={(event: KeyboardEvent) =>
                       handleKeyDown(columnIdx, event, rowIdx)
                     }
                     ref={(element: HTMLInputElement) =>
