@@ -8,11 +8,12 @@ interface ICell {
   onBlur: () => void;
   onChange: (newValue: string) => void;
   onClick: () => void;
+  onCopy: () => void;
+  onCut: () => void;
   onDoubleClick: () => void;
   onFocus: () => void;
-  // TODO: remove the line below?
-  // onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onKeyDown: (event: KeyboardEvent) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onPaste: () => void;
   rowIdx: number;
   value: string | undefined;
 }
@@ -26,9 +27,12 @@ const Cell = forwardRef(
       onBlur,
       onChange,
       onClick,
+      onCopy,
+      onCut,
       onDoubleClick,
       onFocus,
       onKeyDown,
+      onPaste,
       rowIdx,
       value,
     }: ICell,
@@ -45,9 +49,12 @@ const Cell = forwardRef(
         data-rowidx={rowIdx}
         onBlur={onBlur}
         onClick={onClick}
+        onCopy={onCopy}
+        onCut={onCut}
         onDoubleClick={onDoubleClick}
         onFocus={onFocus}
         onKeyDown={(event: any) => onKeyDown(event)}
+        onPaste={onPaste}
         readOnly={isEditing ? false : true}
         ref={ref}
         value={value}

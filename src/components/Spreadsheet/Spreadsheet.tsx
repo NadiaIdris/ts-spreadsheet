@@ -160,8 +160,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleKeyDown = (
     columnIdx: number,
-    // event: React.KeyboardEvent<HTMLInputElement>,
-    event: KeyboardEvent,
+    event: React.KeyboardEvent<HTMLInputElement>,
     rowIdx: number
   ) => {
     const currentCell = spreadsheetState[rowIdx][columnIdx];
@@ -223,6 +222,21 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
+  const handleOnCopy = (columnIdx: number, rowIdx: number) => { 
+    navigator.clipboard.writeText(spreadsheetState[ rowIdx ][ columnIdx ].value!);
+  };
+
+  const handleOnCut = (columnIdx: number, rowIdx: number) => { 
+    navigator.clipboard.writeText(spreadsheetState[ rowIdx ][ columnIdx ].value!);
+    changeCellState({ isEditing: false, isSelected: true,  value: "" }, columnIdx, rowIdx);
+  };
+
+  const handleOnPaste = (columnIdx: number, rowIdx: number) => { 
+    navigator.clipboard.readText().then(clipText => { 
+      changeCellState({ isEditing: false, isSelected: true,  value: clipText }, columnIdx, rowIdx);
+    })
+  };
+
   return (
     <Flex>
       {spreadsheetState.map((row, rowIdx) => (
@@ -265,11 +279,14 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       handleCellValueChange(columnIdx, newValue, rowIdx)
                     }
                     onClick={() => handleCellClick(columnIdx, rowIdx)}
+                    onCopy={() => handleOnCopy(columnIdx, rowIdx)}
+                    onCut={() => handleOnCut(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
                     onFocus={() => handleCellFocus(columnIdx, rowIdx)}
-                    onKeyDown={(event: KeyboardEvent) =>
+                    onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
                       handleKeyDown(columnIdx, event, rowIdx)
                     }
+                    onPaste={() => handleOnPaste(columnIdx, rowIdx)}
                     ref={(element: HTMLInputElement) =>
                       handleAddRef(element, columnIdx, rowIdx)
                     }
