@@ -158,6 +158,19 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
   };
 
+  /* Drag and drop */
+  const handleDragEnd = (
+    columnIdx: number,
+    event: React.DragEvent<HTMLInputElement>,
+    rowIdx: number
+  ) => {
+    console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
+    event?.dataTransfer?.clearData();
+    event?.dataTransfer?.setData("text/plain", "This text may be dragged");
+    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
+    moveFocusTo(columnIdx, rowIdx);
+  };
+
   const handleKeyDown = (
     columnIdx: number,
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -222,19 +235,27 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
-  const handleOnCopy = (columnIdx: number, rowIdx: number) => { 
-    navigator.clipboard.writeText(spreadsheetState[ rowIdx ][ columnIdx ].value!);
+  const handleOnCopy = (columnIdx: number, rowIdx: number) => {
+    navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
-  const handleOnCut = (columnIdx: number, rowIdx: number) => { 
-    navigator.clipboard.writeText(spreadsheetState[ rowIdx ][ columnIdx ].value!);
-    changeCellState({ isEditing: false, isSelected: true,  value: "" }, columnIdx, rowIdx);
+  const handleOnCut = (columnIdx: number, rowIdx: number) => {
+    navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
+    changeCellState(
+      { isEditing: false, isSelected: true, value: "" },
+      columnIdx,
+      rowIdx
+    );
   };
 
-  const handleOnPaste = (columnIdx: number, rowIdx: number) => { 
-    navigator.clipboard.readText().then(clipText => { 
-      changeCellState({ isEditing: false, isSelected: true,  value: clipText }, columnIdx, rowIdx);
-    })
+  const handleOnPaste = (columnIdx: number, rowIdx: number) => {
+    navigator.clipboard.readText().then((clipText) => {
+      changeCellState(
+        { isEditing: false, isSelected: true, value: clipText },
+        columnIdx,
+        rowIdx
+      );
+    });
   };
 
   return (
@@ -282,6 +303,29 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                     onCut={() => handleOnCut(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
+                    onDrag={() => {}}
+                    onDragEnd={(event: React.DragEvent<HTMLInputElement>) =>
+                      handleDragEnd(columnIdx, event, rowIdx)
+                    }
+                    onDragStart={(event: React.DragEvent<HTMLInputElement>) => {
+                      event.dataTransfer.setData(
+                        "text/plain",
+                        spreadsheetState[rowIdx][columnIdx].value!
+                      );
+                      console.log("drag start");
+                    }}
+                    onDragEnter={(e) => console.log("onDragEnter")}
+                    onDragLeave={(e) => console.log("onDragLeave")}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      console.log("onDragOver");
+                    }}
+                    onDrop={(event) => {
+                      const data = event.dataTransfer.getData("text/plain");
+                      console.log(data);
+                      // changeCellState(
+                      console.log("onDrop");
+                    }}
                     onFocus={() => handleCellFocus(columnIdx, rowIdx)}
                     onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
                       handleKeyDown(columnIdx, event, rowIdx)

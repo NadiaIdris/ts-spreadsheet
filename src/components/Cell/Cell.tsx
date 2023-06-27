@@ -11,6 +11,13 @@ interface ICell {
   onCopy: () => void;
   onCut: () => void;
   onDoubleClick: () => void;
+  onDrag: () => void;
+  onDragEnd: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragStart: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragEnter: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragLeave: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragOver: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDrop: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onPaste: () => void;
@@ -30,6 +37,13 @@ const Cell = forwardRef(
       onCopy,
       onCut,
       onDoubleClick,
+      onDrag,
+      onDragEnd,
+      onDragStart,
+      onDragEnter,
+      onDragLeave,
+      onDragOver,
+      onDrop,
       onFocus,
       onKeyDown,
       onPaste,
@@ -52,6 +66,14 @@ const Cell = forwardRef(
         onCopy={onCopy}
         onCut={onCut}
         onDoubleClick={onDoubleClick}
+        onDrag={onDrag}
+        onDragEnd={onDragEnd}
+        draggable={true}
+        onDragStart={(event: any) => onDragStart(event)}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         onFocus={onFocus}
         onKeyDown={(event: any) => onKeyDown(event)}
         onPaste={onPaste}
