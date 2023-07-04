@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
@@ -165,8 +165,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-    event?.dataTransfer?.clearData();
-    event?.dataTransfer?.setData("text/plain", "This text may be dragged");
+    // event?.dataTransfer?.clearData();
+    event.dataTransfer.setData("text/plain", "This text may be dragged");
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
     moveFocusTo(columnIdx, rowIdx);
   };
@@ -303,14 +303,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                     onCut={() => handleOnCut(columnIdx, rowIdx)}
                     onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
-                    onDrag={() => {}}
+                    onDrag={(event) => {
+                      // console.log("onDrag");
+                      // console.log("event.dataTransfer ---->", event.dataTransfer  )
+                    }}
                     onDragEnd={(event: React.DragEvent<HTMLInputElement>) =>
                       handleDragEnd(columnIdx, event, rowIdx)
                     }
                     onDragStart={(event: React.DragEvent<HTMLInputElement>) => {
                       event.dataTransfer.setData(
                         "text/plain",
-                        spreadsheetState[rowIdx][columnIdx].value!
+                        formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx)
                       );
                       console.log("drag start");
                     }}
@@ -318,13 +321,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onDragLeave={(e) => console.log("onDragLeave")}
                     onDragOver={(e) => {
                       e.preventDefault();
-                      console.log("onDragOver");
                     }}
                     onDrop={(event) => {
                       const data = event.dataTransfer.getData("text/plain");
-                      console.log(data);
-                      // changeCellState(
-                      console.log("onDrop");
+                      console.log(
+                        "onDrop event.dataTransfer.getData: --->",
+                        data
+                      );
+                      console.log("onDrop event.target is --> ", event.target);
+                      const target = event.target as HTMLInputElement;
+                      console.log("onDrop target.dataset.rowIdx is --> ", target.dataset.rowidx);
+                      console.log("onDrop target.dataset.columnIdx is --> ", target.dataset.columnidx);
                     }}
                     onFocus={() => handleCellFocus(columnIdx, rowIdx)}
                     onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>

@@ -11,7 +11,7 @@ interface ICell {
   onCopy: () => void;
   onCut: () => void;
   onDoubleClick: () => void;
-  onDrag: () => void;
+  onDrag: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragEnd: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragStart: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragEnter: (event: React.DragEvent<HTMLInputElement>) => void;
