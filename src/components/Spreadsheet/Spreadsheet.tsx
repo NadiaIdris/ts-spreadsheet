@@ -166,9 +166,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
     // event?.dataTransfer?.clearData();
-    event.dataTransfer.setData("text/plain", "This text may be dragged");
-    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
-    moveFocusTo(columnIdx, rowIdx);
+    // const data = event.dataTransfer.getData("text/plain");
+    // const target = event.target as HTMLInputElement; 
+    // const row = target.dataset.rowidx;
+    // const column = target.dataset.columnidx;
+    // changeCellState({ isEditing: false, isSelected: true, value: data }, Number(column), Number(row));
+    // moveFocusTo(Number(column), Number(row));
   };
 
   const handleKeyDown = (
@@ -313,9 +316,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     onDragStart={(event: React.DragEvent<HTMLInputElement>) => {
                       event.dataTransfer.setData(
                         "text/plain",
-                        formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx)
+                        spreadsheetState[rowIdx][columnIdx].value!
                       );
                       console.log("drag start");
+                      console.log("onDragStart event.dataTransfer ---->", event.dataTransfer)
                     }}
                     onDragEnter={(e) => console.log("onDragEnter")}
                     onDragLeave={(e) => console.log("onDragLeave")}
@@ -324,14 +328,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     }}
                     onDrop={(event) => {
                       const data = event.dataTransfer.getData("text/plain");
-                      console.log(
-                        "onDrop event.dataTransfer.getData: --->",
-                        data
-                      );
-                      console.log("onDrop event.target is --> ", event.target);
-                      const target = event.target as HTMLInputElement;
-                      console.log("onDrop target.dataset.rowIdx is --> ", target.dataset.rowidx);
-                      console.log("onDrop target.dataset.columnIdx is --> ", target.dataset.columnidx);
+                      const target = event.target as HTMLInputElement; 
+                      const row = target.dataset.rowidx;
+                      const column = target.dataset.columnidx;
+                      changeCellState({ isEditing: false, isSelected: true, value: data }, Number(column), Number(row));
+                      moveFocusTo(Number(column), Number(row));
                     }}
                     onFocus={() => handleCellFocus(columnIdx, rowIdx)}
                     onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
