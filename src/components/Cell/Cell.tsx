@@ -11,15 +11,9 @@ interface ICell {
   onCopy: () => void;
   onCut: () => void;
   onDoubleClick: () => void;
-  onDrag: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragEnd: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragStart: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragEnter: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragLeave: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragOver: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDrop: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onSelect: (event: any) => void;
   onPaste: () => void;
   rowIdx: number;
   value: string | undefined;
@@ -37,15 +31,9 @@ const Cell = forwardRef(
       onCopy,
       onCut,
       onDoubleClick,
-      onDrag,
-      onDragEnd,
-      onDragStart,
-      onDragEnter,
-      onDragLeave,
-      onDragOver,
-      onDrop,
       onFocus,
       onKeyDown,
+      onSelect,
       onPaste,
       rowIdx,
       value,
@@ -66,17 +54,10 @@ const Cell = forwardRef(
         onCopy={onCopy}
         onCut={onCut}
         onDoubleClick={onDoubleClick}
-        onDrag={onDrag}
-        onDragEnd={onDragEnd}
-        draggable={true}
-        onDragStart={(event: any) => onDragStart(event)}
-        onDragEnter={onDragEnter}
-        onDragLeave={onDragLeave}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
         onFocus={onFocus}
         onKeyDown={(event: any) => onKeyDown(event)}
         onPaste={onPaste}
+        onSelect={onSelect}
         readOnly={isEditing ? false : true}
         ref={ref}
         value={value}
@@ -89,10 +70,6 @@ export default Cell;
 export type { ICell };
 
 const OneCell = styled.input`
-  // border-right: 1px solid var(--color-border-spreadsheet);
-  // border-bottom: 1px solid var(--color-border-spreadsheet);
-  // border-left: 1px solid transparent;
-  // border-top: 1px solid transparent;
   border: 1px solid transparent;
   max-width: 100%;
   min-width: 20px;
