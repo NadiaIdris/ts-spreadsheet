@@ -89,10 +89,11 @@ export default Cell;
 export type { ICell };
 
 const OneCell = styled.input`
-  border-right: 1px solid var(--color-border-spreadsheet);
-  border-bottom: 1px solid var(--color-border-spreadsheet);
-  border-left: 1px solid transparent;
-  border-top: 1px solid transparent;
+  // border-right: 1px solid var(--color-border-spreadsheet);
+  // border-bottom: 1px solid var(--color-border-spreadsheet);
+  // border-left: 1px solid transparent;
+  // border-top: 1px solid transparent;
+  border: 1px solid transparent;
   max-width: 100%;
   min-width: 20px;
   padding: 5px;
@@ -100,16 +101,12 @@ const OneCell = styled.input`
   transition: background-color 0.1s ease-in-out;
 
   &:focus {
-    background-color: var(--color-hover-cell);
-    border-radius: 2px;
-    outline: 2px solid var(--color-text-cell);
+    outline: 3px solid transparent;
     outline-offset: -2px;
-    z-index: 10;
-    color: var(--color-white);
   }
 
   &:hover {
-    cursor: pointer;
+    cursor: default;
     background-color: var(--color-hover-cell);
   }
 `;

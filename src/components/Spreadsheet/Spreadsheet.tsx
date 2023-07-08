@@ -2,6 +2,7 @@ import { MutableRefObject, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
+import CellWrapper from "../CellWrapper";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -165,7 +166,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-    changeCellState({ isEditing: false, isSelected: false, value: "" }, columnIdx, rowIdx);
+    changeCellState(
+      { isEditing: false, isSelected: false, value: "" },
+      columnIdx,
+      rowIdx
+    );
   };
 
   const handleKeyDown = (
@@ -287,58 +292,70 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     />
                   )}
                   {/* Add the rest of row items.  */}
-                  <Cell
-                    columnIdx={columnIdx}
-                    isEditing={column.isEditing}
-                    isSelected={column.isSelected}
-                    key={`cell-${rowIdx}/${columnIdx}`}
-                    onBlur={() => handleCellBlur(columnIdx, rowIdx)}
-                    onChange={(newValue) =>
-                      handleCellValueChange(columnIdx, newValue, rowIdx)
-                    }
-                    onClick={() => handleCellClick(columnIdx, rowIdx)}
-                    onCopy={() => handleOnCopy(columnIdx, rowIdx)}
-                    onCut={() => handleOnCut(columnIdx, rowIdx)}
-                    onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
-                    onDrag={(event) => {
-                      // console.log("onDrag");
-                      // console.log("event.dataTransfer ---->", event.dataTransfer  )
-                    }}
-                    onDragEnd={(event: React.DragEvent<HTMLInputElement>) =>
-                      handleDragEnd(columnIdx, event, rowIdx)
-                    }
-                    onDragStart={(event: React.DragEvent<HTMLInputElement>) => {
-                      event.dataTransfer.setData(
-                        "text/plain",
-                        spreadsheetState[rowIdx][columnIdx].value!
-                      );
-                      event.dataTransfer.effectAllowed = "move";
-                      console.log("drag start");
-                      console.log("onDragStart event.dataTransfer ---->", event.dataTransfer)
-                    }}
-                    onDragEnter={(e) => console.log("onDragEnter")}
-                    onDragLeave={(e) => console.log("onDragLeave")}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                    }}
-                    onDrop={(event) => {
-                      const data = event.dataTransfer.getData("text/plain");
-                      console.log("onDrop columnIdx ---->", columnIdx)
-                      console.log("onDrop rowIdx ---->", rowIdx)
-                      changeCellState({ isEditing: false, isSelected: true, value: data }, columnIdx, rowIdx);
-                      moveFocusTo(columnIdx, rowIdx);
-                    }}
-                    onFocus={() => handleCellFocus(columnIdx, rowIdx)}
-                    onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
-                      handleKeyDown(columnIdx, event, rowIdx)
-                    }
-                    onPaste={() => handleOnPaste(columnIdx, rowIdx)}
-                    ref={(element: HTMLInputElement) =>
-                      handleAddRef(element, columnIdx, rowIdx)
-                    }
-                    rowIdx={rowIdx}
-                    value={column.value}
-                  />
+                  <CellWrapper>
+                    <Cell
+                      columnIdx={columnIdx}
+                      isEditing={column.isEditing}
+                      isSelected={column.isSelected}
+                      key={`cell-${rowIdx}/${columnIdx}`}
+                      onBlur={() => handleCellBlur(columnIdx, rowIdx)}
+                      onChange={(newValue) =>
+                        handleCellValueChange(columnIdx, newValue, rowIdx)
+                      }
+                      onClick={() => handleCellClick(columnIdx, rowIdx)}
+                      onCopy={() => handleOnCopy(columnIdx, rowIdx)}
+                      onCut={() => handleOnCut(columnIdx, rowIdx)}
+                      onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
+                      onDrag={(event) => {
+                        // console.log("onDrag");
+                        // console.log("event.dataTransfer ---->", event.dataTransfer  )
+                      }}
+                      onDragEnd={(event: React.DragEvent<HTMLInputElement>) =>
+                        handleDragEnd(columnIdx, event, rowIdx)
+                      }
+                      onDragStart={(
+                        event: React.DragEvent<HTMLInputElement>
+                      ) => {
+                        const dt = event.dataTransfer;
+                        dt.setData(
+                          "text/plain",
+                          spreadsheetState[rowIdx][columnIdx].value!
+                        );
+                        event.dataTransfer.effectAllowed = "move";
+                        console.log("drag start");
+                        console.log(
+                          "onDragStart event.dataTransfer ---->",
+                          event.dataTransfer
+                        );
+                      }}
+                      onDragEnter={(e) => console.log("onDragEnter")}
+                      onDragLeave={(e) => console.log("onDragLeave")}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                      }}
+                      onDrop={(event) => {
+                        const data = event.dataTransfer.getData("text/plain");
+                        console.log("onDrop columnIdx ---->", columnIdx);
+                        console.log("onDrop rowIdx ---->", rowIdx);
+                        changeCellState(
+                          { isEditing: false, isSelected: true, value: data },
+                          columnIdx,
+                          rowIdx
+                        );
+                        moveFocusTo(columnIdx, rowIdx);
+                      }}
+                      onFocus={() => handleCellFocus(columnIdx, rowIdx)}
+                      onKeyDown={(
+                        event: React.KeyboardEvent<HTMLInputElement>
+                      ) => handleKeyDown(columnIdx, event, rowIdx)}
+                      onPaste={() => handleOnPaste(columnIdx, rowIdx)}
+                      ref={(element: HTMLInputElement) =>
+                        handleAddRef(element, columnIdx, rowIdx)
+                      }
+                      rowIdx={rowIdx}
+                      value={column.value}
+                    />
+                  </CellWrapper>
                 </>
               );
             })}
