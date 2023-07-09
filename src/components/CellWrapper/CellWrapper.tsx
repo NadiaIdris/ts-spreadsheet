@@ -2,14 +2,14 @@ import styled from "styled-components";
 
 interface CellWrapperProps {
   children: React.ReactNode;
-  onDrag: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragEnd: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragStart: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragEnter: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragLeave: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDragOver: (event: React.DragEvent<HTMLInputElement>) => void;
-  onDrop: (event: React.DragEvent<HTMLInputElement>) => void;
-  onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onDrag: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragStart: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnter: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+  onMouseOver: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const CellWrapper = ({
@@ -28,7 +28,7 @@ const CellWrapper = ({
       onDrag={onDrag}
       onDragEnd={onDragEnd}
       draggable={true}
-      onDragStart={(event: any) => onDragStart(event)}
+      onDragStart={onDragStart}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}
@@ -47,11 +47,11 @@ const CellWrapperStyledOne = styled.div`
   border-bottom: 1px solid var(--color-border-spreadsheet);
   border-left: 1px solid transparent;
   border-top: 1px solid transparent;
+  color: var(--color-text-cell-not-focused);
+  cursor: grab;
   max-width: 100%;
   min-width: 20px;
-  color: var(--color-text-cell-not-focused);
   transition: background-color 0.1s ease-in-out;
-  cursor: grab;
 
   &:focus-within {
     border-radius: 2px;

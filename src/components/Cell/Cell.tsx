@@ -11,9 +11,17 @@ interface ICell {
   onCopy: () => void;
   onCut: () => void;
   onDoubleClick: () => void;
+  onDrag?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragEnd?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragStart?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragEnter?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragLeave?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDragOver?: (event: React.DragEvent<HTMLInputElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onSelect: (event: any) => void;
+  onMouseDown: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
   onPaste: () => void;
   rowIdx: number;
   value: string | undefined;
@@ -31,9 +39,17 @@ const Cell = forwardRef(
       onCopy,
       onCut,
       onDoubleClick,
+      onDrag,
+      onDragEnd,
+      onDragStart,
+      onDragEnter,
+      onDragLeave,
+      onDragOver,
+      onDrop,
       onFocus,
       onKeyDown,
-      onSelect,
+      onMouseDown,
+      onMouseOver,
       onPaste,
       rowIdx,
       value,
@@ -49,15 +65,24 @@ const Cell = forwardRef(
         data-columnidx={columnIdx}
         onChange={onChangeHander}
         data-rowidx={rowIdx}
+        draggable={false}
         onBlur={onBlur}
         onClick={onClick}
         onCopy={onCopy}
         onCut={onCut}
         onDoubleClick={onDoubleClick}
+        onDrag={onDrag}
+        onDragEnd={onDragEnd}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragStart={onDragStart}
         onFocus={onFocus}
         onKeyDown={(event: any) => onKeyDown(event)}
+        onMouseDown={onMouseDown}
+        onMouseOver={onMouseOver}
         onPaste={onPaste}
-        onSelect={onSelect}
         readOnly={isEditing ? false : true}
         ref={ref}
         value={value}
