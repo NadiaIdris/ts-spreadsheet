@@ -63,10 +63,10 @@ const Cell = forwardRef(
     return (
       <OneCell
         data-columnidx={columnIdx}
-        onChange={onChangeHander}
         data-rowidx={rowIdx}
-        draggable={false}
+        draggable={true}
         onBlur={onBlur}
+        onChange={onChangeHander}
         onClick={onClick}
         onCopy={onCopy}
         onCut={onCut}
@@ -96,19 +96,19 @@ export type { ICell };
 
 const OneCell = styled.input`
   border: 1px solid transparent;
+  color: var(--color-text-cell-not-focused);
   max-width: 100%;
   min-width: 20px;
-  padding: 5px;
-  color: var(--color-text-cell-not-focused);
-  transition: background-color 0.1s ease-in-out;
+  // padding: 5px;
 
   &:focus {
-    outline: 3px solid transparent;
-    outline-offset: -2px;
+    outline: 1px solid transparent;
   }
 
   &:hover {
     cursor: default;
     background-color: var(--color-hover-cell);
+    // outline: 3px solid var(--color-hover-cell);
+    // outline-offset: -1px;
   }
 `;

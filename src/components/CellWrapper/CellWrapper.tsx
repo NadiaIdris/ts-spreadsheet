@@ -21,7 +21,7 @@ const CellWrapper = ({
   onDragLeave,
   onDragOver,
   onDrop,
-  onMouseOver
+  onMouseOver,
 }: CellWrapperProps) => {
   return (
     <CellWrapperStyledOne
@@ -51,7 +51,18 @@ const CellWrapperStyledOne = styled.div`
   cursor: grab;
   max-width: 100%;
   min-width: 20px;
-  transition: background-color 0.1s ease-in-out;
+  padding: 3px;
+  // transition: background-color 0.1s ease-in-out;
+
+
+  &:active {
+    background-color: lightblue;
+    border-radius: 5px;
+    outline: 3px solid red;
+    outline-offset: 0px;
+    z-index: 10;
+    color: var(--color-white);
+  }
 
   &:focus-within {
     border-radius: 2px;

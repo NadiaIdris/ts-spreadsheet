@@ -335,15 +335,15 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) return;
-                      console.log("onMouseOver event ---->", event);
-                      console.log(
-                        "onMouseOver event.target ---->",
-                        event.target
-                      );
-                      console.log(
-                        "onMouseOver event.currentTarget ---->",
-                        event.currentTarget
-                      );
+                      // console.log("onMouseOver event ---->", event);
+                      // console.log(
+                      //   "onMouseOver event.target ---->",
+                      //   event.target
+                      // );
+                      // console.log(
+                      //   "onMouseOver event.currentTarget ---->",
+                      //   event.currentTarget
+                      // );
 
                       // If any of the children are focused, then don't change the background color.
                       // if (event.target.contains(document.activeElement)) return;
@@ -362,76 +362,27 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                       onCut={() => handleOnCut(columnIdx, rowIdx)}
                       onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
-                      onDrag={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDrag");
-                        // console.log("onDrag");
-                        // console.log("event.dataTransfer ---->", event.dataTransfer  )
-                      }}
-                      onDragEnd={(event: React.DragEvent<HTMLInputElement>) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDragEnd");
-                      }}
                       onDragStart={(
                         event: React.DragEvent<HTMLInputElement>
                       ) => {
+                        // Set the input prop "draggable={true}" in Cell and prevent default in onDragStart event.
+                        // More info here: https://stackoverflow.com/a/44049369/10029397
                         event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDragStart");
-                        // const dt = event.dataTransfer;
-                        // dt.setData(
-                        //   "text/plain",
-                        //   spreadsheetState[rowIdx][columnIdx].value!
-                        // );
-                        // event.dataTransfer.effectAllowed = "move";
-                        // console.log("drag start");
-                        // console.log(
-                        //   "onDragStart event.dataTransfer ---->",
-                        //   event.dataTransfer
-                        // );
-                      }}
-                      onDragEnter={(event: React.DragEvent<HTMLInputElement>) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDragEnter");
-                      }}
-                      onDragLeave={(event: React.DragEvent<HTMLInputElement>) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDragLeave");
-                      }}
-                      onDragOver={(event: React.DragEvent<HTMLInputElement>) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDragOver");
-                      }}
-                      onDrop={(event: React.DragEvent<HTMLInputElement>) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log("Input onDrop");
-                        // const data = event.dataTransfer.getData("text/plain");
-                        // console.log("onDrop columnIdx ---->", columnIdx);
-                        // console.log("onDrop rowIdx ---->", rowIdx);
-                        // changeCellState(
-                        //   { isEditing: false, isSelected: true, value: data },
-                        //   columnIdx,
-                        //   rowIdx
-                        // );
-                        // moveFocusTo(columnIdx, rowIdx);
                       }}
                       onFocus={() => handleCellFocus(columnIdx, rowIdx)}
                       onKeyDown={(
                         event: React.KeyboardEvent<HTMLInputElement>
                       ) => handleKeyDown(columnIdx, event, rowIdx)}
-                      onMouseDown={(event: React.MouseEvent<HTMLInputElement>) => { 
+                      onMouseDown={(
+                        event: React.MouseEvent<HTMLInputElement>
+                      ) => {
                         event.stopPropagation();
                       }}
-                      onMouseOver={(event: React.MouseEvent<HTMLInputElement>) => { 
+                      onMouseOver={(
+                        event: React.MouseEvent<HTMLInputElement>
+                      ) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        
                       }}
                       onPaste={() => handleOnPaste(columnIdx, rowIdx)}
                       ref={(element: HTMLInputElement) =>
