@@ -99,7 +99,6 @@ const OneCell = styled.input`
   color: var(--color-text-cell-not-focused);
   max-width: 100%;
   min-width: 20px;
-  // padding: 5px;
 
   &:focus {
     outline: 1px solid transparent;
@@ -107,8 +106,5 @@ const OneCell = styled.input`
 
   &:hover {
     cursor: default;
-    background-color: var(--color-hover-cell);
-    // outline: 3px solid var(--color-hover-cell);
-    // outline-offset: -1px;
   }
 `;

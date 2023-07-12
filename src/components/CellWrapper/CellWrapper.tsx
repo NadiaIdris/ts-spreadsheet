@@ -48,27 +48,26 @@ const CellWrapperStyledOne = styled.div`
   border-left: 1px solid transparent;
   border-top: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
-  cursor: grab;
+  cursor: default;
   max-width: 100%;
   min-width: 20px;
   padding: 3px;
-  // transition: background-color 0.1s ease-in-out;
-
 
   &:active {
-    background-color: lightblue;
-    border-radius: 5px;
-    outline: 3px solid red;
-    outline-offset: 0px;
+    background-color: var(--color-background);
+    border-radius: 0px;
+    outline: 3px dashed red;
+    outline-offset: -3px;
     z-index: 10;
     color: var(--color-white);
   }
 
   &:focus-within {
     border-radius: 2px;
+    color: var(--color-white);
+    cursor: grab;
     outline: 3px solid var(--color-text-cell);
     outline-offset: -3px;
     z-index: 10;
-    color: var(--color-white);
   }
 `;
