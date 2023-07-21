@@ -175,6 +175,25 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     );
   };
 
+  // Update the whole spreadsheet in the database.
+  const handleDBUpdate = async (spreadsheetState: OneCell[][]) => {
+    try {
+      const responseBody = await fetch("/sp/set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(spreadsheetState),
+      });
+      if (!responseBody.ok)
+        throw new Error(
+          `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
+        );
+    } catch (error) {
+      console.log("error ---->", error);
+    }
+  };
+
   const handleKeyDown = (
     columnIdx: number,
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -265,27 +284,27 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   useEffect(() => {
     // Fetch for the data from the server.
-    let data;
+    let spreadsheetData;
     const fetchData = async () => {
-      const response = await fetch("/sp/get", {
+      const responseBody = await fetch("/sp/get", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
         // mode: "no-cors",
       });
-      console.log("response ---> ", response);
+      console.log("response ---> ", responseBody);
       // Check if the response is not ok.
-      if (!response.ok)
+      if (!responseBody.ok)
         throw new Error(
-          `🪷🪷🪷 Error fetching data from the server. HTTP status ${response.status}`
+          `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
         );
-      const dataJson = await response.json();
-      console.log("dataJson ---->", dataJson);
-      data = dataJson;
+      const data = await responseBody.json();
+      console.log("data ----> ", data);
+      spreadsheetData = data;
       // Empty array means there is no data in the database.
-      if (dataJson.length === 0) return;
-      setSpreadsheetState(data);
+      if (data.length === 0) return;
+      setSpreadsheetState(spreadsheetData);
     };
 
     fetchData();
@@ -323,6 +342,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     />
                   )}
                   {/* Add the rest of row items.  */}
+                  {/* TODO: clean up unnessesary props. */}
                   <CellWrapper
                     onDrag={(event) => {
                       // console.log("onDrag");
@@ -364,18 +384,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) return;
-                      // console.log("onMouseOver event ---->", event);
-                      // console.log(
-                      //   "onMouseOver event.target ---->",
-                      //   event.target
-                      // );
-                      // console.log(
-                      //   "onMouseOver event.currentTarget ---->",
-                      //   event.currentTarget
-                      // );
-
-                      // If any of the children are focused, then don't change the background color.
-                      // if (event.target.contains(document.activeElement)) return;
                     }}
                   >
                     <Cell
@@ -384,9 +392,27 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       isSelected={column.isSelected}
                       key={`cell-${rowIdx}/${columnIdx}`}
                       onBlur={() => handleCellBlur(columnIdx, rowIdx)}
-                      onChange={(newValue) =>
-                        handleCellValueChange(columnIdx, newValue, rowIdx)
-                      }
+                      onChange={(newValue) => {
+                        // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
+                        setSpreadsheetState((spreadsheet) => {
+                          const newRow = [
+                            ...spreadsheet[rowIdx].slice(0, columnIdx),
+                            {
+                              ...spreadsheet[rowIdx][columnIdx],
+                              value: newValue,
+                            },
+                            ...spreadsheet[rowIdx].slice(columnIdx + 1),
+                          ];
+
+                          const newSpreadsheetState = [
+                            ...spreadsheet.slice(0, rowIdx),
+                            newRow,
+                            ...spreadsheet.slice(rowIdx + 1),
+                          ];
+                          handleDBUpdate(newSpreadsheetState);
+                          return newSpreadsheetState;
+                        });
+                      }}
                       onClick={() => handleCellClick(columnIdx, rowIdx)}
                       onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                       onCut={() => handleOnCut(columnIdx, rowIdx)}
