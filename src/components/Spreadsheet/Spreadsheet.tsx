@@ -240,6 +240,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
+    // TODO: add a way to check if selection of the text is copyied, then only write that selection to clipboard.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
@@ -261,6 +262,34 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       );
     });
   };
+
+  useEffect(() => {
+    // Fetch for the data from the server.
+    let data;
+    const fetchData = async () => {
+      const response = await fetch("/sp/get", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // mode: "no-cors",
+      });
+      console.log("response ---> ", response);
+      // Check if the response is not ok.
+      if (!response.ok)
+        throw new Error(
+          `🪷🪷🪷 Error fetching data from the server. HTTP status ${response.status}`
+        );
+      const dataJson = await response.json();
+      console.log("dataJson ---->", dataJson);
+      data = dataJson;
+      // Empty array means there is no data in the database.
+      if (dataJson.length === 0) return;
+      setSpreadsheetState(data);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <Flex>
