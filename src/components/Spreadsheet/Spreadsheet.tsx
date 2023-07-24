@@ -260,6 +260,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
     // TODO: add a way to check if selection of the text is copyied, then only write that selection to clipboard.
+    // Check if any text is selected. getSelection()
+    // If text is selected, copy only the selected text.
+    // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
+    const selection = window.getSelection();
+    console.log("selection, type is None  ---->", selection?.type)
+    if (selection !== null) { 
+      navigator.clipboard.writeText(selection.toString())
+      console.log("selection text ---->", selection?.toString());
+      return;
+    }
+    // If not, copy the whole cell value.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
@@ -273,6 +284,20 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleOnPaste = (columnIdx: number, rowIdx: number) => {
+    // When isEditing is true, and the cursor is at the start of test, then add the clipboard text to the start of the text and append all the text after the cursor.
+    // When isEditing is true, and the cursor is at the end of text, then append the pasted text to the current cell value.
+    // When isEditing is true and something is selected, then paste the text to the selected text. Chop off the the text before the selected
+    // text, then paste the clipboard text and then append the text after the selected text.
+
+    // Is there any text before the cursor?
+    // Is there any text after the cursor?
+    // Is there any text selected?
+    // If there is text selected, then paste the clipboard text to the selected text.
+    // If there is no text selected, then paste the clipboard text to the cursor position.
+
+    // If selected type is Caret, it means no selection has been done. If selected type is Range, it means there is a text selection.
+    const selectedText = window.getSelection()?.toString();
+    console.log("selectedText in paste---> ", selectedText)
     navigator.clipboard.readText().then((clipText) => {
       changeCellState(
         { isEditing: false, isSelected: true, value: clipText },
