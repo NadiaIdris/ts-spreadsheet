@@ -126,11 +126,25 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     newValue: string,
     rowIdx: number
   ) => {
-    changeCellState(
-      { isSelected: true, isEditing: true, value: newValue },
-      columnIdx,
-      rowIdx
-    );
+    // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
+    setSpreadsheetState((spreadsheet) => {
+      const newRow = [
+        ...spreadsheet[rowIdx].slice(0, columnIdx),
+        {
+          ...spreadsheet[rowIdx][columnIdx],
+          value: newValue,
+        },
+        ...spreadsheet[rowIdx].slice(columnIdx + 1),
+      ];
+
+      const newSpreadsheetState = [
+        ...spreadsheet.slice(0, rowIdx),
+        newRow,
+        ...spreadsheet.slice(rowIdx + 1),
+      ];
+      handleDBUpdate(newSpreadsheetState);
+      return newSpreadsheetState;
+    });
   };
 
   const moveFocusTo = (columnIdx: number, rowIdx: number) => {
@@ -259,18 +273,22 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
-    // TODO: add a way to check if selection of the text is copyied, then only write that selection to clipboard.
-    // Check if any text is selected. getSelection()
+    // If isEditing is false, then copy the cell value to the clipboard.
+    // if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
+    //   navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
+    //   return;
+    // }
+    // Check if any text is selected using getSelection() method.
     // If text is selected, copy only the selected text.
     // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
     const selection = window.getSelection();
-    console.log("selection, type is None  ---->", selection?.type);
-    if (selection !== null) {
+    console.log("selection on copy is ---->", selection);
+    if (selection?.type === "Range") {
       navigator.clipboard.writeText(selection.toString());
       console.log("selection text ---->", selection?.toString());
       return;
     }
-    // If not, copy the whole cell value.
+    // Copy the whole cell value.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
@@ -284,58 +302,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleOnPaste = (columnIdx: number, rowIdx: number) => {
-    // When isEditing is true, and the cursor is at the start of test, then add the clipboard text to the start of the text and append all the text after the cursor.
-    // When isEditing is true, and the cursor is at the end of text, then append the pasted text to the current cell value.
-    // When isEditing is true and something is selected, then paste the text to the selected text. Chop off the the text before the selected
-    // text, then paste the clipboard text and then append the text after the selected text.
-
-    // Is there any text before the cursor?
-    // Is there any text after the cursor?
-    // Is there any text selected?
-    // If there is text selected, then paste the clipboard text to the selected text.
-    // If there is no text selected, then paste the clipboard text to the cursor position.
-
-    // If selected type is Caret, it means no selection has been done. If selected type is Range, it means there is a text selection.
-    const selectedText = window.getSelection()?.toString();
-    console.log("selectedText in paste---> ", `"${selectedText}"`);
-    console.log("selectedText length in paste---> ", selectedText?.length)
-    console.log("selectedText type in paste---> ", typeof selectedText)
-    navigator.clipboard.readText().then((clipText) => {
-      const currentCell = spreadsheetState[ rowIdx ][ columnIdx ].value;
-      // No text was selected before paste, so paste the clipboard text to the cursor position.
-
-      if (selectedText?.length === 0) { 
-        const startText = currentCell?.slice(
-          0,
-          window.getSelection()?.focusOffset
-        );
-        const endText = currentCell?.slice(window.getSelection()?.focusOffset);
-        const newText = startText + clipText + endText;
-        console.log("startText ---->", startText);
-        console.log("endText ---->", endText);
-        console.log("no paste text was selected ---->", newText);
-        return;
-      }
-      
-      // If something is selected in the paste cell, then replace that text with the clipboard text.
-      if (currentCell?.includes(selectedText!)) {
-        const startText = currentCell.slice(
-          0,
-          currentCell.indexOf(selectedText!)
-        );
-        const endText = currentCell.slice(
-          currentCell.indexOf(selectedText!) + selectedText!.length
-        );
-        const newText = startText + clipText + endText;
-        console.log("newText ---->", newText);
-        // TODO: update state in DB.
+    // If isEditing is false, then paste the clipboard text to the cell.
+    if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
+      navigator.clipboard.readText().then((clipText) => {
+        // TODO: update the db with new value. Decouple the react state update from the changeCellState function.
         changeCellState(
-          { isEditing: false, isSelected: true, value: newText },
+          { isEditing: false, isSelected: true, value: clipText },
           columnIdx,
           rowIdx
         );
-      }
-    });
+      });
+    }
   };
 
   useEffect(() => {
@@ -397,7 +374,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     />
                   )}
                   {/* Add the rest of row items.  */}
-                  {/* TODO: clean up unnessesary props. */}
+                  {/* TODO: create handler functions rather than writing code inline. */}
                   <CellWrapper
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
                       handleDragEnd(columnIdx, event, rowIdx)
@@ -439,25 +416,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       key={`cell-${rowIdx}/${columnIdx}`}
                       onBlur={() => handleCellBlur(columnIdx, rowIdx)}
                       onChange={(newValue) => {
-                        // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
-                        setSpreadsheetState((spreadsheet) => {
-                          const newRow = [
-                            ...spreadsheet[rowIdx].slice(0, columnIdx),
-                            {
-                              ...spreadsheet[rowIdx][columnIdx],
-                              value: newValue,
-                            },
-                            ...spreadsheet[rowIdx].slice(columnIdx + 1),
-                          ];
-
-                          const newSpreadsheetState = [
-                            ...spreadsheet.slice(0, rowIdx),
-                            newRow,
-                            ...spreadsheet.slice(rowIdx + 1),
-                          ];
-                          handleDBUpdate(newSpreadsheetState);
-                          return newSpreadsheetState;
-                        });
+                        handleCellValueChange(columnIdx, newValue, rowIdx);
                       }}
                       onClick={() => handleCellClick(columnIdx, rowIdx)}
                       onCopy={() => handleOnCopy(columnIdx, rowIdx)}
