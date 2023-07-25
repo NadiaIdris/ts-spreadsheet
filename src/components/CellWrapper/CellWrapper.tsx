@@ -2,14 +2,14 @@ import styled from "styled-components";
 
 interface CellWrapperProps {
   children: React.ReactNode;
-  onDrag: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDragEnd: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDragStart: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDragEnter: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (event: React.DragEvent<HTMLDivElement>) => void;
-  onMouseOver: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onDrag?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnter?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onMouseOver?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const CellWrapper = ({

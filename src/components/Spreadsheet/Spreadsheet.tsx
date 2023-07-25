@@ -264,9 +264,9 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     // If text is selected, copy only the selected text.
     // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
     const selection = window.getSelection();
-    console.log("selection, type is None  ---->", selection?.type)
-    if (selection !== null) { 
-      navigator.clipboard.writeText(selection.toString())
+    console.log("selection, type is None  ---->", selection?.type);
+    if (selection !== null) {
+      navigator.clipboard.writeText(selection.toString());
       console.log("selection text ---->", selection?.toString());
       return;
     }
@@ -297,13 +297,44 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
     // If selected type is Caret, it means no selection has been done. If selected type is Range, it means there is a text selection.
     const selectedText = window.getSelection()?.toString();
-    console.log("selectedText in paste---> ", selectedText)
+    console.log("selectedText in paste---> ", `"${selectedText}"`);
+    console.log("selectedText length in paste---> ", selectedText?.length)
+    console.log("selectedText type in paste---> ", typeof selectedText)
     navigator.clipboard.readText().then((clipText) => {
-      changeCellState(
-        { isEditing: false, isSelected: true, value: clipText },
-        columnIdx,
-        rowIdx
-      );
+      const currentCell = spreadsheetState[ rowIdx ][ columnIdx ].value;
+      // No text was selected before paste, so paste the clipboard text to the cursor position.
+
+      if (selectedText?.length === 0) { 
+        const startText = currentCell?.slice(
+          0,
+          window.getSelection()?.focusOffset
+        );
+        const endText = currentCell?.slice(window.getSelection()?.focusOffset);
+        const newText = startText + clipText + endText;
+        console.log("startText ---->", startText);
+        console.log("endText ---->", endText);
+        console.log("no paste text was selected ---->", newText);
+        return;
+      }
+      
+      // If something is selected in the paste cell, then replace that text with the clipboard text.
+      if (currentCell?.includes(selectedText!)) {
+        const startText = currentCell.slice(
+          0,
+          currentCell.indexOf(selectedText!)
+        );
+        const endText = currentCell.slice(
+          currentCell.indexOf(selectedText!) + selectedText!.length
+        );
+        const newText = startText + clipText + endText;
+        console.log("newText ---->", newText);
+        // TODO: update state in DB.
+        changeCellState(
+          { isEditing: false, isSelected: true, value: newText },
+          columnIdx,
+          rowIdx
+        );
+      }
     });
   };
 
@@ -316,7 +347,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        // mode: "no-cors",
       });
       console.log("response ---> ", responseBody);
       // Check if the response is not ok.
@@ -369,10 +399,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {/* Add the rest of row items.  */}
                   {/* TODO: clean up unnessesary props. */}
                   <CellWrapper
-                    onDrag={(event) => {
-                      // console.log("onDrag");
-                      // console.log("event.dataTransfer ---->", event.dataTransfer  )
-                    }}
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
                       handleDragEnd(columnIdx, event, rowIdx)
                     }
@@ -390,11 +416,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                         "onDragStart event.dataTransfer ---->",
                         event.dataTransfer
                       );
-                    }}
-                    onDragEnter={(e) => console.log("onDragEnter")}
-                    onDragLeave={(e) => console.log("onDragLeave")}
-                    onDragOver={(e) => {
-                      e.preventDefault();
                     }}
                     onDrop={(event) => {
                       const data = event.dataTransfer.getData("text/plain");
