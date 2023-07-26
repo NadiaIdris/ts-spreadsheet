@@ -2,14 +2,16 @@ import styled from "styled-components";
 
 interface CellHeaderProps {
   isFirstColumnCell?: boolean;
+  style?: React.CSSProperties;
   value: string;
 }
 
-const CellHeader = ({ isFirstColumnCell = false, value }: CellHeaderProps) => {
+const CellHeader = ({ isFirstColumnCell = false, value, ...rest }: CellHeaderProps) => {
   return (
     <OneCell
       isFirstColumnCell={isFirstColumnCell}
       readOnly
+      {...rest}
       type="text"
       value={value}
     />

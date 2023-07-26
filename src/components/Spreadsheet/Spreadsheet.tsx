@@ -178,19 +178,50 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   /* Drag and drop */
-  const handleDragEnd = (
+  const handleCellWrapperDragEnd = (
     columnIdx: number,
     event: React.DragEvent<HTMLDivElement>,
     rowIdx: number
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
     // If the cell wasn't dragged to another cell, then don't change the cell state.
-    if (event.dataTransfer.dropEffect === "none") return;
+    // if (event.dataTransfer.dropEffect === "none") return;
     changeCellState(
       { isEditing: false, isSelected: false, value: "" },
       columnIdx,
       rowIdx
     );
+  };
+
+  const handleCellWrapperDragStart = (
+    columnIdx: number,
+    event: React.DragEvent<HTMLDivElement>,
+    rowIdx: number
+  ) => {
+    const dt = event.dataTransfer;
+    dt.setData("text/plain", spreadsheetState[rowIdx][columnIdx].value!);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.dropEffect = "move";
+    console.log("drag start");
+    console.log("onDragStart event.dataTransfer ---->", event.dataTransfer);
+  };
+
+  const handleCellWrapperDrop = (
+    columnIdx: number,
+    event: React.DragEvent<HTMLDivElement>,
+    rowIdx: number
+  ) => {
+    const data = event.dataTransfer.getData("text/plain");
+    console.log("onDrop columnIdx ---->", columnIdx);
+    console.log("onDrop rowIdx ---->", rowIdx);
+    console.log("onDrop data ---->", data);
+    // TODO: update the data in the db
+    changeCellState(
+      { isEditing: false, isSelected: true, value: data },
+      columnIdx,
+      rowIdx
+    );
+    moveFocusTo(columnIdx, rowIdx);
   };
 
   // Update the whole spreadsheet in the database.
@@ -225,27 +256,28 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
 
-        // If on the last row, then add a new row.
+        // If on the last row, then do an early return.
         if (rowIdx === spreadsheetState.length - 1) {
-          // Add a new row to the spreadsheetState.
-          const newRow = Array.from(
-            { length: spreadsheetState[rowIdx].length - 1 },
-            () => {
-              return {
-                isSelected: false,
-                isEditing: false,
-                value: "",
-              } as OneCell;
-            }
-          );
-          newRow.push({ isEditing: true, isSelected: true, value: "" });
-          
-          setSpreadsheetState((spreadsheet) => {
-            const newSpreadsheet = [...spreadsheet, newRow];
-            handleDBUpdate(newSpreadsheet);
-            setTimeout(() => moveFocusTo(columnIdx, rowIdx + 1), 0);
-            return newSpreadsheet;
-          });
+          // // Add a new row to the spreadsheetState.
+          // const newRow = Array.from(
+          //   { length: spreadsheetState[rowIdx].length - 1 },
+          //   () => {
+          //     return {
+          //       isSelected: false,
+          //       isEditing: false,
+          //       value: "",
+          //     } as OneCell;
+          //   }
+          // );
+          // newRow.push({ isEditing: true, isSelected: true, value: "" });
+
+          // setSpreadsheetState((spreadsheet) => {
+          //   const newSpreadsheet = [...spreadsheet, newRow];
+          //   handleDBUpdate(newSpreadsheet);
+          //   setTimeout(() => moveFocusTo(columnIdx, rowIdx + 1), 0);
+          //   return newSpreadsheet;
+          // });
+          console.log("on the last row");
           return;
         }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
@@ -365,7 +397,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         <>
           {/* Add column headers */}
           {rowIdx === 0 && (
-            <div key={`row-column-headers`} style={{ display: "flex" }}>
+            <div key={`row-column-headers`}>
               {/* First cell in row has no value (it's empty). */}
               <CellHeader isFirstColumnCell key={`cell-0`} value="" />
               {/* Rest of the cell headers will have alphabet letters as header values. */}
@@ -375,6 +407,15 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   value={ALPHABET[columnIdx]}
                 />
               ))}
+              <CellHeader
+                key={`cell-header-new-column-button`}
+                style={{
+                  backgroundColor: "red",
+                  borderRight: "none",
+                  width: "20px",
+                }}
+                value="+"
+              />
             </div>
           )}
           {/* Add rest of the rows */}
@@ -394,33 +435,17 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {/* TODO: create handler functions rather than writing code inline. */}
                   <CellWrapper
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
-                      handleDragEnd(columnIdx, event, rowIdx)
+                      handleCellWrapperDragEnd(columnIdx, event, rowIdx)
                     }
                     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
-                      // event.preventDefault();
-                      // event.stopPropagation();
-                      const dt = event.dataTransfer;
-                      dt.setData(
-                        "text/plain",
-                        spreadsheetState[rowIdx][columnIdx].value!
-                      );
-                      event.dataTransfer.effectAllowed = "move";
-                      console.log("drag start");
-                      console.log(
-                        "onDragStart event.dataTransfer ---->",
-                        event.dataTransfer
-                      );
+                      handleCellWrapperDragStart(columnIdx, event, rowIdx);
+                    }}
+                    /* Do not remove onDragOver. We need it. */
+                    onDragOver={(event: React.DragEvent<HTMLDivElement>) => {
+                      event.preventDefault();
                     }}
                     onDrop={(event) => {
-                      const data = event.dataTransfer.getData("text/plain");
-                      console.log("onDrop columnIdx ---->", columnIdx);
-                      console.log("onDrop rowIdx ---->", rowIdx);
-                      changeCellState(
-                        { isEditing: false, isSelected: true, value: data },
-                        columnIdx,
-                        rowIdx
-                      );
-                      moveFocusTo(columnIdx, rowIdx);
+                      handleCellWrapperDrop(columnIdx, event, rowIdx);
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) return;
