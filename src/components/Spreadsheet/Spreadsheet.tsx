@@ -273,16 +273,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
-    // If isEditing is false, then copy the cell value to the clipboard.
-    // if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
-    //   navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
-    //   return;
-    // }
     // Check if any text is selected using getSelection() method.
     // If text is selected, copy only the selected text.
     // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
     const selection = window.getSelection();
-    console.log("selection on copy is ---->", selection);
     if (selection?.type === "Range") {
       navigator.clipboard.writeText(selection.toString());
       console.log("selection text ---->", selection?.toString());
@@ -436,7 +430,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       onMouseDown={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        event.stopPropagation();
+                        // event.stopPropagation();
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
