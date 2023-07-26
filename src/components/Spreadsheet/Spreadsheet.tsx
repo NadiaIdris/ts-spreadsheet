@@ -126,6 +126,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     newValue: string,
     rowIdx: number
   ) => {
+    const currentCell = spreadsheetState[rowIdx][columnIdx];
+    // If the new value is the same as the current value, then don't update the cell value.
+    if (currentCell.value === newValue) return;
+
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     setSpreadsheetState((spreadsheet) => {
       const newRow = [
@@ -204,7 +208,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
           `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
         );
     } catch (error) {
-      console.log("error ---->", error);
+      console.log("error in updating db ---->", error);
     }
   };
 
@@ -220,6 +224,30 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       console.log("Enter key pressed");
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
+
+        // If on the last row, then add a new row.
+        if (rowIdx === spreadsheetState.length - 1) {
+          // Add a new row to the spreadsheetState.
+          const newRow = Array.from(
+            { length: spreadsheetState[rowIdx].length - 1 },
+            () => {
+              return {
+                isSelected: false,
+                isEditing: false,
+                value: "",
+              } as OneCell;
+            }
+          );
+          newRow.push({ isEditing: true, isSelected: true, value: "" });
+          
+          setSpreadsheetState((spreadsheet) => {
+            const newSpreadsheet = [...spreadsheet, newRow];
+            handleDBUpdate(newSpreadsheet);
+            setTimeout(() => moveFocusTo(columnIdx, rowIdx + 1), 0);
+            return newSpreadsheet;
+          });
+          return;
+        }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
         moveFocusTo(columnIdx, rowIdx + 1);
         // Set the cell below state (isSelected to true).
@@ -299,12 +327,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     // If isEditing is false, then paste the clipboard text to the cell.
     if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
       navigator.clipboard.readText().then((clipText) => {
-        // TODO: update the db with new value. Decouple the react state update from the changeCellState function.
-        changeCellState(
-          { isEditing: false, isSelected: true, value: clipText },
-          columnIdx,
-          rowIdx
-        );
+        handleCellValueChange(columnIdx, clipText, rowIdx);
       });
     }
   };
