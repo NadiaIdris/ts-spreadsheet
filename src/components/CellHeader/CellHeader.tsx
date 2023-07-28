@@ -6,7 +6,11 @@ interface CellHeaderProps {
   value: string;
 }
 
-const CellHeader = ({ isFirstColumnCell = false, value, ...rest }: CellHeaderProps) => {
+const CellHeader = ({
+  isFirstColumnCell = false,
+  value,
+  ...rest
+}: CellHeaderProps) => {
   return (
     <OneCell
       isFirstColumnCell={isFirstColumnCell}
@@ -20,12 +24,14 @@ const CellHeader = ({ isFirstColumnCell = false, value, ...rest }: CellHeaderPro
 
 export default CellHeader;
 
-const OneCell = styled.input<{ isFirstColumnCell: boolean; }>`
+const OneCell = styled.input<{ isFirstColumnCell: boolean }>`
   // TODO: change purple to transparent.
   border: 1px solid purple;
   max-width: ${({ isFirstColumnCell }) =>
     isFirstColumnCell ? "40px" : "98px"};
-  min-width: 20px;
+  // min-width is calculated based on the cell's input width + 8px padding from the div that wraps it.
+  min-width: ${({ isFirstColumnCell }) =>
+    isFirstColumnCell ? "30px" : "68px"};
   padding: 5px;
   text-align: center;
   color: var(--color-text-header);

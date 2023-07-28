@@ -91,16 +91,19 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     );
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     setSpreadsheetState((spreadsheet) => {
+      let newSpreadsheet;
       const newRow = [
         ...spreadsheet[rowIdx].slice(0, columnIdx),
         { ...spreadsheet[rowIdx][columnIdx], ...cellUpdate },
         ...spreadsheet[rowIdx].slice(columnIdx + 1),
       ];
-      return [
+      newSpreadsheet = [
         ...spreadsheet.slice(0, rowIdx),
         newRow,
         ...spreadsheet.slice(rowIdx + 1),
-      ];
+      ]
+      handleDBUpdate(newSpreadsheet);
+      return newSpreadsheet;
     });
   };
 
@@ -131,24 +134,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     if (currentCell.value === newValue) return;
 
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
-    setSpreadsheetState((spreadsheet) => {
-      const newRow = [
-        ...spreadsheet[rowIdx].slice(0, columnIdx),
-        {
-          ...spreadsheet[rowIdx][columnIdx],
-          value: newValue,
-        },
-        ...spreadsheet[rowIdx].slice(columnIdx + 1),
-      ];
-
-      const newSpreadsheetState = [
-        ...spreadsheet.slice(0, rowIdx),
-        newRow,
-        ...spreadsheet.slice(rowIdx + 1),
-      ];
-      handleDBUpdate(newSpreadsheetState);
-      return newSpreadsheetState;
-    });
+    changeCellState({value: newValue}, columnIdx, rowIdx);
   };
 
   const moveFocusTo = (columnIdx: number, rowIdx: number) => {
@@ -185,7 +171,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
     // If the cell wasn't dragged to another cell, then don't change the cell state.
-    // if (event.dataTransfer.dropEffect === "none") return;
+    if (event.dataTransfer.dropEffect === "none") return;
     changeCellState(
       { isEditing: false, isSelected: false, value: "" },
       columnIdx,
@@ -215,13 +201,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     console.log("onDrop columnIdx ---->", columnIdx);
     console.log("onDrop rowIdx ---->", rowIdx);
     console.log("onDrop data ---->", data);
-    // TODO: update the data in the db
     changeCellState(
       { isEditing: false, isSelected: true, value: data },
       columnIdx,
       rowIdx
     );
-    moveFocusTo(columnIdx, rowIdx);
+    // setTimeout(() => moveFocusTo(columnIdx, rowIdx), 0);
+    // moveFocusTo(columnIdx, rowIdx);
   };
 
   // Update the whole spreadsheet in the database.

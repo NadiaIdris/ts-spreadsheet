@@ -95,11 +95,10 @@ export default Cell;
 export type { ICell };
 
 const OneCell = styled.input`
-/* Change red to transparent */
-  border: 1px solid red;
+  border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
-  min-width: 20px;
+  min-width: 60px;
   width: 100%;
 
   &:focus {
