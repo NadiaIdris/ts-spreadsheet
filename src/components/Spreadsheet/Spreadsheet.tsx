@@ -330,6 +330,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       );
       moveFocusTo(columnIdx + 1, rowIdx);
     }
+
+    if (event.key === "Tab" && event.shiftKey) {
+      // TODO: go to a previous cell.
+    }
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
@@ -397,7 +401,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         <>
           {/* Add column headers */}
           {rowIdx === 0 && (
-            <div key={`row-column-headers`}>
+            <div key={`row-column-headers`} style={{ display: "flex" }}>
               {/* First cell in row has no value (it's empty). */}
               <CellHeader isFirstColumnCell key={`cell-0`} value="" />
               {/* Rest of the cell headers will have alphabet letters as header values. */}
@@ -407,7 +411,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   value={ALPHABET[columnIdx]}
                 />
               ))}
-              <CellHeader
+              {/* <CellHeader
                 key={`cell-header-new-column-button`}
                 style={{
                   backgroundColor: "red",
@@ -415,7 +419,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   width: "20px",
                 }}
                 value="+"
-              />
+              /> */}
             </div>
           )}
           {/* Add rest of the rows */}

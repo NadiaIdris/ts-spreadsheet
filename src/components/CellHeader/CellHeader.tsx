@@ -20,10 +20,11 @@ const CellHeader = ({ isFirstColumnCell = false, value, ...rest }: CellHeaderPro
 
 export default CellHeader;
 
-const OneCell = styled.input<{ isFirstColumnCell: boolean }>`
-  border: 1px solid transparent;
+const OneCell = styled.input<{ isFirstColumnCell: boolean; }>`
+  // TODO: change purple to transparent.
+  border: 1px solid purple;
   max-width: ${({ isFirstColumnCell }) =>
-    isFirstColumnCell ? "40px" : "100%"};
+    isFirstColumnCell ? "40px" : "98px"};
   min-width: 20px;
   padding: 5px;
   text-align: center;

@@ -49,9 +49,11 @@ const CellWrapperStyledOne = styled.div`
   border-top: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   cursor: default;
-  max-width: 100%;
-  min-width: 20px;
+  // max-width: 100%;
+  // min-width: 20px;
   padding: 3px;
+  // Remove the border below.
+  border: 1px solid green;
 
   &:active {
     background-color: var(--color-background);
