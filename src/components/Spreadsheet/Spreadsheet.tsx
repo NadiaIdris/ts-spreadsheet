@@ -101,7 +101,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         ...spreadsheet.slice(0, rowIdx),
         newRow,
         ...spreadsheet.slice(rowIdx + 1),
-      ]
+      ];
       handleDBUpdate(newSpreadsheet);
       return newSpreadsheet;
     });
@@ -134,7 +134,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     if (currentCell.value === newValue) return;
 
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
-    changeCellState({value: newValue}, columnIdx, rowIdx);
+    changeCellState({ value: newValue }, columnIdx, rowIdx);
   };
 
   const moveFocusTo = (columnIdx: number, rowIdx: number) => {
@@ -244,26 +244,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
         // If on the last row, then do an early return.
         if (rowIdx === spreadsheetState.length - 1) {
-          // // Add a new row to the spreadsheetState.
-          // const newRow = Array.from(
-          //   { length: spreadsheetState[rowIdx].length - 1 },
-          //   () => {
-          //     return {
-          //       isSelected: false,
-          //       isEditing: false,
-          //       value: "",
-          //     } as OneCell;
-          //   }
-          // );
-          // newRow.push({ isEditing: true, isSelected: true, value: "" });
-
-          // setSpreadsheetState((spreadsheet) => {
-          //   const newSpreadsheet = [...spreadsheet, newRow];
-          //   handleDBUpdate(newSpreadsheet);
-          //   setTimeout(() => moveFocusTo(columnIdx, rowIdx + 1), 0);
-          //   return newSpreadsheet;
-          // });
-          console.log("on the last row");
+          changeCellState({ isEditing: false }, columnIdx, rowIdx);
           return;
         }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
