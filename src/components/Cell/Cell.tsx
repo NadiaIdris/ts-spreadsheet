@@ -7,7 +7,8 @@ interface ICell {
   isSelected: boolean | undefined;
   onBlur: () => void;
   onChange: (newValue: string) => void;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent) => void;
+  onContextMenu: (event: React.MouseEvent) => void;
   onCopy: () => void;
   onCut: () => void;
   onDoubleClick: () => void;
@@ -36,6 +37,7 @@ const Cell = forwardRef(
       onBlur,
       onChange,
       onClick,
+      onContextMenu,
       onCopy,
       onCut,
       onDoubleClick,
@@ -68,6 +70,7 @@ const Cell = forwardRef(
         onBlur={onBlur}
         onChange={onChangeHander}
         onClick={onClick}
+        onContextMenu={onContextMenu}
         onCopy={onCopy}
         onCut={onCut}
         onDoubleClick={onDoubleClick}

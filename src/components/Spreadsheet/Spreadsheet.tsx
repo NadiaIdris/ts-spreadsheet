@@ -149,11 +149,18 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
-  const handleCellClick = (columnIdx: number, rowIdx: number) => {
-    console.log(
-      `%cOnclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-      "color: #E78A00"
-    );
+  const handleCellClick = (columnIdx: number, event: React.MouseEvent, rowIdx: number) => {
+    if (event.type === "click") {
+      console.log(
+        `%cLeft onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+        "color: #E78A00"
+      );
+    } else if (event.type === "contextmenu") { 
+      console.log(
+        `%cRight onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
+        "color: #900"
+      );
+    }
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
@@ -269,23 +276,39 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       console.log(
         `%cArrowRight key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`
       );
+      // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowRight" focuses input field.
+      event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
     }
 
     if (event.key === "ArrowLeft" && currentCell.isEditing === false) {
+      // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowLeft" focuses input field.
+      event.preventDefault();
       moveFocusTo(columnIdx - 1, rowIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
     }
 
     if (event.key === "ArrowUp") {
+      // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowUp" focuses input field.
+      event.preventDefault();
       moveFocusTo(columnIdx, rowIdx - 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
     }
 
     if (event.key === "ArrowDown") {
+      // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowDown" focuses input field.
+      event.preventDefault();
       moveFocusTo(columnIdx, rowIdx + 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+    }
+
+    // Note: Make sure "Tab" + Shift is before "Tab" key. Otherwise, "Tab" key will be triggered first.
+    if (event.key === "Tab" && event.shiftKey) {
+      event.preventDefault();
+      console.log("Shift enter clicked");
+      moveFocusTo(columnIdx - 1, rowIdx);
+      return;
     }
 
     if (event.key === "Tab") {
@@ -296,10 +319,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         "color: #FF5C00"
       );
       moveFocusTo(columnIdx + 1, rowIdx);
-    }
-
-    if (event.key === "Tab" && event.shiftKey) {
-      // TODO: go to a previous cell.
     }
   };
 
@@ -419,7 +438,9 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       handleCellWrapperDrop(columnIdx, event, rowIdx);
                     }}
                     onMouseOver={(event: any) => {
-                      if (event.target !== event.currentTarget) return;
+                      if (event.target !== event.currentTarget) {
+                        return;
+                      }
                     }}
                   >
                     <Cell
@@ -431,7 +452,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       onChange={(newValue) => {
                         handleCellValueChange(columnIdx, newValue, rowIdx);
                       }}
-                      onClick={() => handleCellClick(columnIdx, rowIdx)}
+                      onClick={(event: React.MouseEvent) => handleCellClick(columnIdx, event, rowIdx)}
+                      onContextMenu={(event: React.MouseEvent) => handleCellClick(columnIdx, event, rowIdx)}
                       onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                       onCut={() => handleOnCut(columnIdx, rowIdx)}
                       onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
