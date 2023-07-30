@@ -156,13 +156,16 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         "color: #E78A00"
       );
     } else if (event.type === "contextmenu") { 
+      event.preventDefault();
       console.log(
         `%cRight onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
         "color: #900"
       );
+    
     }
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
+    if (cell.isSelected) return;
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
