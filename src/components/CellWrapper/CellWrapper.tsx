@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 interface CellWrapperProps {
   children: React.ReactNode;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
   onDrag?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDragStart?: (event: React.DragEvent<HTMLDivElement>) => void;
@@ -14,6 +15,7 @@ interface CellWrapperProps {
 
 const CellWrapper = ({
   children,
+  onContextMenu,
   onDrag,
   onDragEnd,
   onDragStart,
@@ -25,6 +27,7 @@ const CellWrapper = ({
 }: CellWrapperProps) => {
   return (
     <CellWrapperStyledOne
+      onContextMenu={onContextMenu}
       onDrag={onDrag}
       onDragEnd={onDragEnd}
       draggable={true}

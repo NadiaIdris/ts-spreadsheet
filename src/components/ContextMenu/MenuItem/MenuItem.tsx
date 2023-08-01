@@ -1,7 +1,10 @@
 interface MenuItemProps {
+  action: string;
+  columnIdx: number;
+  icon?: string;
   id: number;
   label: string;
-  action: string;
+  rowIdx: number;
 }
 
 const MenuItem = ({ label }: MenuItemProps) => {

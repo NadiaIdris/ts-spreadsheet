@@ -3,6 +3,8 @@ import styled from "styled-components";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
+import ContextMenu from "../ContextMenu";
+import cellContextMenu from "../../data/cellContextMenu";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -57,6 +59,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
+  const [contextMenu, setContextMenu] = useState({
+    isContextMenuOpen: false,
+    locationX: 0,
+    locationY: 0,
+    rowIdx: 0,
+    columnIdx: 0,
+  });
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -113,6 +122,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       "background: #222; color: #A1E53C"
     );
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
+    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -149,19 +159,29 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
-  const handleCellClick = (columnIdx: number, event: React.MouseEvent, rowIdx: number) => {
+  const handleCellClick = (
+    columnIdx: number,
+    event: React.MouseEvent,
+    rowIdx: number
+  ) => {
     if (event.type === "click") {
       console.log(
         `%cLeft onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
         "color: #E78A00"
       );
-    } else if (event.type === "contextmenu") { 
+    } else if (event.type === "contextmenu") {
       event.preventDefault();
+      setContextMenu({
+        isContextMenuOpen: true,
+        locationX: event.clientX,
+        locationY: event.clientY,
+        rowIdx,
+        columnIdx,
+      });
       console.log(
         `%cRight onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
         "color: #900"
       );
-    
     }
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
@@ -425,8 +445,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     />
                   )}
                   {/* Add the rest of row items.  */}
-                  {/* TODO: create handler functions rather than writing code inline. */}
                   <CellWrapper
+                    onContextMenu={(event: React.MouseEvent<HTMLDivElement>) =>
+                      handleCellClick(columnIdx, event, rowIdx)
+                    }
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
                       handleCellWrapperDragEnd(columnIdx, event, rowIdx)
                     }
@@ -455,8 +477,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       onChange={(newValue) => {
                         handleCellValueChange(columnIdx, newValue, rowIdx);
                       }}
-                      onClick={(event: React.MouseEvent) => handleCellClick(columnIdx, event, rowIdx)}
-                      onContextMenu={(event: React.MouseEvent) => handleCellClick(columnIdx, event, rowIdx)}
+                      onClick={(event: React.MouseEvent) =>
+                        handleCellClick(columnIdx, event, rowIdx)
+                      }
+                      onContextMenu={(event: React.MouseEvent) =>
+                        handleCellClick(columnIdx, event, rowIdx)
+                      }
                       onCopy={() => handleOnCopy(columnIdx, rowIdx)}
                       onCut={() => handleOnCut(columnIdx, rowIdx)}
                       onDoubleClick={() => handleDoubleClick(columnIdx, rowIdx)}
@@ -490,6 +516,15 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       value={column.value}
                     />
                   </CellWrapper>
+                  {contextMenu.isContextMenuOpen && (
+                    <ContextMenu
+                      columnIdx={contextMenu.columnIdx}
+                      data={cellContextMenu}
+                      left={contextMenu.locationX}
+                      rowIdx={contextMenu.rowIdx}
+                      top={contextMenu.locationY}
+                    />
+                  )}
                 </>
               );
             })}
