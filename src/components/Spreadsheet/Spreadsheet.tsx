@@ -187,6 +187,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     if (cell.isEditing) return;
     if (cell.isSelected) return;
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
+    moveFocusTo(columnIdx, rowIdx);
   };
 
   const handleDoubleClick = (columnIdx: number, rowIdx: number) => {
@@ -236,8 +237,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       columnIdx,
       rowIdx
     );
-    // setTimeout(() => moveFocusTo(columnIdx, rowIdx), 0);
-    // moveFocusTo(columnIdx, rowIdx);
+    moveFocusTo(columnIdx, rowIdx);
   };
 
   // Update the whole spreadsheet in the database.

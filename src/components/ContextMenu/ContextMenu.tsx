@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import MenuItem from "./MenuItem";
 import type { MenuItemProps } from "./MenuItem";
+import { ReactComponent as AddIcon } from "../../assets/icons/add.svg";
 
 interface ContextMenuProps {
   columnIdx: number;
@@ -19,9 +20,11 @@ const ContextMenu = ({
 }: ContextMenuProps) => {
   return (
     <ContextMenuStyled left={left} top={top}>
-      <div>
-        <img></img>
-        <div>Add {data.length} {data.length > 1 ? "rows" : "row"} above</div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <AddIcon color="green" height={14} width={14}></AddIcon>
+        <ContextMenuItemTextStyled>
+          Add {data.length} {data.length > 1 ? "rows" : "row"} above
+        </ContextMenuItemTextStyled>
       </div>
       {data.map((item) => (
         <MenuItem
@@ -48,4 +51,8 @@ const ContextMenuStyled = styled.div<{ left: number; top: number }>`
   top: ${({ top }) => top}px;
   width: 300px;
   z-index: 11;
+`;
+
+const ContextMenuItemTextStyled = styled.div`
+  font-size: 0.8em;
 `;
