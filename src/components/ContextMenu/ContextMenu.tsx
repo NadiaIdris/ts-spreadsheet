@@ -19,6 +19,10 @@ const ContextMenu = ({
 }: ContextMenuProps) => {
   return (
     <ContextMenuStyled left={left} top={top}>
+      <div>
+        <img></img>
+        <div>Add {data.length} {data.length > 1 ? "rows" : "row"} above</div>
+      </div>
       {data.map((item) => (
         <MenuItem
           action={item.action}

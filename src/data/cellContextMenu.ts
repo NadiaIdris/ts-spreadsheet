@@ -8,7 +8,8 @@ const cellContextMenu = [
     id: 2,
     label: 'Add row below',
     action: 'addRowBelow',
-  }
+  },
+  
 ];
 
 export default cellContextMenu;

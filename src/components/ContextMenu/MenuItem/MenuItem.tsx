@@ -1,3 +1,5 @@
+import styled from "styled-components";
+
 interface MenuItemProps {
   action: string;
   columnIdx: number;
@@ -8,8 +10,13 @@ interface MenuItemProps {
 }
 
 const MenuItem = ({ label }: MenuItemProps) => {
-  return <div>{label}</div>;
+  return <MenuItemStyled>{label}</MenuItemStyled>;
 };
 
 export default MenuItem;
 export type { MenuItemProps };
+
+const MenuItemStyled = styled.div`
+  background-color: white;
+  cursor: pointer;
+  `;
