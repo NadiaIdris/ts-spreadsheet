@@ -43,9 +43,18 @@ const ALPHABET = [
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
 
 interface OneCell {
+  columnIdx?: number;
   isEditing?: boolean;
   isSelected?: boolean;
+  rowIdx?: number;
   value?: string;
+}
+
+export interface SelectedCells {
+  columnIdxEnd: number | null;
+  columnIdxStart: number | null;
+  rowIdxEnd: number | null;
+  rowIdxStart: number | null;
 }
 
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
@@ -66,6 +75,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: 0,
     columnIdx: 0,
   });
+  const [selectedCells, setSelectedCells] = useState({
+    columnIdxEnd: null,
+    columnIdxStart: null,
+    rowIdxEnd: null,
+    rowIdxStart: null,
+  } as SelectedCells);
+
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -177,6 +193,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         locationY: event.clientY,
         rowIdx,
         columnIdx,
+      });
+      setSelectedCells({
+        columnIdxEnd: columnIdx,
+        columnIdxStart: columnIdx,
+        rowIdxEnd: rowIdx,
+        rowIdxStart: rowIdx,
       });
       console.log(
         `%cRight onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
@@ -446,6 +468,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   )}
                   {/* Add the rest of row items.  */}
                   <CellWrapper
+                    key={`cell-wrapper-${rowIdx}/${columnIdx}`}
                     onContextMenu={(event: React.MouseEvent<HTMLDivElement>) =>
                       handleCellClick(columnIdx, event, rowIdx)
                     }
@@ -518,10 +541,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   </CellWrapper>
                   {contextMenu.isContextMenuOpen && (
                     <ContextMenu
-                      columnIdx={contextMenu.columnIdx}
-                      data={cellContextMenu}
+                      selectedCells={selectedCells}
                       left={contextMenu.locationX}
-                      rowIdx={contextMenu.rowIdx}
                       top={contextMenu.locationY}
                     />
                   )}
@@ -540,4 +561,5 @@ export default Spreadsheet;
 const Flex = styled.div`
   display: flex;
   flex-direction: column;
+  overflow: auto;
 `;

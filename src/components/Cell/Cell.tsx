@@ -63,7 +63,7 @@ const Cell = forwardRef(
     };
 
     return (
-      <OneCell
+      <CellStyled
         data-columnidx={columnIdx}
         data-rowidx={rowIdx}
         draggable={true}
@@ -97,7 +97,7 @@ const Cell = forwardRef(
 export default Cell;
 export type { ICell };
 
-const OneCell = styled.input`
+const CellStyled = styled.input`
   border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
