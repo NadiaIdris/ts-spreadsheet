@@ -82,6 +82,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdxStart: null,
   } as SelectedCells);
 
+  const [previousCell, setPreviousCell] = useState({
+    columnIdx: null as number | null,
+    rowIdx: null as number | null,
+  });
+
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -224,7 +229,14 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
     // If the cell wasn't dragged to another cell, then don't change the cell state.
+    console.log(
+      `onDragEnd event.dataTransfer.dropEffect ---->`,
+      event.dataTransfer.dropEffect
+    );
     if (event.dataTransfer.dropEffect === "none") return;
+    // If the cell was dropped on the same cell, then don't change the cell state.
+    if (previousCell.columnIdx === columnIdx && previousCell.rowIdx === rowIdx)
+      return;
     changeCellState(
       { isEditing: false, isSelected: false, value: "" },
       columnIdx,
@@ -254,6 +266,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     console.log("onDrop columnIdx ---->", columnIdx);
     console.log("onDrop rowIdx ---->", rowIdx);
     console.log("onDrop data ---->", data);
+    setPreviousCell({ columnIdx, rowIdx });
     changeCellState(
       { isEditing: false, isSelected: true, value: data },
       columnIdx,
