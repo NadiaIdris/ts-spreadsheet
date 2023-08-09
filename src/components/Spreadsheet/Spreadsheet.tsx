@@ -190,6 +190,9 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         `%cLeft onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
         "color: #E78A00"
       );
+      // If context menu is open, then close it.
+      if (contextMenu.isContextMenuOpen)
+        setContextMenu({ ...contextMenu, isContextMenuOpen: false });
     } else if (event.type === "contextmenu") {
       event.preventDefault();
       setContextMenu({
@@ -228,11 +231,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-    // If the cell wasn't dragged to another cell, then don't change the cell state.
     console.log(
       `onDragEnd event.dataTransfer.dropEffect ---->`,
       event.dataTransfer.dropEffect
     );
+    // If cell was dragged to a cell that is not droppable, then early return.
     if (event.dataTransfer.dropEffect === "none") return;
     // If the cell was dropped on the same cell, then don't change the cell state.
     if (previousCell.columnIdx === columnIdx && previousCell.rowIdx === rowIdx)

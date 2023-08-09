@@ -46,24 +46,15 @@ const CellWrapper = ({
 export default CellWrapper;
 
 const CellWrapperStyledOne = styled.div`
-  border-right: 1px solid var(--color-border-spreadsheet);
-  border-bottom: 1px solid var(--color-border-spreadsheet);
-  border-left: 1px solid transparent;
-  border-top: 1px solid transparent;
+  // border-right: 1px solid var(--color-border-spreadsheet);
+  // border-bottom: 1px solid var(--color-border-spreadsheet);
+  // border-left: 1px solid transparent;
+  // border-top: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   cursor: default;
   padding: 3px;
   // Remove the border below.
   border: 1px solid green;
-
-  &:active {
-    background-color: var(--color-background);
-    border-radius: 0px;
-    outline: 3px dashed red;
-    outline-offset: -3px;
-    z-index: 10;
-    color: var(--color-white);
-  }
 
   &:focus-within {
     border-radius: 2px;

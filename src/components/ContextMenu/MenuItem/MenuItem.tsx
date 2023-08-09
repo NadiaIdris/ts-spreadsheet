@@ -1,20 +1,24 @@
 import styled from "styled-components";
 
 interface MenuItemProps {
-  action: string;
-  icon?: string;
-  id: number;
-  label: string;
+  children: React.ReactNode;
 }
 
-const MenuItem = ({ label }: MenuItemProps) => {
-  return <MenuItemStyled>{label}</MenuItemStyled>;
+const MenuItem = ({ children }: MenuItemProps) => {
+  return <MenuItemStyled>{children}</MenuItemStyled>;
 };
 
 export default MenuItem;
 export type { MenuItemProps };
 
 const MenuItemStyled = styled.div`
+  align-items: center;
   background-color: white;
   cursor: pointer;
+  display: flex;
+  padding: 6px 0 6px 8px;
+
+  &:hover {
+    background-color: purple;
+  }
   `;

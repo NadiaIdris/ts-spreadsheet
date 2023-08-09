@@ -28,13 +28,7 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
     const hasOneOrMoreColumns = columnsCount >= 1;
     if (hasZeroColumns) return;
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "6px 0 6px 8px",
-        }}
-      >
+      <MenuItem>
         {iconAdd}
         {hasOneOrMoreColumns && (
           <ContextMenuItemTextStyled>
@@ -44,7 +38,7 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
               : `${columnsCount} columns`}
           </ContextMenuItemTextStyled>
         )}
-      </div>
+      </MenuItem>
     );
   };
 
@@ -55,13 +49,7 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
     const hasOneOrMoreRows = rowsCount >= 1;
     if (hasZeroRows) return;
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "6px 0 6px 8px",
-        }}
-      >
+      <MenuItem>
         {iconAdd}
         {hasOneOrMoreRows && (
           <ContextMenuItemTextStyled>
@@ -71,7 +59,7 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
               : `${rowsCount} rows`}
           </ContextMenuItemTextStyled>
         )}
-      </div>
+      </MenuItem>
     );  
   };
 
