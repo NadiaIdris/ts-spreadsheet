@@ -1,26 +1,26 @@
 import styled from "styled-components";
 import MenuItem from "./MenuItem";
-import { ReactComponent as IconAdd } from "../../assets/icons/add.svg"; // https://create-react-app.dev/docs/adding-images-fonts-and-files/#adding-svgs
-import { SelectedCells } from "../Spreadsheet/Spreadsheet";
+// import IconAdd from "../icons/IconAdd";
+import { ReactComponent as IconAdd } from "../../assets/icons/add.svg";
+import { ColumnsToAdd, SelectedCells } from "../Spreadsheet/Spreadsheet";
 import { calculateColumns, calculateRows } from "../../utils/utils";
 
 interface ContextMenuProps {
+  addColumnsOnClick: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
   left: number;
   selectedCells: SelectedCells;
   top: number;
 }
 
-const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
+const ContextMenu = ({
+  addColumnsOnClick,
+  left,
+  selectedCells,
+  top,
+}: ContextMenuProps) => {
   const { columnIdxEnd, columnIdxStart, rowIdxEnd, rowIdxStart } =
     selectedCells;
-  const iconAdd = (
-    <IconAdd
-      color="green"
-      height={14}
-      style={{ marginRight: "8px" }}
-      width={14}
-    ></IconAdd>
-  );
+  const iconAdd = <IconAdd color="#1d2c37" height={10} width={10} />;
   const addColumns = () => {
     const columnsCount = calculateColumns(columnIdxEnd, columnIdxStart);
     const hasZeroColumns = columnsCount === 0;
@@ -28,39 +28,34 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
     const hasOneOrMoreColumns = columnsCount >= 1;
     if (hasZeroColumns) return;
     return (
-      <MenuItem>
-        {iconAdd}
+      <MenuItem
+        icon={iconAdd}
+        onClick={() => addColumnsOnClick({ columnIdxStart, columnsCount })}
+      >
         {hasOneOrMoreColumns && (
           <ContextMenuItemTextStyled>
-            Add{" "}
-            {hasOneColumn
-              ? "1 column"
-              : `${columnsCount} columns`}
+            Add {hasOneColumn ? "1 column" : `${columnsCount} columns`} left
           </ContextMenuItemTextStyled>
         )}
       </MenuItem>
     );
   };
 
-  const addRows = () => { 
+  const addRows = () => {
     const rowsCount = calculateRows(rowIdxEnd, rowIdxStart);
     const hasZeroRows = rowsCount === 0;
     const hasOneRow = rowsCount === 1;
     const hasOneOrMoreRows = rowsCount >= 1;
     if (hasZeroRows) return;
     return (
-      <MenuItem>
-        {iconAdd}
+      <MenuItem icon={iconAdd}>
         {hasOneOrMoreRows && (
           <ContextMenuItemTextStyled>
-            Add{" "}
-            {hasOneRow
-              ? "1 row"
-              : `${rowsCount} rows`}
+            Add {hasOneRow ? "1 row" : `${rowsCount} rows`} above
           </ContextMenuItemTextStyled>
         )}
       </MenuItem>
-    );  
+    );
   };
 
   return (
@@ -74,8 +69,9 @@ const ContextMenu = ({ left, selectedCells, top }: ContextMenuProps) => {
 export default ContextMenu;
 
 const ContextMenuStyled = styled.div<{ left: number; top: number }>`
-  background: white; // TODO: Background color doesn't work.
-  color: red;
+  background-color: white;
+  border-radius: var(--border-radius-medium);
+  color: var(--color-background);
   left: ${({ left }) => left}px;
   padding: 10px;
   position: absolute;

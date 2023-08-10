@@ -57,6 +57,11 @@ export interface SelectedCells {
   rowIdxStart: number | null;
 }
 
+export interface ColumnsToAdd {
+  columnIdxStart: number | null;
+  columnsCount: number;
+}
+
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   const grid: OneCell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: columns }, () => {
@@ -415,6 +420,39 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
+  const addColumnsOnClick = ({
+    columnIdxStart,
+    columnsCount,
+  }: ColumnsToAdd) => {
+    const newSpreadsheetState = [...spreadsheetState];
+    console.log(`add columns left`);
+ 
+    // Loop over the newSpreadsheetState and for each row, add "x" new empty cells at the columnIdxStart.
+    newSpreadsheetState.forEach((row, rowIndex) => {
+      const startChunkOfTheRow = row.slice(0, columnIdxStart!);
+      const newCellsChunk = Array.from({ length: columnsCount }, (v, i) => {
+        return {
+          columnIdx: columnIdxStart! + i,
+          isSelected: false,
+          isEditing: false,
+          rowIdx: rowIndex,
+          value: "",
+        } as OneCell;
+      });
+      const endChunkOfTheRow = [];
+      for (let i = columnIdxStart!; i < row.length; i++) { 
+        const newColumnIdxStart = i! + columnsCount;
+        endChunkOfTheRow.push({
+          columnIdx: newColumnIdxStart,
+          isSelected: false,
+          isEditing: false,
+          rowIdx: rowIndex,
+          value: "",
+        } as OneCell);
+      }
+    });
+  };
+
   useEffect(() => {
     // Fetch for the data from the server.
     let spreadsheetData;
@@ -555,8 +593,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       value={column.value}
                     />
                   </CellWrapper>
-                  {contextMenu.isContextMenuOpen && (
+                  {/* {contextMenu.isContextMenuOpen && ( */}
+                  {true && (
                     <ContextMenu
+                      addColumnsOnClick={addColumnsOnClick}
                       selectedCells={selectedCells}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}

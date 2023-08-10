@@ -2,16 +2,24 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background-color: #1D2C37;
-  cursor: pointer;
 }
 
 :root {
-  --color-background: #1D2C37;
+  --border-radius-medium: 4px; 
+  --color-background: #1d2c37;
   --color-border-spreadsheet: #334958;
-  --color-text-header: #4E6C82;
+  --color-text-header: #4e6c82;
   --color-text-cell-not-focused: #8ca4b3;
   --color-text-cell: #05ec00;
   --color-white: #fff;
-  --color-hover-cell: #17222B;
+  --color-hover-cell: #17222b;
+  --color-hover-over-white: #dfdfdf;
+}
+
+body {
+  background-color: var(--color-background);
+}
+
+input {
+  background-color: var(--color-background);
 }
