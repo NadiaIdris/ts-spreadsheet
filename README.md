@@ -1,6 +1,7 @@
 # Spreadsheet app written in TypeScript
 
 ## Icons
+>💡 React uses [SVGR](https://react-svgr.com/) to convert svg icons to React components.
 
 1. Add svg icons to the `src/assets/icons` folder.
 
@@ -28,13 +29,15 @@
         fill="currentColor"
       />
     </svg>
- </span>```
+ </span>
+ ````
+
 > This allows us to style the icon with the `color` CSS property.
 ```css
 .search-icon {
     color: red;
 }
-````
+```
 
 > Or we can use prop `color` and pass the color to the icon component.
 
@@ -46,7 +49,7 @@
 
 ### Change other props of the svg element (width, height, etc.)
 
-Find other props you can add to the svg element: search `interface SVGAttributes<T>` in `node_modules/@types/react/index.d.ts` file.
+> 💡 Find other props you can add to the svg element: search `interface SVGAttributes<T>` in `node_modules/@types/react/index.d.ts` file.
 
 > Use the `className` prop to pass a class name to the svg element.
 
@@ -54,7 +57,7 @@ Find other props you can add to the svg element: search `interface SVGAttributes
 <IconAdd className="icon" />
 ```
 
-> Then use CSS to style the svg element.
+Then use CSS to style the svg element.
 
 ```css
 .icon {
