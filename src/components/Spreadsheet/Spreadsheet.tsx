@@ -63,6 +63,11 @@ export interface ColumnsToAdd {
   columnsCount: number;
 }
 
+export interface RowsToAdd { 
+  rowIdxStart: number | null;
+  rowsCount: number;
+}
+
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   const grid: OneCell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: columns }, () => {
@@ -457,6 +462,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     handleDBUpdate(newSpreadSheetState);
   };
 
+  const addRowsOnClick = () => {
+    console.log("addRowsOnClick got called");
+  };
+
   useEffect(() => {
     // Fetch for the data from the server.
     let spreadsheetData;
@@ -601,6 +610,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {true && (
                     <ContextMenu
                       addColumnsOnClick={addColumnsOnClick}
+                      addRowsOnClick={addRowsOnClick}
                       selectedCells={selectedCells}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}

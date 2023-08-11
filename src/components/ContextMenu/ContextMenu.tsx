@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import MenuItem from "./MenuItem";
-// import IconAdd from "../icons/IconAdd";
 import { ReactComponent as IconAdd } from "../../assets/icons/add.svg";
-import { ColumnsToAdd, SelectedCells } from "../Spreadsheet/Spreadsheet";
+import { ColumnsToAdd, RowsToAdd, SelectedCells } from "../Spreadsheet";
 import { calculateColumns, calculateRows } from "../../utils/utils";
 
 interface ContextMenuProps {
   addColumnsOnClick: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
+  addRowsOnClick: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
   left: number;
   selectedCells: SelectedCells;
   top: number;
@@ -20,7 +20,7 @@ const ContextMenu = ({
 }: ContextMenuProps) => {
   const { columnIdxEnd, columnIdxStart, rowIdxEnd, rowIdxStart } =
     selectedCells;
-  const iconAdd = <IconAdd color="#1d2c37" height={10} width={10} />;
+  const iconAdd = <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon"/>;
   const addColumns = () => {
     const columnsCount = calculateColumns(columnIdxEnd, columnIdxStart);
     const hasZeroColumns = columnsCount === 0;
@@ -48,7 +48,7 @@ const ContextMenu = ({
     const hasOneOrMoreRows = rowsCount >= 1;
     if (hasZeroRows) return;
     return (
-      <MenuItem icon={iconAdd}>
+      <MenuItem icon={iconAdd} onClick={() => addRowsOnClick({})}>
         {hasOneOrMoreRows && (
           <ContextMenuItemTextStyled>
             Add {hasOneRow ? "1 row" : `${rowsCount} rows`} above
