@@ -5,6 +5,7 @@ import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
 import cellContextMenu from "../../data/cellContextMenu";
+import { start } from "repl";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -423,12 +424,9 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   const addColumnsOnClick = ({
     columnIdxStart,
     columnsCount,
-  }: ColumnsToAdd) => {
-    const newSpreadsheetState = [...spreadsheetState];
-    console.log(`add columns left`);
- 
-    // Loop over the newSpreadsheetState and for each row, add "x" new empty cells at the columnIdxStart.
-    newSpreadsheetState.forEach((row, rowIndex) => {
+  }: ColumnsToAdd) => { 
+    // Loop over the spreadSheetCopy and for each row, add "x" new empty cells at the columnIdxStart.
+    const newSpreadSheetState = spreadsheetState.map((row, rowIndex) => {
       const startChunkOfTheRow = row.slice(0, columnIdxStart!);
       const newCellsChunk = Array.from({ length: columnsCount }, (v, i) => {
         return {
@@ -439,18 +437,24 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
           value: "",
         } as OneCell;
       });
+      // Update the column indices of the rest of the cells in the row.
       const endChunkOfTheRow = [];
       for (let i = columnIdxStart!; i < row.length; i++) { 
         const newColumnIdxStart = i! + columnsCount;
         endChunkOfTheRow.push({
+          ...row[i],
           columnIdx: newColumnIdxStart,
-          isSelected: false,
-          isEditing: false,
-          rowIdx: rowIndex,
-          value: "",
         } as OneCell);
       }
+      // Construct new row.
+      const newRow = [ ...startChunkOfTheRow, ...newCellsChunk, ...endChunkOfTheRow ];
+      return newRow;
     });
+
+    // Update the spreadsheet state.
+    setSpreadsheetState(newSpreadSheetState);
+    // Update the database.
+    handleDBUpdate(newSpreadSheetState);
   };
 
   useEffect(() => {
