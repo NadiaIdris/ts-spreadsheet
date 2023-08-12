@@ -477,13 +477,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     console.log("addRowsOnClick got called");
     const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
     const columnsCount = spreadsheetState[0].length;
-    const newRowsChunk = Array.from({ length: rowsCount }, (v, i) => {
-      return Array.from({ length: columnsCount }, (v, i) => {
+    const newRowsChunk = Array.from({ length: rowsCount }, (v, rowI) => {
+      return Array.from({ length: columnsCount }, (v, columnI) => {
         return {
-          columnIdx: i,
+          columnIdx: columnI,
           isSelected: false,
           isEditing: false,
-          rowIdx: rowIdxStart! + i,
+          rowIdx: rowIdxStart! + rowI,
           value: "",
         };
       });

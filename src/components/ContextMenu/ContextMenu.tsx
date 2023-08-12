@@ -79,7 +79,7 @@ const ContextMenuStyled = styled.div<{ left: number; top: number }>`
   border-radius: var(--border-radius-medium);
   color: var(--color-background);
   left: ${({ left }) => left}px;
-  padding: 10px;
+  padding: 4px;
   position: absolute;
   top: ${({ top }) => top}px;
   width: 300px;
