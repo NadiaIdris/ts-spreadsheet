@@ -128,10 +128,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     columnIdx: number,
     rowIdx: number
   ) => {
-    console.log(
-      `%cchangeCellState got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-      "background: #222; color: #DA3C8E"
-    );
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     setSpreadsheetState((spreadsheet) => {
       let newSpreadsheet;
@@ -151,20 +147,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
-    console.log(
-      `%cOnblur got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-      "background: #222; color: #A1E53C"
-    );
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
     setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
   const handleCellFocus = (columnIdx: number, rowIdx: number) => {
-    console.log(
-      `%cOnfocus got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-      "background: #222; color: #00C2FF"
-    );
     changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
   };
 
@@ -199,10 +187,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdx: number
   ) => {
     if (event.type === "click") {
-      console.log(
-        `%cLeft onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-        "color: #E78A00"
-      );
       // If context menu is open, then close it.
       if (contextMenu.isContextMenuOpen)
         setContextMenu({ ...contextMenu, isContextMenuOpen: false });
@@ -221,10 +205,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         rowIdxEnd: rowIdx,
         rowIdxStart: rowIdx,
       });
-      console.log(
-        `%cRight onclick got called. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-        "color: #900"
-      );
     }
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
@@ -319,7 +299,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
     if (event.key === "Enter") {
       event.preventDefault();
-      console.log("Enter key pressed");
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
 
@@ -347,9 +326,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
 
     if (event.key === "ArrowRight" && currentCell.isEditing === false) {
-      console.log(
-        `%cArrowRight key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`
-      );
       // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowRight" focuses input field.
       event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
@@ -380,7 +356,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     // Note: Make sure "Tab" + Shift is before "Tab" key. Otherwise, "Tab" key will be triggered first.
     if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();
-      console.log("Shift enter clicked");
       moveFocusTo(columnIdx - 1, rowIdx);
       return;
     }
@@ -388,10 +363,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     if (event.key === "Tab") {
       // Add preventDefault, so that the input field doesn't add animation when "Tab" focuses input field.
       event.preventDefault();
-      console.log(
-        `%cTab key pressed. columnIdx: ${columnIdx} rowIdx: ${rowIdx}`,
-        "color: #FF5C00"
-      );
       moveFocusTo(columnIdx + 1, rowIdx);
     }
   };
@@ -403,7 +374,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     const selection = window.getSelection();
     if (selection?.type === "Range") {
       navigator.clipboard.writeText(selection.toString());
-      console.log("selection text ---->", selection?.toString());
       return;
     }
     // Copy the whole cell value.
@@ -474,7 +444,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
    */
 
   const addRowsOnClick = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
-    console.log("addRowsOnClick got called");
     const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
     const columnsCount = spreadsheetState[0].length;
     const newRowsChunk = Array.from({ length: rowsCount }, (v, rowI) => {
@@ -507,7 +476,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       ...newRowsChunk,
       ...endChunkOfRows,
     ];
-    console.log("adding a row newSpreadsheet ---->", newSpreadsheet);
     // Update the spreadsheet state.
     setSpreadsheetState(newSpreadsheet);
     // Update the database.
