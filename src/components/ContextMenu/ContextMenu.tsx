@@ -14,13 +14,16 @@ interface ContextMenuProps {
 
 const ContextMenu = ({
   addColumnsOnClick,
+  addRowsOnClick,
   left,
   selectedCells,
   top,
 }: ContextMenuProps) => {
   const { columnIdxEnd, columnIdxStart, rowIdxEnd, rowIdxStart } =
     selectedCells;
-  const iconAdd = <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon"/>;
+  const iconAdd = (
+    <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon" />
+  );
   const addColumns = () => {
     const columnsCount = calculateColumns(columnIdxEnd, columnIdxStart);
     const hasZeroColumns = columnsCount === 0;
@@ -48,7 +51,10 @@ const ContextMenu = ({
     const hasOneOrMoreRows = rowsCount >= 1;
     if (hasZeroRows) return;
     return (
-      <MenuItem icon={iconAdd} onClick={() => addRowsOnClick({})}>
+      <MenuItem
+        icon={iconAdd}
+        onClick={() => addRowsOnClick({ rowIdxStart, rowsCount })}
+      >
         {hasOneOrMoreRows && (
           <ContextMenuItemTextStyled>
             Add {hasOneRow ? "1 row" : `${rowsCount} rows`} above

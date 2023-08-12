@@ -63,17 +63,19 @@ export interface ColumnsToAdd {
   columnsCount: number;
 }
 
-export interface RowsToAdd { 
+export interface RowsToAdd {
   rowIdxStart: number | null;
   rowsCount: number;
 }
 
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
-  const grid: OneCell[][] = Array.from({ length: rows }, () =>
-    Array.from({ length: columns }, () => {
+  const grid: OneCell[][] = Array.from({ length: rows }, (v, rowI) =>
+    Array.from({ length: columns }, (v, columnI) => {
       return {
+        columnIdx: columnI,
         isSelected: false,
         isEditing: false,
+        rowIdx: rowI,
         value: "",
       } as OneCell;
     })
@@ -429,7 +431,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   const addColumnsOnClick = ({
     columnIdxStart,
     columnsCount,
-  }: ColumnsToAdd) => { 
+  }: ColumnsToAdd) => {
     // Loop over the spreadSheetCopy and for each row, add "x" new empty cells at the columnIdxStart.
     const newSpreadSheetState = spreadsheetState.map((row, rowIndex) => {
       const startChunkOfTheRow = row.slice(0, columnIdxStart!);
@@ -444,7 +446,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       });
       // Update the column indices of the rest of the cells in the row.
       const endChunkOfTheRow = [];
-      for (let i = columnIdxStart!; i < row.length; i++) { 
+      for (let i = columnIdxStart!; i < row.length; i++) {
         const newColumnIdxStart = i! + columnsCount;
         endChunkOfTheRow.push({
           ...row[i],
@@ -452,7 +454,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         } as OneCell);
       }
       // Construct new row.
-      const newRow = [ ...startChunkOfTheRow, ...newCellsChunk, ...endChunkOfTheRow ];
+      const newRow = [
+        ...startChunkOfTheRow,
+        ...newCellsChunk,
+        ...endChunkOfTheRow,
+      ];
       return newRow;
     });
 
@@ -462,8 +468,50 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     handleDBUpdate(newSpreadSheetState);
   };
 
-  const addRowsOnClick = () => {
+  /**
+   * @
+   * Add "rowsCount" number of new empty rows at the rowIdxStart.
+   */
+
+  const addRowsOnClick = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
     console.log("addRowsOnClick got called");
+    const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
+    const columnsCount = spreadsheetState[0].length;
+    const newRowsChunk = Array.from({ length: rowsCount }, (v, i) => {
+      return Array.from({ length: columnsCount }, (v, i) => {
+        return {
+          columnIdx: i,
+          isSelected: false,
+          isEditing: false,
+          rowIdx: rowIdxStart! + i,
+          value: "",
+        };
+      });
+    });
+    // Update the row indices of the rest of the rows.
+    const endChunkOfRows = [];
+    for (let i = rowIdxStart!; i < spreadsheetState.length; i++) {
+      const newRowIdxStart = i + rowsCount;
+      endChunkOfRows.push(
+        spreadsheetState[i].map((cell) => {
+          return {
+            ...cell,
+            rowIdx: newRowIdxStart,
+          };
+        })
+      );
+    }
+    // Construct new spreadsheet.
+    const newSpreadsheet = [
+      ...firstChunkOfRows,
+      ...newRowsChunk,
+      ...endChunkOfRows,
+    ];
+    console.log("adding a row newSpreadsheet ---->", newSpreadsheet);
+    // Update the spreadsheet state.
+    setSpreadsheetState(newSpreadsheet);
+    // Update the database.
+    handleDBUpdate(newSpreadsheet);
   };
 
   useEffect(() => {
