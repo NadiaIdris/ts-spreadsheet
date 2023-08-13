@@ -9,19 +9,25 @@ const setInitialHeading = (defaultHeading: string) => {
   return defaultHeading;
 };
 
-const calculateRowCount = (
-  rowIdxEnd: SelectedCells["rowIdxEnd"],
-  rowIdxStart: SelectedCells["rowIdxStart"]
-): number => {
-  if (rowIdxEnd === null || rowIdxStart === null) return 0;
+const calculateRowCount = ({
+  rowIdxEnd,
+  rowIdxStart,
+}: {
+  rowIdxEnd: SelectedCells["rowIdxEnd"];
+  rowIdxStart: SelectedCells["rowIdxStart"];
+}): number => {
+  if (rowIdxStart === null || rowIdxEnd === null) return 0;
   return rowIdxEnd - rowIdxStart + 1;
 };
 
-const calculateColumnCount = (
-  columnIdxEnd: SelectedCells["columnIdxEnd"],
-  columnIdxStart: SelectedCells["columnIdxStart"]
-): number => {
-  if (columnIdxEnd === null || columnIdxStart === null) return 0;
+const calculateColumnCount = ({
+  columnIdxEnd,
+  columnIdxStart,
+}: {
+  columnIdxEnd: SelectedCells["columnIdxEnd"];
+  columnIdxStart: SelectedCells["columnIdxStart"];
+}): number => {
+  if (columnIdxStart === null || columnIdxEnd === null) return 0;
   return columnIdxEnd - columnIdxStart + 1;
 };
 

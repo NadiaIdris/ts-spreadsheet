@@ -35,7 +35,7 @@ const ContextMenu = ({
   );
 
   const addColumns = () => {
-    const columnsCount = calculateColumnCount(columnIdxEnd, columnIdxStart);
+    const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
     const hasZeroColumns = columnsCount === 0;
     const hasOneColumn = columnsCount === 1;
     const hasOneOrMoreColumns = columnsCount >= 1;
@@ -55,7 +55,7 @@ const ContextMenu = ({
   };
 
   const addRows = () => {
-    const rowsCount = calculateRowCount(rowIdxEnd, rowIdxStart);
+    const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
     if (zeroRowsSelected) return;
@@ -72,7 +72,7 @@ const ContextMenu = ({
   };
 
   const deleteColumns = () => {
-    const columnsCount = calculateColumnCount(columnIdxEnd, columnIdxStart);
+    const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
     const zeroColumnsSelected = columnsCount === 0;
     const oneColumnSelected = columnsCount === 1;
     if (zeroColumnsSelected) return;
@@ -91,7 +91,7 @@ const ContextMenu = ({
   };
 
   const deleteRows = () => {
-    const rowsCount = calculateRowCount(rowIdxEnd, rowIdxStart);
+    const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
     if (zeroRowsSelected) return;
