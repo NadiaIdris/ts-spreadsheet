@@ -32,15 +32,28 @@ const calculateColumnRange = ({
   columnIdxEnd: SelectedCells["columnIdxEnd"];
   columnIdxStart: SelectedCells["columnIdxStart"];
 }) => {
-  if (columnIdxEnd === null || columnIdxStart === null) return "";
-  if (columnIdxEnd === columnIdxStart) return `${columnIdxStart! + 1}C`;
+  if (columnIdxStart === null || columnIdxEnd === null) return "";
+  if (columnIdxStart === columnIdxEnd) return `${columnIdxStart! + 1}C`;
   return `${columnIdxStart! + 1}C-${columnIdxEnd! + 1}C`;
+};
+
+const calculateRowRange = ({
+  rowIdxEnd,
+  rowIdxStart,
+}: {
+  rowIdxEnd: SelectedCells["rowIdxEnd"];
+  rowIdxStart: SelectedCells["rowIdxStart"];
+}) => {
+  if (rowIdxStart === null || rowIdxEnd === null) return "";
+  if (rowIdxStart === rowIdxEnd) return `${rowIdxStart! + 1}R`;
+  return `${rowIdxStart! + 1}R-${rowIdxEnd! + 1}R`;
 };
 
 export {
   calculateColumnCount,
   calculateColumnRange,
   calculateRowCount,
+  calculateRowRange,
   setInitialHeading,
   SPREADSHEET_HEADING,
 };
