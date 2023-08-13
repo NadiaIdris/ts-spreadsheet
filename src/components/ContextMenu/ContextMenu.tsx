@@ -7,13 +7,13 @@ import {
   calculateRowCount,
   calculateRowRange,
 } from "../../utils/utils";
-import { ColumnsToAdd, RowsToAdd, SelectedCells } from "../Spreadsheet";
+import { ColumnsToAdd, RowsToAdd, SelectedCells, ColumnsToDelete } from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
 interface ContextMenuProps {
   addColumns: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
   addRows: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
-  deleteSelectedColumns: () => void;
+  deleteSelectedColumns: ({columnIdxEnd, columnIdxStart}: ColumnsToDelete) => void;
   deleteSelectedRows: () => void;
   left: number;
   selectedCells: SelectedCells;
@@ -82,7 +82,7 @@ const ContextMenu = ({
     if (zeroColumnsSelected) return;
     const columnRange = calculateColumnRange({ columnIdxEnd, columnIdxStart });
     return (
-      <MenuItem icon={iconDelete} onClick={() => deleteSelectedColumns()}>
+      <MenuItem icon={iconDelete} onClick={() => deleteSelectedColumns({columnIdxEnd, columnIdxStart})}>
         <ContextMenuItemTextStyled>
           Delete{" "}
           {oneColumnSelected

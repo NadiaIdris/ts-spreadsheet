@@ -4,6 +4,7 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
+import { calculateColumnCount } from "../../utils/utils";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -30,6 +31,11 @@ export interface SelectedCells {
 export interface ColumnsToAdd {
   columnIdxStart: number | null;
   columnsCount: number;
+}
+
+export interface ColumnsToDelete {
+  columnIdxStart: number | null;
+  columnIdxEnd: number | null;
 }
 
 export interface RowsToAdd {
@@ -410,7 +416,28 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   // TODO: implement this function.
   /** Delete ... */
-  const deleteSelectedColumnsOnClick = () => {};
+  const deleteSelectedColumns = ({
+    columnIdxEnd,
+    columnIdxStart,
+  }: ColumnsToDelete) => {
+    const columnCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
+    const newSpreadSheetState = spreadsheetState.map((row) => {
+      const startChunkOfTheRow = row.slice(0, columnIdxStart!);
+      const endChunkOfTheRow = [];
+      for (let i = columnIdxEnd! + 1; i < row.length; i++) { 
+        endChunkOfTheRow.push({
+          ...row[ i ],
+          columnIdx: i - columnCount,
+        })
+      }
+      const newRow = [...startChunkOfTheRow, ...endChunkOfTheRow];
+      return newRow;
+    });
+    // Update the spreadsheet state.
+    setSpreadsheetState(newSpreadSheetState);
+    // Update the database.
+    handleDBUpdate(newSpreadSheetState);
+  };
 
   /** Add "rowsCount" number of new empty rows at the rowIdxStart. */
   const addRowsOnClick = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
@@ -454,7 +481,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   // TODO: implement this function.
   /** Delete ... */
-  const deleteSelectedRowsOnClick = () => {};
+  const deleteSelectedRows = () => {};
 
   useEffect(() => {
     // Fetch for the data from the server.
@@ -601,8 +628,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     <ContextMenu
                       addColumns={addColumnsOnClick}
                       addRows={addRowsOnClick}
-                      deleteSelectedColumns={deleteSelectedColumnsOnClick}
-                      deleteSelectedRows={deleteSelectedRowsOnClick}
+                      deleteSelectedColumns={deleteSelectedColumns}
+                      deleteSelectedRows={deleteSelectedRows}
                       selectedCells={selectedCells}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}
