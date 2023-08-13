@@ -9,7 +9,7 @@ const setInitialHeading = (defaultHeading: string) => {
   return defaultHeading;
 };
 
-const calculateRows = (
+const calculateRowCount = (
   rowIdxEnd: SelectedCells["rowIdxEnd"],
   rowIdxStart: SelectedCells["rowIdxStart"]
 ): number => {
@@ -17,7 +17,7 @@ const calculateRows = (
   return rowIdxEnd - rowIdxStart + 1;
 };
 
-const calculateColumns = (
+const calculateColumnCount = (
   columnIdxEnd: SelectedCells["columnIdxEnd"],
   columnIdxStart: SelectedCells["columnIdxStart"]
 ): number => {
@@ -25,9 +25,22 @@ const calculateColumns = (
   return columnIdxEnd - columnIdxStart + 1;
 };
 
+const calculateColumnRange = ({
+  columnIdxEnd,
+  columnIdxStart,
+}: {
+  columnIdxEnd: SelectedCells["columnIdxEnd"];
+  columnIdxStart: SelectedCells["columnIdxStart"];
+}) => {
+  if (columnIdxEnd === null || columnIdxStart === null) return "";
+  if (columnIdxEnd === columnIdxStart) return `${columnIdxStart! + 1}C`;
+  return `${columnIdxStart! + 1}C-${columnIdxEnd! + 1}C`;
+};
+
 export {
-  calculateColumns,
-  calculateRows,
+  calculateColumnCount,
+  calculateColumnRange,
+  calculateRowCount,
   setInitialHeading,
   SPREADSHEET_HEADING,
 };

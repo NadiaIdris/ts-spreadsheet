@@ -4,42 +4,11 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
-import cellContextMenu from "../../data/cellContextMenu";
-import { start } from "repl";
 
 interface SpreadsheetProps {
   columns?: number;
   rows?: number;
 }
-
-const ALPHABET = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "M",
-  "N",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z",
-];
 
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
 
@@ -522,7 +491,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
               {row.map((column, columnIdx) => (
                 <CellHeader
                   key={`cell-header-${rowIdx}/${columnIdx}`}
-                  value={ALPHABET[columnIdx]}
+                  value={`${columnIdx + 1}C`}
                 />
               ))}
               {/* <CellHeader
@@ -546,7 +515,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                     <CellHeader
                       isFirstColumnCell
                       key={`row-header-${rowIdx}/${columnIdx}`}
-                      value={String(rowIdx + 1)}
+                      value={`${rowIdx + 1}R`}
                     />
                   )}
                   {/* Add the rest of row items.  */}
