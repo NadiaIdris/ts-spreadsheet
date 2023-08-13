@@ -367,6 +367,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     }
   };
 
+  /** Add "columnsCount" number of new empty columns at the columnIdxStart. */
   const addColumnsOnClick = ({
     columnIdxStart,
     columnsCount,
@@ -407,11 +408,11 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     handleDBUpdate(newSpreadSheetState);
   };
 
-  /**
-   * @
-   * Add "rowsCount" number of new empty rows at the rowIdxStart.
-   */
+  // TODO: implement this function.
+  /** Delete ... */
+  const deleteSelectedColumnsOnClick = () => {};
 
+  /** Add "rowsCount" number of new empty rows at the rowIdxStart. */
   const addRowsOnClick = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
     const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
     const columnsCount = spreadsheetState[0].length;
@@ -450,6 +451,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     // Update the database.
     handleDBUpdate(newSpreadsheet);
   };
+
+  // TODO: implement this function.
+  /** Delete ... */
+  const deleteSelectedRowsOnClick = () => {};
 
   useEffect(() => {
     // Fetch for the data from the server.
@@ -594,8 +599,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {/* {contextMenu.isContextMenuOpen && ( */}
                   {true && (
                     <ContextMenu
-                      addColumnsOnClick={addColumnsOnClick}
-                      addRowsOnClick={addRowsOnClick}
+                      addColumns={addColumnsOnClick}
+                      addRows={addRowsOnClick}
+                      deleteSelectedColumns={deleteSelectedColumnsOnClick}
+                      deleteSelectedRows={deleteSelectedRowsOnClick}
                       selectedCells={selectedCells}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}

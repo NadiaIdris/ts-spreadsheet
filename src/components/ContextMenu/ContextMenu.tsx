@@ -11,16 +11,20 @@ import { ColumnsToAdd, RowsToAdd, SelectedCells } from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
 interface ContextMenuProps {
-  addColumnsOnClick: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
-  addRowsOnClick: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
+  addColumns: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
+  addRows: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
+  deleteSelectedColumns: () => void;
+  deleteSelectedRows: () => void;
   left: number;
   selectedCells: SelectedCells;
   top: number;
 }
 
 const ContextMenu = ({
-  addColumnsOnClick,
-  addRowsOnClick,
+  addColumns,
+  addRows,
+  deleteSelectedColumns,
+  deleteSelectedRows,
   left,
   selectedCells,
   top,
@@ -34,7 +38,7 @@ const ContextMenu = ({
     <IconDelete color="#1d2c37" height={10} width={10} title="delete-icon" />
   );
 
-  const addColumns = () => {
+  const addColumnsMenuItem = () => {
     const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
     const hasZeroColumns = columnsCount === 0;
     const hasOneColumn = columnsCount === 1;
@@ -43,7 +47,7 @@ const ContextMenu = ({
     return (
       <MenuItem
         icon={iconAdd}
-        onClick={() => addColumnsOnClick({ columnIdxStart, columnsCount })}
+        onClick={() => addColumns({ columnIdxStart, columnsCount })}
       >
         {hasOneOrMoreColumns && (
           <ContextMenuItemTextStyled>
@@ -54,7 +58,7 @@ const ContextMenu = ({
     );
   };
 
-  const addRows = () => {
+  const addRowsMenuItem = () => {
     const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
@@ -62,7 +66,7 @@ const ContextMenu = ({
     return (
       <MenuItem
         icon={iconAdd}
-        onClick={() => addRowsOnClick({ rowIdxStart, rowsCount })}
+        onClick={() => addRows({ rowIdxStart, rowsCount })}
       >
         <ContextMenuItemTextStyled>
           Add {oneRowSelected ? "1 row" : `${rowsCount} rows`} above
@@ -71,15 +75,14 @@ const ContextMenu = ({
     );
   };
 
-  const deleteColumns = () => {
+  const deleteColumnsMenuItem = () => {
     const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
     const zeroColumnsSelected = columnsCount === 0;
     const oneColumnSelected = columnsCount === 1;
     if (zeroColumnsSelected) return;
-    // TODO: Add onClick handler
     const columnRange = calculateColumnRange({ columnIdxEnd, columnIdxStart });
     return (
-      <MenuItem icon={iconDelete} onClick={() => {}}>
+      <MenuItem icon={iconDelete} onClick={() => deleteSelectedColumns()}>
         <ContextMenuItemTextStyled>
           Delete{" "}
           {oneColumnSelected
@@ -90,15 +93,14 @@ const ContextMenu = ({
     );
   };
 
-  const deleteRows = () => {
+  const deleteRowsMenuItem = () => {
     const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
     if (zeroRowsSelected) return;
     const rowRange = calculateRowRange({ rowIdxEnd, rowIdxStart });
-    // TODO: Add onClick handler
     return (
-      <MenuItem icon={iconDelete} onClick={() => {}}>
+      <MenuItem icon={iconDelete} onClick={() => deleteSelectedRows()}>
         <ContextMenuItemTextStyled>
           Delete {oneRowSelected ? `row ${rowRange}` : `rows ${rowRange}`}
         </ContextMenuItemTextStyled>
@@ -122,11 +124,11 @@ const ContextMenu = ({
 
   return (
     <ContextMenuStyled left={left} top={top}>
-      {addColumns()}
-      {addRows()}
+      {addColumnsMenuItem()}
+      {addRowsMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}
-      {deleteColumns()}
-      {deleteRows()}
+      {deleteColumnsMenuItem()}
+      {deleteRowsMenuItem()}
     </ContextMenuStyled>
   );
 };
