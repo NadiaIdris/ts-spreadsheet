@@ -3,7 +3,14 @@ import {
   ColumnsToAdd,
   ColumnsToDelete,
   RowsToAdd,
+  RowsToDelete,
   SelectedCells,
 } from "./Spreadsheet";
 export default Spreadsheet;
-export type { ColumnsToAdd, ColumnsToDelete, RowsToAdd, SelectedCells };
+export type {
+  ColumnsToAdd,
+  ColumnsToDelete,
+  RowsToAdd,
+  RowsToDelete,
+  SelectedCells,
+};

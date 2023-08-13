@@ -7,14 +7,28 @@ import {
   calculateRowCount,
   calculateRowRange,
 } from "../../utils/utils";
-import { ColumnsToAdd, RowsToAdd, SelectedCells, ColumnsToDelete } from "../Spreadsheet";
+import {
+  ColumnsToAdd,
+  RowsToAdd,
+  SelectedCells,
+  ColumnsToDelete,
+  RowsToDelete,
+} from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
 interface ContextMenuProps {
   addColumns: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
   addRows: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
-  deleteSelectedColumns: ({columnIdxEnd, columnIdxStart}: ColumnsToDelete) => void;
-  deleteSelectedRows: () => void;
+  deleteSelectedColumns: ({
+    columnIdxEnd,
+    columnIdxStart,
+    columnsCount,
+  }: ColumnsToDelete) => void;
+  deleteSelectedRows: ({
+    rowIdxEnd,
+    rowIdxStart,
+    rowsCount,
+  }: RowsToDelete) => void;
   left: number;
   selectedCells: SelectedCells;
   top: number;
@@ -82,7 +96,12 @@ const ContextMenu = ({
     if (zeroColumnsSelected) return;
     const columnRange = calculateColumnRange({ columnIdxEnd, columnIdxStart });
     return (
-      <MenuItem icon={iconDelete} onClick={() => deleteSelectedColumns({columnIdxEnd, columnIdxStart})}>
+      <MenuItem
+        icon={iconDelete}
+        onClick={() =>
+          deleteSelectedColumns({ columnIdxEnd, columnIdxStart, columnsCount })
+        }
+      >
         <ContextMenuItemTextStyled>
           Delete{" "}
           {oneColumnSelected
@@ -100,7 +119,12 @@ const ContextMenu = ({
     if (zeroRowsSelected) return;
     const rowRange = calculateRowRange({ rowIdxEnd, rowIdxStart });
     return (
-      <MenuItem icon={iconDelete} onClick={() => deleteSelectedRows()}>
+      <MenuItem
+        icon={iconDelete}
+        onClick={() =>
+          deleteSelectedRows({ rowIdxEnd, rowIdxStart, rowsCount })
+        }
+      >
         <ContextMenuItemTextStyled>
           Delete {oneRowSelected ? `row ${rowRange}` : `rows ${rowRange}`}
         </ContextMenuItemTextStyled>
@@ -123,7 +147,7 @@ const ContextMenu = ({
   };
 
   return (
-    <ContextMenuStyled left={left} top={top}>
+    <ContextMenuStyled left={left} onContextMenu={() => {}} top={top}>
       {addColumnsMenuItem()}
       {addRowsMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}

@@ -4,7 +4,7 @@ interface MenuItemProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   iconMarginRight?: string;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const MenuItem = ({
@@ -14,7 +14,9 @@ const MenuItem = ({
   onClick,
 }: MenuItemProps) => {
   return (
-    <MenuItemStyled onClick={onClick}>
+    <MenuItemStyled onClick={onClick} onContextMenu={(event: React.MouseEvent) => {
+      event?.preventDefault()
+    }}>
       <div style={{ marginRight: iconMarginRight }}>{icon}</div>
       {children}
     </MenuItemStyled>

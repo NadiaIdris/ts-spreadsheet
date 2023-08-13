@@ -28,19 +28,31 @@ export interface SelectedCells {
   rowIdxStart: number | null;
 }
 
-export interface ColumnsToAdd {
-  columnIdxStart: number | null;
+interface RowAndColumnCount {
   columnsCount: number;
+  rowsCount: number;
+}
+
+export interface ColumnsToAdd {
+  columnIdxStart: SelectedCells["columnIdxStart"];
+  columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface ColumnsToDelete {
-  columnIdxStart: number | null;
-  columnIdxEnd: number | null;
+  columnIdxEnd: SelectedCells["columnIdxEnd"];
+  columnIdxStart: SelectedCells["columnIdxStart"];
+  columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface RowsToAdd {
-  rowIdxStart: number | null;
-  rowsCount: number;
+  rowIdxStart: SelectedCells["rowIdxStart"];
+  rowsCount: RowAndColumnCount["rowsCount"];
+}
+
+export interface RowsToDelete {
+  rowIdxEnd: SelectedCells["rowIdxEnd"];
+  rowIdxStart: SelectedCells["rowIdxStart"];
+  rowsCount: RowAndColumnCount["rowsCount"];
 }
 
 const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
@@ -374,10 +386,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
   };
 
   /** Add "columnsCount" number of new empty columns at the columnIdxStart. */
-  const addColumnsOnClick = ({
-    columnIdxStart,
-    columnsCount,
-  }: ColumnsToAdd) => {
+  const addColumns = ({ columnIdxStart, columnsCount }: ColumnsToAdd) => {
     // Loop over the spreadSheetCopy and for each row, add "x" new empty cells at the columnIdxStart.
     const newSpreadSheetState = spreadsheetState.map((row, rowIndex) => {
       const startChunkOfTheRow = row.slice(0, columnIdxStart!);
@@ -414,33 +423,30 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     handleDBUpdate(newSpreadSheetState);
   };
 
-  // TODO: implement this function.
-  /** Delete ... */
+  /** Delete selected columns from the spreadsheet. */
   const deleteSelectedColumns = ({
     columnIdxEnd,
     columnIdxStart,
+    columnsCount,
   }: ColumnsToDelete) => {
-    const columnCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
     const newSpreadSheetState = spreadsheetState.map((row) => {
       const startChunkOfTheRow = row.slice(0, columnIdxStart!);
       const endChunkOfTheRow = [];
-      for (let i = columnIdxEnd! + 1; i < row.length; i++) { 
+      for (let i = columnIdxEnd! + 1; i < row.length; i++) {
         endChunkOfTheRow.push({
-          ...row[ i ],
-          columnIdx: i - columnCount,
-        })
+          ...row[i],
+          columnIdx: i - columnsCount,
+        });
       }
       const newRow = [...startChunkOfTheRow, ...endChunkOfTheRow];
       return newRow;
     });
-    // Update the spreadsheet state.
     setSpreadsheetState(newSpreadSheetState);
-    // Update the database.
     handleDBUpdate(newSpreadSheetState);
   };
 
   /** Add "rowsCount" number of new empty rows at the rowIdxStart. */
-  const addRowsOnClick = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
+  const addRows = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
     const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
     const columnsCount = spreadsheetState[0].length;
     const newRowsChunk = Array.from({ length: rowsCount }, (v, rowI) => {
@@ -467,21 +473,36 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         })
       );
     }
-    // Construct new spreadsheet.
     const newSpreadsheet = [
       ...firstChunkOfRows,
       ...newRowsChunk,
       ...endChunkOfRows,
     ];
-    // Update the spreadsheet state.
     setSpreadsheetState(newSpreadsheet);
-    // Update the database.
     handleDBUpdate(newSpreadsheet);
   };
 
-  // TODO: implement this function.
-  /** Delete ... */
-  const deleteSelectedRows = () => {};
+  /** Delete the selected rows from the spreadsheet. */
+  const deleteSelectedRows = ({
+    rowIdxEnd,
+    rowIdxStart,
+    rowsCount,
+  }: RowsToDelete) => {
+    console.log("deleteSelectedRows, rowIdxStart --->", rowIdxStart);
+    const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
+    console.log("deleteSelectedRows, firstChunkOfRows --->", firstChunkOfRows);
+    const endChunkOfRows = [];
+    for (let i = rowIdxEnd! + 1; i < spreadsheetState.length; i++) {
+      endChunkOfRows.push(
+        spreadsheetState[i].map((cell) => {
+          return { ...cell, rowIdx: i - rowsCount };
+        })
+      );
+    }
+    const newSpreadsheet = [...firstChunkOfRows, ...endChunkOfRows];
+    setSpreadsheetState(newSpreadsheet);
+    handleDBUpdate(newSpreadsheet);
+  };
 
   useEffect(() => {
     // Fetch for the data from the server.
@@ -626,8 +647,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                   {/* {contextMenu.isContextMenuOpen && ( */}
                   {true && (
                     <ContextMenu
-                      addColumns={addColumnsOnClick}
-                      addRows={addRowsOnClick}
+                      addColumns={addColumns}
+                      addRows={addRows}
                       deleteSelectedColumns={deleteSelectedColumns}
                       deleteSelectedRows={deleteSelectedRows}
                       selectedCells={selectedCells}
