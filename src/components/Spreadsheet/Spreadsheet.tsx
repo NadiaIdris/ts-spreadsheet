@@ -81,7 +81,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     rowIdxEnd: null,
     rowIdxStart: null,
   } as SelectedCells);
-
   const [previousCell, setPreviousCell] = useState({
     columnIdx: null as number | null,
     rowIdx: null as number | null,
@@ -135,7 +134,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    // setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -352,6 +351,12 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
     }
+
+    // TODO: check this if statement.
+    // If user is typing, then set the cell isEditing to true.
+    if (event.key.length === 1) { 
+      changeCellState({ isEditing: true, isSelected: true}, columnIdx, rowIdx);
+    }
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
@@ -387,6 +392,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   /** Add "columnsCount" number of new empty columns at the columnIdxStart. */
   const addColumns = ({ columnIdxStart, columnsCount }: ColumnsToAdd) => {
+    console.log("addColumns, columnIdxStart --->", columnIdxStart);
     // Loop over the spreadSheetCopy and for each row, add "x" new empty cells at the columnIdxStart.
     const newSpreadSheetState = spreadsheetState.map((row, rowIndex) => {
       const startChunkOfTheRow = row.slice(0, columnIdxStart!);
@@ -416,11 +422,10 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       ];
       return newRow;
     });
-
-    // Update the spreadsheet state.
     setSpreadsheetState(newSpreadSheetState);
-    // Update the database.
     handleDBUpdate(newSpreadSheetState);
+    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+
   };
 
   /** Delete selected columns from the spreadsheet. */
@@ -443,6 +448,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     });
     setSpreadsheetState(newSpreadSheetState);
     handleDBUpdate(newSpreadSheetState);
+    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   /** Add "rowsCount" number of new empty rows at the rowIdxStart. */
@@ -480,6 +486,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     ];
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
+    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   /** Delete the selected rows from the spreadsheet. */
@@ -502,6 +509,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     const newSpreadsheet = [...firstChunkOfRows, ...endChunkOfRows];
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
+    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   useEffect(() => {
@@ -644,8 +652,8 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
                       value={column.value}
                     />
                   </CellWrapper>
-                  {/* {contextMenu.isContextMenuOpen && ( */}
-                  {true && (
+                  {/* TODO: maintain focus after rows/cols have been deleted/added. */}
+                  {contextMenu.isContextMenuOpen && (
                     <ContextMenu
                       addColumns={addColumns}
                       addRows={addRows}

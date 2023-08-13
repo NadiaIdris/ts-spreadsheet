@@ -4,7 +4,7 @@ interface MenuItemProps {
   children: React.ReactNode;
   icon?: React.ReactNode;
   iconMarginRight?: string;
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: () => void;
 }
 
 const MenuItem = ({
@@ -14,9 +14,13 @@ const MenuItem = ({
   onClick,
 }: MenuItemProps) => {
   return (
-    <MenuItemStyled onClick={onClick} onContextMenu={(event: React.MouseEvent) => {
-      event?.preventDefault()
-    }}>
+    /* onContextMenu prop is here to stop operating system context menu from appearing when user right clicks on MenuItem component. */
+    <MenuItemStyled
+      onClick={onClick}
+      // onContextMenu={(event: React.MouseEvent) => {
+      //   event?.preventDefault();
+      // }}
+    >
       <div style={{ marginRight: iconMarginRight }}>{icon}</div>
       {children}
     </MenuItemStyled>
