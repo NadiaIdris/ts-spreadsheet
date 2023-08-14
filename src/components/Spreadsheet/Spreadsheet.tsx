@@ -134,7 +134,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
     changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
-    // setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -281,7 +280,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     event: React.KeyboardEvent<HTMLInputElement>,
     rowIdx: number
   ) => {
-    const currentCell = spreadsheetState[rowIdx][columnIdx];
+    const currentCell = spreadsheetState[ rowIdx ][ columnIdx ];
+    
+    const closeContextMenu = () => { 
+      if (contextMenu.isContextMenuOpen) {
+        setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+      }
+    }
 
     if (event.key === "Enter") {
       event.preventDefault();
@@ -291,6 +296,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         // If on the last row, then do an early return.
         if (rowIdx === spreadsheetState.length - 1) {
           changeCellState({ isEditing: false }, columnIdx, rowIdx);
+          closeContextMenu();
           return;
         }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
@@ -301,6 +307,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
           columnIdx,
           rowIdx + 1
         );
+        closeContextMenu();
       } else if (currentCell.isSelected && !currentCell.isEditing) {
         // Set the current cell isEditing to true.
         changeCellState(
@@ -308,6 +315,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
           columnIdx,
           rowIdx
         );
+        closeContextMenu();
       }
     }
 
@@ -316,6 +324,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+      closeContextMenu();
     }
 
     if (event.key === "ArrowLeft" && currentCell.isEditing === false) {
@@ -323,6 +332,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx - 1, rowIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+      closeContextMenu();
     }
 
     if (event.key === "ArrowUp") {
@@ -330,6 +340,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx, rowIdx - 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+      closeContextMenu();
     }
 
     if (event.key === "ArrowDown") {
@@ -337,12 +348,14 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx, rowIdx + 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
+      closeContextMenu();
     }
 
     // Note: Make sure "Tab" + Shift is before "Tab" key. Otherwise, "Tab" key will be triggered first.
     if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();
       moveFocusTo(columnIdx - 1, rowIdx);
+      closeContextMenu();
       return;
     }
 
@@ -350,12 +363,13 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       // Add preventDefault, so that the input field doesn't add animation when "Tab" focuses input field.
       event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
+      closeContextMenu();
     }
 
     // TODO: check this if statement.
     // If user is typing, then set the cell isEditing to true.
-    if (event.key.length === 1) { 
-      changeCellState({ isEditing: true, isSelected: true}, columnIdx, rowIdx);
+    if (event.key.length === 1) {
+      changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
     }
   };
 
@@ -425,7 +439,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     setSpreadsheetState(newSpreadSheetState);
     handleDBUpdate(newSpreadSheetState);
     setContextMenu({ ...contextMenu, isContextMenuOpen: false });
-
   };
 
   /** Delete selected columns from the spreadsheet. */
