@@ -325,16 +325,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         );
         closeContextMenu();
       } else if (currentCell.isSelected && !currentCell.isEditing) {
-        if (event.key.length === 1) {
-          console.log("event.key after 'Enter' got hit --> ", event.key);
-          changeCellState(
-            { isEditing: true, isSelected: true, value: event.key },
-            columnIdx,
-            rowIdx
-          );
-          closeContextMenu();
-          return;
-        }
         // Set the current cell isEditing to true.
         changeCellState(
           { isEditing: true, isSelected: true },
