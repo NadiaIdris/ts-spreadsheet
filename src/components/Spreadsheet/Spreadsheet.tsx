@@ -149,7 +149,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     const currentCell = spreadsheetState[rowIdx][columnIdx];
     // If the new value is the same as the current value, then don't update the cell value.
     if (currentCell.value === newValue) return;
-
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     changeCellState({ value: newValue }, columnIdx, rowIdx);
   };
@@ -280,22 +279,39 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     event: React.KeyboardEvent<HTMLInputElement>,
     rowIdx: number
   ) => {
-    const currentCell = spreadsheetState[ rowIdx ][ columnIdx ];
-    
-    const closeContextMenu = () => { 
+    const currentCell = spreadsheetState[rowIdx][columnIdx];
+
+    const closeContextMenu = () => {
       if (contextMenu.isContextMenuOpen) {
         setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+      }
+    };
+
+    // TODO: check this if statement.
+    // If user is typing, then set the cell isEditing to true.
+    if (event.key.length === 1) {
+      if (currentCell.isSelected && !currentCell.isEditing) {
+        // Clear the cell value.
+        changeCellState(
+          { isEditing: true, isSelected: true, value: "" },
+          columnIdx,
+          rowIdx
+        );
       }
     }
 
     if (event.key === "Enter") {
-      event.preventDefault();
+      // event.preventDefault();
       if (currentCell.isSelected && currentCell.isEditing) {
         // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
 
         // If on the last row, then do an early return.
         if (rowIdx === spreadsheetState.length - 1) {
-          changeCellState({ isEditing: false }, columnIdx, rowIdx);
+          changeCellState(
+            { isEditing: false, isSelected: true },
+            columnIdx,
+            rowIdx
+          );
           closeContextMenu();
           return;
         }
@@ -309,6 +325,16 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
         );
         closeContextMenu();
       } else if (currentCell.isSelected && !currentCell.isEditing) {
+        if (event.key.length === 1) {
+          console.log("event.key after 'Enter' got hit --> ", event.key);
+          changeCellState(
+            { isEditing: true, isSelected: true, value: event.key },
+            columnIdx,
+            rowIdx
+          );
+          closeContextMenu();
+          return;
+        }
         // Set the current cell isEditing to true.
         changeCellState(
           { isEditing: true, isSelected: true },
@@ -364,12 +390,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       event.preventDefault();
       moveFocusTo(columnIdx + 1, rowIdx);
       closeContextMenu();
-    }
-
-    // TODO: check this if statement.
-    // If user is typing, then set the cell isEditing to true.
-    if (event.key.length === 1) {
-      changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
     }
   };
 
