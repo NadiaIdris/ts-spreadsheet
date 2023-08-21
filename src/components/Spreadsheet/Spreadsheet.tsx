@@ -287,11 +287,30 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       }
     };
 
-    // TODO: check this if statement.
-    // If user is typing, then set the cell isEditing to true.
+    // Keep ctrlKey combinations at the top.
+    if (event.ctrlKey && event.key === "c") {
+      handleOnCopy(columnIdx, rowIdx);
+      closeContextMenu();
+      return;
+    }
+
+    if (event.ctrlKey && event.key === "x") {
+      handleOnCut(columnIdx, rowIdx);
+      closeContextMenu();
+      return;
+    }
+
+    if (event.ctrlKey && event.key === "v") {
+      handleOnPaste(columnIdx, rowIdx);
+      closeContextMenu();
+      return;
+    }
+
+    // If `isEditing` is `false` when user starts to type, then set the cell `isEditing` to `true`.
     if (event.key.length === 1) {
       if (currentCell.isSelected && !currentCell.isEditing) {
         // Clear the cell value.
+        console.log("isEditing is false and event.key is --->", event.key);
         changeCellState(
           { isEditing: true, isSelected: true, value: "" },
           columnIdx,
@@ -392,12 +411,15 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
       navigator.clipboard.writeText(selection.toString());
       return;
     }
+
     // Copy the whole cell value.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
-  const handleOnCut = (columnIdx: number, rowIdx: number) => {
-    navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
+  const handleOnCut = async (columnIdx: number, rowIdx: number) => {
+    await navigator.clipboard.writeText(
+      spreadsheetState[rowIdx][columnIdx].value!
+    );
     changeCellState(
       { isEditing: false, isSelected: true, value: "" },
       columnIdx,
