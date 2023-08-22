@@ -4,21 +4,37 @@ import { useState } from "react";
 import { SPREADSHEET_HEADING, setInitialHeading } from "./utils/utils";
 
 function App() {
-  const [heading, setHeading] = useState(setInitialHeading("Spreadsheet"));
+  const [ heading, setHeading ] = useState(setInitialHeading("Spreadsheet"));
+  // TODO: change contextMenu state to useContextMenu custom hook?
+  const [contextMenu, setContextMenu] = useState({
+    isContextMenuOpen: false,
+    locationX: 0,
+    locationY: 0,
+    rowIdx: 0,
+    columnIdx: 0,
+  });
+
   const handleHeadingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     localStorage.setItem(SPREADSHEET_HEADING, e.target.value);
     setHeading(e.target.value);
   };
+
   return (
-    <div>
+    <AppContainer
+      onClick={() => {
+        if (contextMenu.isContextMenuOpen) {
+          setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+        }
+      }}
+    >
       <H1
         value={heading}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
           handleHeadingChange(event)
         }
       />
-      <Spreadsheet />
-    </div>
+      <Spreadsheet contextMenu={contextMenu} setContextMenu={setContextMenu} />
+    </AppContainer>
   );
 }
 
@@ -36,5 +52,5 @@ const H1 = styled.input`
 `;
 
 const AppContainer = styled.div`
-  // background-color: var(--color-background);
+  height: 100%;
 `;

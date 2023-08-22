@@ -1,14 +1,31 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
-import { calculateColumnCount } from "../../utils/utils";
+
+interface ContextMenuI {
+  isContextMenuOpen: boolean;
+  locationX: number;
+  locationY: number;
+  rowIdx: number;
+  columnIdx: number;
+}
 
 interface SpreadsheetProps {
   columns?: number;
+  contextMenu: ContextMenuI;
   rows?: number;
+  setContextMenu: Dispatch<
+    SetStateAction<{
+      isContextMenuOpen: boolean;
+      locationX: number;
+      locationY: number;
+      rowIdx: number;
+      columnIdx: number;
+    }>
+  >;
 }
 
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
@@ -55,7 +72,12 @@ export interface RowsToDelete {
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
-const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
+const Spreadsheet = ({
+  columns = 10,
+  contextMenu,
+  rows = 10,
+  setContextMenu,
+}: SpreadsheetProps) => {
   const grid: OneCell[][] = Array.from({ length: rows }, (v, rowI) =>
     Array.from({ length: columns }, (v, columnI) => {
       return {
@@ -68,13 +90,7 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
-  const [contextMenu, setContextMenu] = useState({
-    isContextMenuOpen: false,
-    locationX: 0,
-    locationY: 0,
-    rowIdx: 0,
-    columnIdx: 0,
-  });
+
   const [selectedCells, setSelectedCells] = useState({
     columnIdxEnd: null,
     columnIdxStart: null,
@@ -108,7 +124,6 @@ const Spreadsheet = ({ rows = 10, columns = 10 }: SpreadsheetProps) => {
     );
   };
 
-  // TODO: is it possible to make this function a custom hook?
   const changeCellState = (
     cellUpdate: OneCell,
     columnIdx: number,

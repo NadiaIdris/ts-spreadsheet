@@ -25,8 +25,7 @@ const CellHeader = ({
 export default CellHeader;
 
 const OneCell = styled.input<{ isFirstColumnCell: boolean }>`
-  // TODO: change purple to transparent.
-  border: 1px solid purple;
+  border: 1px solid transparent;
   max-width: ${({ isFirstColumnCell }) =>
     isFirstColumnCell ? "40px" : "98px"};
   // min-width is calculated based on the cell's input width + 8px padding from the div that wraps it.

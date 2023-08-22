@@ -4,8 +4,12 @@
   padding: 0;
 }
 
+html {
+  height: 100%;
+}
+
 :root {
-  --border-radius-medium: 4px; 
+  --border-radius-medium: 4px;
   --color-background: #1d2c37;
   --color-border-spreadsheet: #334958;
   --color-text-header: #4e6c82;
@@ -18,8 +22,13 @@
 
 body {
   background-color: var(--color-background);
+  height: 100%;
 }
 
 input {
   background-color: var(--color-background);
+}
+
+div#root {
+  height: 100%;
 }
