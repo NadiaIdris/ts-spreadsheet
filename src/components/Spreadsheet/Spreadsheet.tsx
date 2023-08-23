@@ -97,7 +97,6 @@ const Spreadsheet = ({
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
-
   const [selectedCells, setSelectedCells] = useState({
     columnIdxEnd: null,
     columnIdxStart: null,
@@ -108,7 +107,7 @@ const Spreadsheet = ({
     columnIdx: null as number | null,
     rowIdx: null as number | null,
   });
-
+  const [selecting, setSelecting] = useState(false);
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -703,15 +702,25 @@ const Spreadsheet = ({
                       onMouseDown={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        
                         console.log(
                           "onMouseDown called on columnIdx/rowIdx --->",
                           columnIdx,
                           "/",
                           rowIdx
                         );
-                        // TODO: fix this part1.
-                        changeCellState({isSelected: true}, columnIdx, rowIdx)
+                        // TODO: fix this part1. Add a flag isSelecting and then color the background color.
+                        setSelecting(true);
+                        console.log(
+                          "onMouseDown column.isSelected --->",
+                          column.isSelected
+                        );
+                        // Only one cell is selected at this point.
+                        setSelectedCells({
+                          columnIdxEnd: columnIdx,
+                          columnIdxStart: columnIdx,
+                          rowIdxEnd: rowIdx,
+                          rowIdxStart: rowIdx,
+                        });
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
@@ -725,7 +734,37 @@ const Spreadsheet = ({
                           rowIdx
                         );
                         // TODO: fix this part2.
-                        changeCellState({isSelected: true}, columnIdx, rowIdx)
+                        if (selecting) {
+                          console.log(
+                            "onMouseOver column.isSelected --->",
+                            column.isSelected
+                          );
+                          const selectedTowardsLeft = columnIdx < selectedCells.columnIdxStart!;
+                          if (selectedTowardsLeft) { 
+                            // Update columnIdxStart only.
+                            setSelectedCells({
+                              ...selectedCells,
+                              columnIdxStart: columnIdx,
+                            });
+                            return;
+                          }
+                          const selectedTowardsRight = columnIdx > selectedCells.columnIdxStart!;
+                          const unselectedTowardsLeft = !column.isSelected && columnIdx < selectedCells.columnIdxStart!;
+                          if (selectedTowardsRight || unselectedTowardsLeft) { 
+                            // Update columnIdxEnd only.
+                            setSelectedCells({
+                              ...selectedCells,
+                              columnIdxEnd: columnIdx,
+                            });
+                            return;
+                          }
+    
+                          changeCellState(
+                            { isSelected: true },
+                            columnIdx,
+                            rowIdx
+                          );
+                        }
                       }}
                       onMouseUp={(
                         event: React.MouseEvent<HTMLInputElement>
@@ -737,7 +776,12 @@ const Spreadsheet = ({
                           rowIdx
                         );
                         // TODO: fix this part3.
-                        changeCellState({isSelected: true}, columnIdx, rowIdx)
+                        changeCellState(
+                          { isSelected: true },
+                          columnIdx,
+                          rowIdx
+                        );
+                        setSelecting(false);
                       }}
                       onPaste={() => handleOnPaste(columnIdx, rowIdx)}
                       ref={(element: HTMLInputElement) =>
