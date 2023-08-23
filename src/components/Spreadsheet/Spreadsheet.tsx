@@ -1,4 +1,11 @@
-import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
@@ -696,13 +703,41 @@ const Spreadsheet = ({
                       onMouseDown={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        // event.stopPropagation();
+                        
+                        console.log(
+                          "onMouseDown called on columnIdx/rowIdx --->",
+                          columnIdx,
+                          "/",
+                          rowIdx
+                        );
+                        // TODO: fix this part1.
+                        changeCellState({isSelected: true}, columnIdx, rowIdx)
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
                         event.preventDefault();
                         event.stopPropagation();
+                        console.log(
+                          "onMouseOver got called on columnIdx/rowIdx ---->",
+                          columnIdx,
+                          "/",
+                          rowIdx
+                        );
+                        // TODO: fix this part2.
+                        changeCellState({isSelected: true}, columnIdx, rowIdx)
+                      }}
+                      onMouseUp={(
+                        event: React.MouseEvent<HTMLInputElement>
+                      ) => {
+                        console.log(
+                          "onMouseUp called on columnIdx/rowIdx --->",
+                          columnIdx,
+                          "/",
+                          rowIdx
+                        );
+                        // TODO: fix this part3.
+                        changeCellState({isSelected: true}, columnIdx, rowIdx)
                       }}
                       onPaste={() => handleOnPaste(columnIdx, rowIdx)}
                       ref={(element: HTMLInputElement) =>

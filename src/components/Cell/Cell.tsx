@@ -23,6 +23,7 @@ interface ICell {
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onMouseDown: (event: React.MouseEvent<HTMLInputElement>) => void;
   onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onMouseUp: (event: React.MouseEvent<HTMLInputElement>) => void;
   onPaste: () => void;
   rowIdx: number;
   value: string | undefined;
@@ -52,6 +53,7 @@ const Cell = forwardRef(
       onKeyDown,
       onMouseDown,
       onMouseOver,
+      onMouseUp,
       onPaste,
       rowIdx,
       value,
@@ -67,6 +69,7 @@ const Cell = forwardRef(
         data-columnidx={columnIdx}
         data-rowidx={rowIdx}
         draggable={true}
+        isSelected={isSelected}
         onBlur={onBlur}
         onChange={onChangeHander}
         onClick={onClick}
@@ -85,6 +88,7 @@ const Cell = forwardRef(
         onKeyDown={(event: any) => onKeyDown(event)}
         onMouseDown={onMouseDown}
         onMouseOver={onMouseOver}
+        onMouseUp={onMouseUp}
         onPaste={onPaste}
         readOnly={isEditing ? false : true}
         ref={ref}
@@ -97,7 +101,8 @@ const Cell = forwardRef(
 export default Cell;
 export type { ICell };
 
-const CellStyled = styled.input`
+const CellStyled = styled.input<{ isSelected?: boolean; }>`
+  background-color: ${props => props.isSelected ? "blue" : ""};
   border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
