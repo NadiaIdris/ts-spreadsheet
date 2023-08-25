@@ -154,7 +154,27 @@ const Spreadsheet = ({
   };
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
-    changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
+    // Change all the selectedCells isSelected and isEditing values to false.
+    const newRow = [...spreadsheetState[rowIdx]];
+    for (
+      let currentColumnIdx = selectedCells.columnIdxStart!;
+      currentColumnIdx < selectedCells.columnIdxEnd! + 1;
+      currentColumnIdx++
+    ) {
+      newRow[currentColumnIdx] = {
+        ...newRow[currentColumnIdx],
+        isEditing: false,
+        isSelected: false,
+      };
+    }
+    const newSpreadsheet = [
+      ...spreadsheetState.slice(0, rowIdx),
+      newRow,
+      ...spreadsheetState.slice(rowIdx + 1),
+    ];
+    setSpreadsheetState(newSpreadsheet);
+    handleDBUpdate(newSpreadsheet);
+    // changeCellState({ isEditing: false, isSelected: false }, columnIdx, rowIdx);
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -421,6 +441,30 @@ const Spreadsheet = ({
       moveFocusTo(columnIdx + 1, rowIdx);
       closeContextMenu();
     }
+  };
+
+  const handleMouseDown = (
+    columnIdx: number,
+    event: React.MouseEvent,
+    rowIdx: number
+  ) => {
+    console.log(
+      "onMouseDown called on columnIdx/rowIdx --->",
+      columnIdx,
+      "/",
+      rowIdx
+    );
+    setSelecting(true);
+    const cell = spreadsheetState[rowIdx][columnIdx];
+    // This is false if the cell is not selected.
+    console.log("onMouseDown cell.isSelected --->", cell.isSelected);
+    // Only one cell is selected at this point.
+    setSelectedCells({
+      columnIdxEnd: columnIdx,
+      columnIdxStart: columnIdx,
+      rowIdxEnd: rowIdx,
+      rowIdxStart: rowIdx,
+    });
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
@@ -702,25 +746,7 @@ const Spreadsheet = ({
                       onMouseDown={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        console.log(
-                          "onMouseDown called on columnIdx/rowIdx --->",
-                          columnIdx,
-                          "/",
-                          rowIdx
-                        );
-                        // TODO: fix this part1. Add a flag isSelecting and then color the background color.
-                        setSelecting(true);
-                        console.log(
-                          "onMouseDown column.isSelected --->",
-                          column.isSelected
-                        );
-                        // Only one cell is selected at this point.
-                        setSelectedCells({
-                          columnIdxEnd: columnIdx,
-                          columnIdxStart: columnIdx,
-                          rowIdxEnd: rowIdx,
-                          rowIdxStart: rowIdx,
-                        });
+                        handleMouseDown(columnIdx, event, rowIdx);
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
@@ -733,24 +759,73 @@ const Spreadsheet = ({
                           "/",
                           rowIdx
                         );
-                        // TODO: fix this part2.
                         if (selecting) {
+                          const currentCell =
+                            spreadsheetState[rowIdx][columnIdx];
                           console.log(
-                            "onMouseOver column.isSelected --->",
-                            column.isSelected
+                            "onMouseOver currentCell.isSelected --->",
+                            currentCell.isSelected
                           );
-                          const selectedTowardsLeft = columnIdx < selectedCells.columnIdxStart!;
-                          if (selectedTowardsLeft) { 
+                          // selectedTowardsLeft means (adding cells to selection, update columnIdxStart): |newSelectedCell| <-- |selectedCell|
+                          const selectedTowardsLeft =
+                            columnIdx < selectedCells.columnIdxStart!;
+                          // unselectedTowardsRight means (removing cells from selection, update columnIdxStart): |selectedCell became unSelectedCell| --> |selectedCell|
+                          let unselectedCell: OneCell | undefined =
+                            spreadsheetState[rowIdx][columnIdx - 1];
+                          if (unselectedCell === undefined) {
+                            unselectedCell =
+                              spreadsheetState[rowIdx][columnIdx];
+                          }
+                          const unselectedTowardsRight =
+                            unselectedCell.isSelected &&
+                            columnIdx > selectedCells.columnIdxStart!;
+                          if (selectedTowardsLeft || unselectedTowardsRight) {
                             // Update columnIdxStart only.
                             setSelectedCells({
                               ...selectedCells,
                               columnIdxStart: columnIdx,
                             });
+                            const newRow = [...spreadsheetState[rowIdx]];
+                            // Loop over spreadsheetState's correct row and change the isSelected value to true or false depending are we selecting/unselecting.
+                            // If we are unselecting a cell, then we ONLY need to set isSelected to false in the unselected cell. We do an early return.
+                            if (unselectedTowardsRight) {
+                              newRow[columnIdx - 1] = {
+                                ...newRow[columnIdx - 1],
+                                isSelected: false,
+                              };
+                              const newSpreadsheet = [
+                                ...spreadsheetState.slice(0, rowIdx),
+                                newRow,
+                                ...spreadsheetState.slice(rowIdx + 1),
+                              ];
+                              setSpreadsheetState(newSpreadsheet);
+                              handleDBUpdate(newSpreadsheet);
+                              return;
+                            }
+                            // If we are selecting a cell, then we need to set isSelected to true in the selected cell.
+                            newRow[columnIdx] = {
+                              ...newRow[columnIdx],
+                              isSelected: true,
+                            };
+                            const newSpreadsheet = [
+                              ...spreadsheetState.slice(0, rowIdx),
+                              newRow,
+                              ...spreadsheetState.slice(rowIdx + 1),
+                            ];
+                            setSpreadsheetState(newSpreadsheet);
+                            handleDBUpdate(newSpreadsheet);
                             return;
                           }
-                          const selectedTowardsRight = columnIdx > selectedCells.columnIdxStart!;
-                          const unselectedTowardsLeft = !column.isSelected && columnIdx < selectedCells.columnIdxStart!;
-                          if (selectedTowardsRight || unselectedTowardsLeft) { 
+
+                          // selectedTowardsRight means: |selectedCell| --> |newSelectedCell|
+                          const selectedTowardsRight =
+                            columnIdx > selectedCells.columnIdxStart!;
+                          // TODO: added unselect
+                          // unselectedTowardsLeft means: |selectedCell| <-- |selectedCell became unSelectedCell|
+                          const unselectedTowardsLeft =
+                            !column.isSelected &&
+                            columnIdx < selectedCells.columnIdxStart!;
+                          if (selectedTowardsRight || unselectedTowardsLeft) {
                             // Update columnIdxEnd only.
                             setSelectedCells({
                               ...selectedCells,
@@ -758,7 +833,7 @@ const Spreadsheet = ({
                             });
                             return;
                           }
-    
+
                           changeCellState(
                             { isSelected: true },
                             columnIdx,
