@@ -1,10 +1,9 @@
-import Spreadsheet from "./Spreadsheet";
-import {
+import Spreadsheet, {
   ColumnsToAdd,
   ColumnsToDelete,
   RowsToAdd,
   RowsToDelete,
-  SelectedCells,
+  SelectedCellsGroup,
 } from "./Spreadsheet";
 export default Spreadsheet;
 export type {
@@ -12,5 +11,5 @@ export type {
   ColumnsToDelete,
   RowsToAdd,
   RowsToDelete,
-  SelectedCells,
+  SelectedCellsGroup as SelectedCells,
 };

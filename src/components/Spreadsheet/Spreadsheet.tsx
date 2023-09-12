@@ -46,10 +46,16 @@ interface OneCell {
 }
 
 export interface SelectedCells {
-  columnIdxEnd: number | null;
-  columnIdxStart: number | null;
-  rowIdxEnd: number | null;
   rowIdxStart: number | null;
+  rowIdxEnd: number | null;
+  columnIdxStart: number | null;
+  columnIdxEnd: number | null;
+}
+
+export interface Selected {
+  previousDirection: "up" | "right" | "down" | "left" | undefined;
+  previouslySelectedCell: SelectedCells;
+  selectedCellsGroups: SelectedCells[];
 }
 
 interface RowAndColumnCount {
@@ -63,8 +69,8 @@ export interface ColumnsToAdd {
 }
 
 export interface ColumnsToDelete {
-  columnIdxEnd: SelectedCells["columnIdxEnd"];
   columnIdxStart: SelectedCells["columnIdxStart"];
+  columnIdxEnd: SelectedCells["columnIdxEnd"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
@@ -74,8 +80,8 @@ export interface RowsToAdd {
 }
 
 export interface RowsToDelete {
-  rowIdxEnd: SelectedCells["rowIdxEnd"];
   rowIdxStart: SelectedCells["rowIdxStart"];
+  rowIdxEnd: SelectedCells["rowIdxEnd"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
@@ -97,12 +103,17 @@ const Spreadsheet = ({
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
-  const [selectedCells, setSelectedCells] = useState({
-    columnIdxEnd: null,
-    columnIdxStart: null,
-    rowIdxEnd: null,
-    rowIdxStart: null,
-  } as SelectedCells);
+  // const [ selectedCells, setSelectedCells ] = useState<SelectedCells>({});
+  const [selected, setSelectedCells] = useState<Selected>({
+    previousDirection: undefined,
+    previouslySelectedCell: {
+      rowIdxStart: null,
+      rowIdxEnd: null,
+      columnIdxStart: null,
+      columnIdxEnd: null,
+    },
+    selectedCellsGroups: [],
+  });
   const [previousCell, setPreviousCell] = useState({
     columnIdx: null as number | null,
     rowIdx: null as number | null,
@@ -154,32 +165,27 @@ const Spreadsheet = ({
   };
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
+    // TODO: fix this
     // Change all the selectedCells isSelected and isEditing values to false.
-    const newRow = [...spreadsheetState[rowIdx]];
-    for (
-      let currentColumnIdx = selectedCells.columnIdxStart!;
-      currentColumnIdx < selectedCells.columnIdxEnd! + 1;
-      currentColumnIdx++
-    ) {
-      newRow[currentColumnIdx] = {
-        ...newRow[currentColumnIdx],
-        isEditing: false,
-        isSelected: false,
-      };
-    }
-    const newSpreadsheet = [
-      ...spreadsheetState.slice(0, rowIdx),
-      newRow,
-      ...spreadsheetState.slice(rowIdx + 1),
-    ];
-    setSpreadsheetState(newSpreadsheet);
-    handleDBUpdate(newSpreadsheet);
-    setSelectedCells({
-      columnIdxEnd: null,
-      columnIdxStart: null,
-      rowIdxEnd: null,
-      rowIdxStart: null,
-    });
+    // const newRow = [...spreadsheetState[rowIdx]];
+    // for (
+    //   let currentColumnIdx = selectedCells.columnIdxStart!;
+    //   currentColumnIdx < selectedCells.columnIdxEnd! + 1;
+    //   currentColumnIdx++
+    // ) {
+    //   newRow[currentColumnIdx] = {
+    //     ...newRow[currentColumnIdx],
+    //     isEditing: false,
+    //     isSelected: false,
+    //   };
+    // }
+    // const newSpreadsheet = [
+    //   ...spreadsheetState.slice(0, rowIdx),
+    //   newRow,
+    //   ...spreadsheetState.slice(rowIdx + 1),
+    // ];
+    // setSpreadsheetState(newSpreadsheet);
+    // handleDBUpdate(newSpreadsheet)
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -223,18 +229,19 @@ const Spreadsheet = ({
     } else if (event.type === "contextmenu") {
       event.preventDefault();
       setContextMenu({
+        columnIdx,
         isContextMenuOpen: true,
         locationX: event.clientX,
         locationY: event.clientY,
         rowIdx,
-        columnIdx,
       });
-      setSelectedCells({
-        columnIdxEnd: columnIdx,
-        columnIdxStart: columnIdx,
-        rowIdxEnd: rowIdx,
-        rowIdxStart: rowIdx,
-      });
+      // TODO: fix this
+      // setSelectedCells({
+      //   columnIdxStart: columnIdx,
+      //   columnIdxEnd: columnIdx,
+      //   rowIdxStart: rowIdx,
+      //   rowIdxEnd: rowIdx,
+      // });
     }
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
@@ -465,12 +472,13 @@ const Spreadsheet = ({
     // This is false if the cell is not selected.
     console.log("onMouseDown cell.isSelected --->", cell.isSelected);
     // Only one cell is selected at this point.
-    setSelectedCells({
-      columnIdxEnd: columnIdx,
-      columnIdxStart: columnIdx,
-      rowIdxEnd: rowIdx,
-      rowIdxStart: rowIdx,
-    });
+    // TODO: fix this
+    //   setSelectedCells({
+    //     columnIdxStart: columnIdx,
+    //     columnIdxEnd: columnIdx,
+    //     rowIdxStart: rowIdx,
+    //     rowIdxEnd: rowIdx,
+    //   });
   };
 
   const handleOnMouseOver = (
@@ -489,113 +497,118 @@ const Spreadsheet = ({
       );
     }
 
-    if (selecting) {
-      const currentCell = spreadsheetState[rowIdx][columnIdx];
-      const newRow = [...spreadsheetState[rowIdx]];
-      console.log(
-        "onMouseOver currentCell.isSelected --->",
-        currentCell.isSelected
-      );
+    // if (selecting) {
+    //   let selectDirection: "left" | "right" | "up" | "down" | undefined =
+    //     undefined;
+    //   const currentCell = spreadsheetState[rowIdx][columnIdx];
+    //   const newRow = [...spreadsheetState[rowIdx]];
+    //   console.log(
+    //     "onMouseOver currentCell.isSelected --->",
+    //     currentCell.isSelected
+    //   );
 
-      // selectedTowardsLeft means (add cells to selection, update columnIdxStart): |newSelectedCell| <-- |selectedCell|
-      const selectedTowardsLeft = columnIdx < selectedCells.columnIdxStart!;
-      if (selectedTowardsLeft) {
-        // Update columnIdxStart only.
-        setSelectedCells({
-          ...selectedCells,
-          columnIdxStart: columnIdx,
-        });
-        // If we are selecting a cell, then we need to set isSelected to true in the selected cell.
-        newRow[columnIdx] = {
-          ...newRow[columnIdx],
-          isSelected: true,
-        };
-        const newSpreadsheet = [
-          ...spreadsheetState.slice(0, rowIdx),
-          newRow,
-          ...spreadsheetState.slice(rowIdx + 1),
-        ];
-        setSpreadsheetState(newSpreadsheet);
-        handleDBUpdate(newSpreadsheet);
-        return;
-      }
+    //   // selectedTowardsLeft means (add cells to selection, update columnIdxStart): |newSelectedCell| <-- |selectedCell|
+    //   const selectedTowardsLeft = columnIdx < selectedCells.columnIdxStart!;
+    //   if (selectedTowardsLeft) {
+    //     // Update columnIdxStart only.
+    //     setSelectedCells({
+    //       ...selectedCells,
+    //       columnIdxStart: columnIdx,
+    //     });
+    //     // If we are selecting a cell, then we need to set isSelected to true in the selected cell.
+    //     newRow[columnIdx] = {
+    //       ...newRow[columnIdx],
+    //       isSelected: true,
+    //     };
+    //     const newSpreadsheet = [
+    //       ...spreadsheetState.slice(0, rowIdx),
+    //       newRow,
+    //       ...spreadsheetState.slice(rowIdx + 1),
+    //     ];
+    //     setSpreadsheetState(newSpreadsheet);
+    //     handleDBUpdate(newSpreadsheet);
+    //     return;
+    //   }
 
-      // unselectedTowardsRight means (remove cells from selection, update columnIdxStart): |selectedCell became unSelectedCell| --> |selectedCell|
-      let unselectedFromLeftCell: OneCell | undefined =
-        spreadsheetState[rowIdx][columnIdx - 1];
-      const unselectedTowardsRight =
-        unselectedFromLeftCell.isSelected && columnIdx > selectedCells.columnIdxStart!;
-      // TODO: fix the unselected cell issue unselectingTowardsRight and unselectingTowardsLeft.
-      // if (unselectedCell === undefined) {
-      //   unselectedCell = spreadsheetState[rowIdx][columnIdx];
-      // }
-      console.log(
-        `%conMouseOver unselectedCell ---> ${JSON.stringify(unselectedFromLeftCell)}`,
-        "background: #222; color: #bada55"
-      );
-      // Loop over spreadsheetState's correct row and change the isSelected value to true or false depending are we selecting/unselecting.
-      // If we are unselecting a cell, then we ONLY need to set isSelected to false in the unselected cell. We do an early return.
-      if (unselectedTowardsRight) {
-        // Update columnIdxStart only.
-        setSelectedCells({
-          ...selectedCells,
-          columnIdxStart: columnIdx,
-        });
-        newRow[columnIdx - 1] = {
-          ...newRow[columnIdx - 1],
-          isSelected: false,
-        };
-        const newSpreadsheet = [
-          ...spreadsheetState.slice(0, rowIdx),
-          newRow,
-          ...spreadsheetState.slice(rowIdx + 1),
-        ];
-        setSpreadsheetState(newSpreadsheet);
-        handleDBUpdate(newSpreadsheet);
-        return;
-      }
+    //   // unselectedTowardsRight means (remove cells from selection, update columnIdxStart): |selectedCell became unSelectedCell| --> |selectedCell|
+    //   let unselectedFromLeftCell: OneCell | undefined =
+    //     spreadsheetState[rowIdx][columnIdx - 1];
+    //   const unselectedTowardsRight =
+    //     unselectedFromLeftCell.isSelected &&
+    //     columnIdx > selectedCells.columnIdxStart!;
+    //   // TODO: fix the unselected cell issue unselectingTowardsRight and unselectingTowardsLeft.
+    //   // if (unselectedCell === undefined) {
+    //   //   unselectedCell = spreadsheetState[rowIdx][columnIdx];
+    //   // }
+    //   console.log(
+    //     `%conMouseOver unselectedCell ---> ${JSON.stringify(
+    //       unselectedFromLeftCell
+    //     )}`,
+    //     "background: #222; color: #bada55"
+    //   );
+    //   // Loop over spreadsheetState's correct row and change the isSelected value to true or false depending are we selecting/unselecting.
+    //   // If we are unselecting a cell, then we ONLY need to set isSelected to false in the unselected cell. We do an early return.
+    //   if (unselectedTowardsRight) {
+    //     // Update columnIdxStart only.
+    //     setSelectedCells({
+    //       ...selectedCells,
+    //       columnIdxStart: columnIdx,
+    //     });
+    //     newRow[columnIdx - 1] = {
+    //       ...newRow[columnIdx - 1],
+    //       isSelected: false,
+    //     };
+    //     const newSpreadsheet = [
+    //       ...spreadsheetState.slice(0, rowIdx),
+    //       newRow,
+    //       ...spreadsheetState.slice(rowIdx + 1),
+    //     ];
+    //     setSpreadsheetState(newSpreadsheet);
+    //     handleDBUpdate(newSpreadsheet);
+    //     return;
+    //   }
 
-      // selectedTowardsRight means (add cells to selection, update columnIdxEnd): |selectedCell| --> |newSelectedCell|
-      const selectedTowardsRight = columnIdx > selectedCells.columnIdxStart!;
-      // unselectedTowardsLeft means (remove cells from selection, update columnIdxEnd): |selectedCell| <-- |selectedCell became unSelectedCell|
-      const unselectedTowardsLeft =
-        !currentCell.isSelected && columnIdx < selectedCells.columnIdxStart!;
-      if (selectedTowardsRight) {
-        // Update columnIdxEnd only.
-        setSelectedCells({
-          ...selectedCells,
-          columnIdxEnd: columnIdx,
-        });
-        newRow[columnIdx] = { ...newRow[columnIdx], isSelected: true };
-        const newSpreadsheet = [
-          ...spreadsheetState.slice(0, rowIdx),
-          newRow,
-          ...spreadsheetState.slice(rowIdx + 1),
-        ];
-        setSpreadsheetState(newSpreadsheet);
-        handleDBUpdate(newSpreadsheet);
-        return;
-      }
-      if (unselectedTowardsLeft) {
-        // Update columnIdxEnd only.
-        setSelectedCells({
-          ...selectedCells,
-          columnIdxEnd: columnIdx,
-        });
-        newRow[columnIdx + 1] = {
-          ...newRow[columnIdx + 1],
-          isSelected: false,
-        };
-        const newSpreadsheet = [
-          ...spreadsheetState.slice(0, rowIdx),
-          newRow,
-          ...spreadsheetState.slice(rowIdx + 1),
-        ];
-        setSpreadsheetState(newSpreadsheet);
-        handleDBUpdate(newSpreadsheet);
-        return;
-      }
-    }
+    //   // selectedTowardsRight means (add cells to selection, update columnIdxEnd): |selectedCell| --> |newSelectedCell|
+    //   const selectedTowardsRight = columnIdx > selectedCells.columnIdxStart!;
+    //   // unselectedTowardsLeft means (remove cells from selection, update columnIdxEnd): |selectedCell| <-- |selectedCell became unSelectedCell|
+    //   const unselectedTowardsLeft =
+    //     !currentCell.isSelected && columnIdx < selectedCells.columnIdxStart!;
+    //   if (selectedTowardsRight) {
+    //     // Update columnIdxEnd only.
+    //     setSelectedCells({
+    //       ...selectedCells,
+    //       columnIdxEnd: columnIdx,
+    //     });
+    //     newRow[columnIdx] = { ...newRow[columnIdx], isSelected: true };
+    //     const newSpreadsheet = [
+    //       ...spreadsheetState.slice(0, rowIdx),
+    //       newRow,
+    //       ...spreadsheetState.slice(rowIdx + 1),
+    //     ];
+    //     setSpreadsheetState(newSpreadsheet);
+    //     handleDBUpdate(newSpreadsheet);
+    //     return;
+    //   }
+    //   if (unselectedTowardsLeft) {
+    //     // Update columnIdxEnd only.
+    //     setSelectedCells({
+    //       ...selectedCells,
+    //       columnIdxEnd: columnIdx,
+    //     });
+    //     newRow[columnIdx + 1] = {
+    //       ...newRow[columnIdx + 1],
+    //       isSelected: false,
+    //     };
+    //     const newSpreadsheet = [
+    //       ...spreadsheetState.slice(0, rowIdx),
+    //       newRow,
+    //       ...spreadsheetState.slice(rowIdx + 1),
+    //     ];
+    //     setSpreadsheetState(newSpreadsheet);
+    //     handleDBUpdate(newSpreadsheet);
+    //     return;
+    //   }
+    // }
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {

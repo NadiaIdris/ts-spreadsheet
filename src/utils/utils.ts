@@ -55,11 +55,42 @@ const calculateRowRange = ({
   return `${rowIdxStart! + 1}R-${rowIdxEnd! + 1}R`;
 };
 
+const calculateCurrentDirection = ({
+  previousCell,
+  currentCell,
+}: {
+  previousCell: SelectedCells;
+  currentCell: SelectedCells;
+}): "direction didn't change" | "up" | "right" | "down" | "left" => {
+  if (
+    previousCell.rowIdxStart === currentCell.rowIdxStart &&
+    previousCell.columnIdxStart === currentCell.columnIdxStart
+  ) {
+    return "direction didn't change";
+  }
+
+  if (previousCell.rowIdxStart! < currentCell.rowIdxStart!) {
+    return "up";
+  }
+  if (previousCell.columnIdxStart! < currentCell.columnIdxStart!) {
+    return "right";
+  }
+  if (previousCell.rowIdxStart! > currentCell.rowIdxStart!) {
+    return "down";
+  }
+  if (previousCell.columnIdxStart! > currentCell.columnIdxStart!) {
+    return "left";
+  }
+
+  return "left";
+};
+
 export {
+  SPREADSHEET_HEADING,
   calculateColumnCount,
   calculateColumnRange,
+  calculateCurrentDirection,
   calculateRowCount,
   calculateRowRange,
   setInitialHeading,
-  SPREADSHEET_HEADING,
 };
