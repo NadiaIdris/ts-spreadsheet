@@ -45,7 +45,7 @@ interface OneCell {
   value?: string;
 }
 
-export interface SelectedCells {
+export interface SelectedCellOrCells {
   rowIdxStart: number | null;
   rowIdxEnd: number | null;
   columnIdxStart: number | null;
@@ -54,34 +54,34 @@ export interface SelectedCells {
 
 export interface Selected {
   previousDirection: "up" | "right" | "down" | "left" | undefined;
-  previouslySelectedCell: SelectedCells;
-  selectedCellsGroups: SelectedCells[];
+  previouslySelectedCell: SelectedCellOrCells;
+  selectedCellsGroups: SelectedCellOrCells[];
 }
 
-interface RowAndColumnCount {
+export interface RowAndColumnCount {
   columnsCount: number;
   rowsCount: number;
 }
 
 export interface ColumnsToAdd {
-  columnIdxStart: SelectedCells["columnIdxStart"];
+  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface ColumnsToDelete {
-  columnIdxStart: SelectedCells["columnIdxStart"];
-  columnIdxEnd: SelectedCells["columnIdxEnd"];
+  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
+  columnIdxEnd: SelectedCellOrCells["columnIdxEnd"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface RowsToAdd {
-  rowIdxStart: SelectedCells["rowIdxStart"];
+  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
 export interface RowsToDelete {
-  rowIdxStart: SelectedCells["rowIdxStart"];
-  rowIdxEnd: SelectedCells["rowIdxEnd"];
+  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
+  rowIdxEnd: SelectedCellOrCells["rowIdxEnd"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
@@ -235,18 +235,52 @@ const Spreadsheet = ({
         locationY: event.clientY,
         rowIdx,
       });
-      // TODO: fix this
-      // setSelectedCells({
-      //   columnIdxStart: columnIdx,
-      //   columnIdxEnd: columnIdx,
-      //   rowIdxStart: rowIdx,
-      //   rowIdxEnd: rowIdx,
-      // });
     }
+
     const cell = spreadsheetState[rowIdx][columnIdx];
     if (cell.isEditing) return;
     if (cell.isSelected) return;
-    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
+
+    // TODO: fix this. Set all the cell's selected to false, except the cell which was just clicked.
+    // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
+    const spreadSheetCopy = [ ...spreadsheetState ];
+    const newSpreadSheetState = spreadSheetCopy.map((row) => {
+      const newRow = row.map((column) => ({
+        ...column,
+        isSelected: false,
+      }));
+      return newRow;
+    });
+    console.log("onCellClick new spreadsheet state is --> ", newSpreadSheetState)
+  setSpreadsheetState(newSpreadSheetState);
+  setSelectedCells((selectedCells) => {
+    const currentCell = {
+      rowIdxStart: rowIdx,
+      rowIdxEnd: rowIdx,
+      columnIdxStart: columnIdx,
+      columnIdxEnd: columnIdx,
+    };
+    console.log("onCellClick currentCell --->", currentCell);
+
+    // If there is something in the selectedCellsGroup, then unselect everything,
+    // select the current cell and return.
+    if (selectedCells.selectedCellsGroups.length > 0) {
+      return {
+        ...selectedCells,
+        previousDirection: undefined,
+        previouslySelectedCell: currentCell,
+        selectedCellsGroups: [],
+      };
+    }
+
+    return {
+      ...selectedCells,
+      previousDirection: undefined,
+      previouslySelectedCell: currentCell,
+      selectedCellsGroups: [currentCell],
+    };
+  });
+    
     moveFocusTo(columnIdx, rowIdx);
   };
 
@@ -471,14 +505,29 @@ const Spreadsheet = ({
     const cell = spreadsheetState[rowIdx][columnIdx];
     // This is false if the cell is not selected.
     console.log("onMouseDown cell.isSelected --->", cell.isSelected);
-    // Only one cell is selected at this point.
     // TODO: fix this
-    //   setSelectedCells({
-    //     columnIdxStart: columnIdx,
-    //     columnIdxEnd: columnIdx,
-    //     rowIdxStart: rowIdx,
-    //     rowIdxEnd: rowIdx,
-    //   });
+    // setSelectedCells((selectedCells) => {
+    //   const newState = {
+    //     ...selectedCells, // previous state
+    //     previouslySelectedCell: {
+    //       rowIdxStart: rowIdx,
+    //       rowIdxEnd: rowIdx,
+    //       columnIdxStart: columnIdx,
+    //       columnIdxEnd: columnIdx,
+    //     },
+    //     selectedCellsGroups: [
+    //       ...selectedCells.selectedCellsGroups,
+    //       {
+    //         rowIdxStart: rowIdx,
+    //         rowIdxEnd: rowIdx,
+    //         columnIdxStart: columnIdx,
+    //         columnIdxEnd: columnIdx,
+    //       },
+    //     ],
+    //   };
+    //   console.log("onMouseDown selected cells state is --> ", newState);
+    //   return newState;
+    // });
   };
 
   const handleOnMouseOver = (
@@ -923,7 +972,13 @@ const Spreadsheet = ({
                       addRows={addRows}
                       deleteSelectedColumns={deleteSelectedColumns}
                       deleteSelectedRows={deleteSelectedRows}
-                      selectedCells={selectedCells}
+                      /* TODO: fix the hardcoded values */
+                      selectedCells={{
+                        columnIdxEnd: 1,
+                        columnIdxStart: 1,
+                        rowIdxEnd: 1,
+                        rowIdxStart: 1,
+                      }}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}
                     />

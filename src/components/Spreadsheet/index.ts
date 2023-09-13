@@ -3,7 +3,7 @@ import Spreadsheet, {
   ColumnsToDelete,
   RowsToAdd,
   RowsToDelete,
-  SelectedCellsGroup,
+  SelectedCellOrCells,
 } from "./Spreadsheet";
 export default Spreadsheet;
 export type {
@@ -11,5 +11,5 @@ export type {
   ColumnsToDelete,
   RowsToAdd,
   RowsToDelete,
-  SelectedCellsGroup as SelectedCells,
+  SelectedCellOrCells,
 };

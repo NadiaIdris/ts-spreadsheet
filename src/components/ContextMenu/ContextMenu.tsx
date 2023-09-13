@@ -10,9 +10,9 @@ import {
 import {
   ColumnsToAdd,
   RowsToAdd,
-  SelectedCells,
   ColumnsToDelete,
   RowsToDelete,
+  SelectedCellOrCells,
 } from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
@@ -30,7 +30,7 @@ interface ContextMenuProps {
     rowsCount,
   }: RowsToDelete) => void;
   left: number;
-  selectedCells: SelectedCells;
+  selectedCells: SelectedCellOrCells;
   top: number;
 }
 
@@ -43,7 +43,8 @@ const ContextMenu = ({
   selectedCells,
   top,
 }: ContextMenuProps) => {
-  const { columnIdxEnd, columnIdxStart, rowIdxEnd, rowIdxStart } =
+  // TODO: I restructured this DS. Rewrite this logic.
+  const { rowIdxStart, rowIdxEnd, columnIdxStart, columnIdxEnd } =
     selectedCells;
   const iconAdd = (
     <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon" />
