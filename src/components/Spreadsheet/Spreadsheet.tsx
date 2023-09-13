@@ -167,25 +167,14 @@ const Spreadsheet = ({
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
     // TODO: fix this
     // Change all the selectedCells isSelected and isEditing values to false.
-    // const newRow = [...spreadsheetState[rowIdx]];
-    // for (
-    //   let currentColumnIdx = selectedCells.columnIdxStart!;
-    //   currentColumnIdx < selectedCells.columnIdxEnd! + 1;
-    //   currentColumnIdx++
-    // ) {
-    //   newRow[currentColumnIdx] = {
-    //     ...newRow[currentColumnIdx],
-    //     isEditing: false,
-    //     isSelected: false,
-    //   };
-    // }
-    // const newSpreadsheet = [
-    //   ...spreadsheetState.slice(0, rowIdx),
-    //   newRow,
-    //   ...spreadsheetState.slice(rowIdx + 1),
-    // ];
-    // setSpreadsheetState(newSpreadsheet);
-    // handleDBUpdate(newSpreadsheet)
+    const newSpreadsheet = spreadsheetState.map((row) => {
+      const newRow = row.map((cell) => {
+        return { ...cell, isSelected: false, isEditing: false };
+      });
+      return newRow;
+    });
+    setSpreadsheetState(newSpreadsheet);
+    handleDBUpdate(newSpreadsheet)
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -238,49 +227,57 @@ const Spreadsheet = ({
     }
 
     const cell = spreadsheetState[rowIdx][columnIdx];
-    if (cell.isEditing) return;
-    if (cell.isSelected) return;
-
-    // TODO: fix this. Set all the cell's selected to false, except the cell which was just clicked.
+    // if (cell.isEditing) return;
+    // if (cell.isSelected) return;
     // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
-    const spreadSheetCopy = [ ...spreadsheetState ];
-    const newSpreadSheetState = spreadSheetCopy.map((row) => {
-      const newRow = row.map((column) => ({
-        ...column,
-        isSelected: false,
-      }));
+    const spreadSheetCopy = [...spreadsheetState];
+    const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
+      const rowCopy = [...row];
+      const newRow = rowCopy.map((column, colI) => {
+        if (rowI === rowIdx && colI === columnIdx) {
+          return { ...column, isSelected: true };
+        }
+        return { ...column, isSelected: false };
+      });
       return newRow;
     });
-    console.log("onCellClick new spreadsheet state is --> ", newSpreadSheetState)
-  setSpreadsheetState(newSpreadSheetState);
-  setSelectedCells((selectedCells) => {
-    const currentCell = {
-      rowIdxStart: rowIdx,
-      rowIdxEnd: rowIdx,
-      columnIdxStart: columnIdx,
-      columnIdxEnd: columnIdx,
-    };
-    console.log("onCellClick currentCell --->", currentCell);
+    console.log(
+      "newSpreadSheetState inside click event handler -->",
+      newSpreadSheetState
+    );
 
-    // If there is something in the selectedCellsGroup, then unselect everything,
-    // select the current cell and return.
-    if (selectedCells.selectedCellsGroups.length > 0) {
+    handleDBUpdate(newSpreadSheetState);
+
+    setSpreadsheetState(newSpreadSheetState);
+
+    setSelectedCells((selectedCells) => {
+      const currentCell = {
+        rowIdxStart: rowIdx,
+        rowIdxEnd: rowIdx,
+        columnIdxStart: columnIdx,
+        columnIdxEnd: columnIdx,
+      };
+      console.log("onCellClick currentCell --->", currentCell);
+
+      // If there is something in the selectedCellsGroup, then unselect everything,
+      // select the current cell and return.
+      if (selectedCells.selectedCellsGroups.length > 0) {
+        return {
+          ...selectedCells,
+          previousDirection: undefined,
+          previouslySelectedCell: currentCell,
+          selectedCellsGroups: [],
+        };
+      }
+
       return {
         ...selectedCells,
         previousDirection: undefined,
         previouslySelectedCell: currentCell,
-        selectedCellsGroups: [],
+        selectedCellsGroups: [currentCell],
       };
-    }
+    });
 
-    return {
-      ...selectedCells,
-      previousDirection: undefined,
-      previouslySelectedCell: currentCell,
-      selectedCellsGroups: [currentCell],
-    };
-  });
-    
     moveFocusTo(columnIdx, rowIdx);
   };
 
@@ -858,15 +855,6 @@ const Spreadsheet = ({
                   value={`${columnIdx + 1}C`}
                 />
               ))}
-              {/* <CellHeader
-                key={`cell-header-new-column-button`}
-                style={{
-                  backgroundColor: "red",
-                  borderRight: "none",
-                  width: "20px",
-                }}
-                value="+"
-              /> */}
             </div>
           )}
           {/* Add rest of the rows */}
@@ -954,6 +942,10 @@ const Spreadsheet = ({
                           columnIdx,
                           "/",
                           rowIdx
+                        );
+                        console.log(
+                          "onMouseUp current cell is selected -->",
+                          spreadsheetState[rowIdx][columnIdx].isSelected
                         );
                         setSelecting(false);
                       }}
