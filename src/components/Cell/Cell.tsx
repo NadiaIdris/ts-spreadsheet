@@ -1,10 +1,9 @@
 import React, { ForwardedRef, forwardRef } from "react";
 import styled from "styled-components";
+import { ICellData } from "./../Spreadsheet";
 
 interface ICell {
-  columnIdx: number;
-  isEditing: boolean | undefined;
-  isSelected: boolean | undefined;
+  cellData: ICellData;
   onBlur: () => void;
   onChange: (newValue: string) => void;
   onClick: (event: React.MouseEvent) => void;
@@ -21,20 +20,16 @@ interface ICell {
   onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onMouseDown: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onMouseDown: () => void;
   onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
   onMouseUp: (event: React.MouseEvent<HTMLInputElement>) => void;
   onPaste: () => void;
-  rowIdx: number;
-  value: string | undefined;
 }
 
 const Cell = forwardRef(
   (
     {
-      columnIdx,
-      isEditing,
-      isSelected,
+      cellData,
       onBlur,
       onChange,
       onClick,
@@ -55,11 +50,10 @@ const Cell = forwardRef(
       onMouseOver,
       onMouseUp,
       onPaste,
-      rowIdx,
-      value,
     }: ICell,
     ref: ForwardedRef<HTMLInputElement>
   ) => {
+    const { rowIdx, columnIdx, isEditing, isFocused, value } = cellData;
     const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(event.target.value);
     };
@@ -69,7 +63,7 @@ const Cell = forwardRef(
         data-columnidx={columnIdx}
         data-rowidx={rowIdx}
         draggable={true}
-        isSelected={isSelected}
+        isFocused={isFocused}
         onBlur={onBlur}
         onChange={onChangeHander}
         onClick={onClick}
@@ -101,8 +95,8 @@ const Cell = forwardRef(
 export default Cell;
 export type { ICell };
 
-const CellStyled = styled.input<{ isSelected?: boolean; }>`
-  background-color: ${props => props.isSelected ? "blue" : ""};
+const CellStyled = styled.input<{ isFocused?: boolean }>`
+  background-color: ${(props) => (props.isFocused ? "blue" : "")};
   border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;

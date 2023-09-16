@@ -1,4 +1,4 @@
-import { SelectedCellOrCells } from "../components/Spreadsheet/Spreadsheet";
+import { SelectionRangeStartAndEndCells } from "../components/Spreadsheet/Spreadsheet";
 const SPREADSHEET_HEADING = "spreadsheetHeading";
 
 const setInitialHeading = (defaultHeading: string) => {
@@ -10,33 +10,33 @@ const setInitialHeading = (defaultHeading: string) => {
 };
 
 const calculateRowCount = ({
-  rowIdxEnd,
   rowIdxStart,
+  rowIdxEnd,
 }: {
-  rowIdxEnd: SelectedCellOrCells["rowIdxEnd"];
-  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
+  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["rowIdx"];
 }): number => {
   if (rowIdxStart === null || rowIdxEnd === null) return 0;
   return rowIdxEnd - rowIdxStart + 1;
 };
 
 const calculateColumnCount = ({
-  columnIdxEnd,
   columnIdxStart,
+  columnIdxEnd,
 }: {
-  columnIdxEnd: SelectedCellOrCells["columnIdxEnd"];
-  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
+  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
 }): number => {
   if (columnIdxStart === null || columnIdxEnd === null) return 0;
   return columnIdxEnd - columnIdxStart + 1;
 };
 
 const calculateColumnRange = ({
-  columnIdxEnd,
   columnIdxStart,
+  columnIdxEnd,
 }: {
-  columnIdxEnd: SelectedCellOrCells["columnIdxEnd"];
-  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
+  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
 }) => {
   if (columnIdxStart === null || columnIdxEnd === null) return "";
   if (columnIdxStart === columnIdxEnd) return `${columnIdxStart! + 1}C`;
@@ -44,52 +44,21 @@ const calculateColumnRange = ({
 };
 
 const calculateRowRange = ({
-  rowIdxEnd,
   rowIdxStart,
+  rowIdxEnd,
 }: {
-  rowIdxEnd: SelectedCellOrCells["rowIdxEnd"];
-  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
+  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["rowIdx"];
 }) => {
   if (rowIdxStart === null || rowIdxEnd === null) return "";
   if (rowIdxStart === rowIdxEnd) return `${rowIdxStart! + 1}R`;
   return `${rowIdxStart! + 1}R-${rowIdxEnd! + 1}R`;
 };
 
-const calculateCurrentDirection = ({
-  previousCell,
-  currentCell,
-}: {
-  previousCell: SelectedCellOrCells;
-  currentCell: SelectedCellOrCells;
-}): "direction didn't change" | "up" | "right" | "down" | "left" => {
-  if (
-    previousCell.rowIdxStart === currentCell.rowIdxStart &&
-    previousCell.columnIdxStart === currentCell.columnIdxStart
-  ) {
-    return "direction didn't change";
-  }
-
-  if (previousCell.rowIdxStart! < currentCell.rowIdxStart!) {
-    return "up";
-  }
-  if (previousCell.columnIdxStart! < currentCell.columnIdxStart!) {
-    return "right";
-  }
-  if (previousCell.rowIdxStart! > currentCell.rowIdxStart!) {
-    return "down";
-  }
-  if (previousCell.columnIdxStart! > currentCell.columnIdxStart!) {
-    return "left";
-  }
-
-  return "left";
-};
-
 export {
   SPREADSHEET_HEADING,
   calculateColumnCount,
   calculateColumnRange,
-  calculateCurrentDirection,
   calculateRowCount,
   calculateRowRange,
   setInitialHeading,

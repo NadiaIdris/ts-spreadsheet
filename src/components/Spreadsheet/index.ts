@@ -1,15 +1,17 @@
 import Spreadsheet, {
   ColumnsToAdd,
   ColumnsToDelete,
+  ICellData,
   RowsToAdd,
   RowsToDelete,
-  SelectedCellOrCells,
+  SelectionRangeStartAndEndCells,
 } from "./Spreadsheet";
 export default Spreadsheet;
 export type {
   ColumnsToAdd,
   ColumnsToDelete,
+  ICellData,
   RowsToAdd,
   RowsToDelete,
-  SelectedCellOrCells,
+  SelectionRangeStartAndEndCells,
 };

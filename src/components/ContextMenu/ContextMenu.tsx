@@ -9,16 +9,16 @@ import {
 } from "../../utils/utils";
 import {
   ColumnsToAdd,
-  RowsToAdd,
   ColumnsToDelete,
+  RowsToAdd,
   RowsToDelete,
-  SelectedCellOrCells,
+  SelectionRangeStartAndEndCells,
 } from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
 interface ContextMenuProps {
-  addColumns: ({ columnIdxStart, columnsCount }: ColumnsToAdd) => void;
-  addRows: ({ rowIdxStart, rowsCount }: RowsToAdd) => void;
+  addColumns: ({ columnIdx, columnsCount }: ColumnsToAdd) => void;
+  addRows: ({ rowIdx, rowsCount }: RowsToAdd) => void;
   deleteSelectedColumns: ({
     columnIdxEnd,
     columnIdxStart,
@@ -30,7 +30,7 @@ interface ContextMenuProps {
     rowsCount,
   }: RowsToDelete) => void;
   left: number;
-  selectedCells: SelectedCellOrCells;
+  selectionStartAndEndCells: SelectionRangeStartAndEndCells;
   top: number;
 }
 
@@ -40,12 +40,13 @@ const ContextMenu = ({
   deleteSelectedColumns,
   deleteSelectedRows,
   left,
-  selectedCells,
+  selectionStartAndEndCells,
   top,
 }: ContextMenuProps) => {
-  // TODO: I restructured this DS. Rewrite this logic.
-  const { rowIdxStart, rowIdxEnd, columnIdxStart, columnIdxEnd } =
-    selectedCells;
+  const { selectionStartCell, selectionEndCell } =
+    selectionStartAndEndCells;
+  const { columnIdx: columnIdxStart, rowIdx: rowIdxStart } = selectionStartCell;
+  const { columnIdx: columnIdxEnd, rowIdx: rowIdxEnd } = selectionEndCell;
   const iconAdd = (
     <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon" />
   );
@@ -62,7 +63,7 @@ const ContextMenu = ({
     return (
       <MenuItem
         icon={iconAdd}
-        onClick={() => addColumns({ columnIdxStart, columnsCount })}
+        onClick={() => addColumns({ columnIdx: columnIdxStart, columnsCount })}
       >
         {hasOneOrMoreColumns && (
           <ContextMenuItemTextStyled>
@@ -81,7 +82,7 @@ const ContextMenu = ({
     return (
       <MenuItem
         icon={iconAdd}
-        onClick={() => addRows({ rowIdxStart, rowsCount })}
+        onClick={() => addRows({ rowIdx: rowIdxStart, rowsCount })}
       >
         <ContextMenuItemTextStyled>
           Add {oneRowSelected ? "1 row" : `${rowsCount} rows`} above

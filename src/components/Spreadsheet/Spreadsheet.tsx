@@ -12,7 +12,7 @@ import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
 
-interface ContextMenuI {
+interface IContextMenu {
   isContextMenuOpen: boolean;
   locationX: number;
   locationY: number;
@@ -22,7 +22,7 @@ interface ContextMenuI {
 
 interface SpreadsheetProps {
   columns?: number;
-  contextMenu: ContextMenuI;
+  contextMenu: IContextMenu;
   rows?: number;
   setContextMenu: Dispatch<
     SetStateAction<{
@@ -37,25 +37,28 @@ interface SpreadsheetProps {
 
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
 
-interface OneCell {
+export interface ICellData {
+  rowIdx?: number;
   columnIdx?: number;
   isEditing?: boolean;
-  isSelected?: boolean;
-  rowIdx?: number;
+  isFocused?: boolean;
   value?: string;
 }
 
-export interface SelectedCellOrCells {
-  rowIdxStart: number | null;
-  rowIdxEnd: number | null;
-  columnIdxStart: number | null;
-  columnIdxEnd: number | null;
+export interface SelectedCell {
+  rowIdx: number | null;
+  columnIdx: number | null;
+}
+
+// We need SelectionRange for ContextMenu component.
+export interface SelectionRangeStartAndEndCells {
+  selectionStartCell: SelectedCell;
+  selectionEndCell: SelectedCell;
 }
 
 export interface Selected {
-  previousDirection: "up" | "right" | "down" | "left" | undefined;
-  previouslySelectedCell: SelectedCellOrCells;
-  selectedCellsGroups: SelectedCellOrCells[];
+  previousCell: SelectedCell;
+  allSelectedCells: SelectedCell[];
 }
 
 export interface RowAndColumnCount {
@@ -64,24 +67,24 @@ export interface RowAndColumnCount {
 }
 
 export interface ColumnsToAdd {
-  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
+  columnIdx: SelectedCell["columnIdx"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface ColumnsToDelete {
-  columnIdxStart: SelectedCellOrCells["columnIdxStart"];
-  columnIdxEnd: SelectedCellOrCells["columnIdxEnd"];
+  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
 export interface RowsToAdd {
-  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
+  rowIdx: SelectedCell["rowIdx"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
 export interface RowsToDelete {
-  rowIdxStart: SelectedCellOrCells["rowIdxStart"];
-  rowIdxEnd: SelectedCellOrCells["rowIdxEnd"];
+  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
@@ -91,34 +94,29 @@ const Spreadsheet = ({
   rows = 10,
   setContextMenu,
 }: SpreadsheetProps) => {
-  const grid: OneCell[][] = Array.from({ length: rows }, (v, rowI) =>
+  const grid: ICellData[][] = Array.from({ length: rows }, (v, rowI) =>
     Array.from({ length: columns }, (v, columnI) => {
       return {
         columnIdx: columnI,
-        isSelected: false,
+        isFocused: false,
         isEditing: false,
         rowIdx: rowI,
         value: "",
-      } as OneCell;
+      } as ICellData;
     })
   );
-  const [spreadsheetState, setSpreadsheetState] = useState<OneCell[][]>(grid);
-  // const [ selectedCells, setSelectedCells ] = useState<SelectedCells>({});
+  const [spreadsheetState, setSpreadsheetState] = useState<ICellData[][]>(grid);
+  const [selectionStartAndEndCells, setSelectionStartAndEndCells] =
+    useState<SelectionRangeStartAndEndCells>({
+      selectionStartCell: { rowIdx: null, columnIdx: null },
+      selectionEndCell: { rowIdx: null, columnIdx: null },
+    });
   const [selected, setSelectedCells] = useState<Selected>({
-    previousDirection: undefined,
-    previouslySelectedCell: {
-      rowIdxStart: null,
-      rowIdxEnd: null,
-      columnIdxStart: null,
-      columnIdxEnd: null,
-    },
-    selectedCellsGroups: [],
+    previousCell: { rowIdx: null, columnIdx: null },
+    allSelectedCells: [],
   });
-  const [previousCell, setPreviousCell] = useState({
-    columnIdx: null as number | null,
-    rowIdx: null as number | null,
-  });
-  const [selecting, setSelecting] = useState(false);
+  const [ selecting, setSelecting ] = useState(false);
+  // const [ previousCell, setPreviousCell ] = useState<SelectedCell>({});
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -141,11 +139,15 @@ const Spreadsheet = ({
     );
   };
 
-  const changeCellState = (
-    cellUpdate: OneCell,
-    columnIdx: number,
-    rowIdx: number
-  ) => {
+  const changeCellState = ({
+    rowIdx,
+    columnIdx,
+    cellUpdate,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+    cellUpdate: ICellData;
+  }) => {
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
     setSpreadsheetState((spreadsheet) => {
       let newSpreadsheet;
@@ -164,11 +166,17 @@ const Spreadsheet = ({
     });
   };
 
-  const handleCellBlur = (columnIdx: number, rowIdx: number) => {
-    // Change all the selectedCells isSelected and isEditing values to false.
+  const handleCellBlur = ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
+    // Change all the selectedCells isEditing and isFocused values to false.
     const newSpreadsheet = spreadsheetState.map((row) => {
-      const newRow = row.map((cell) => {
-        return { ...cell, isSelected: false, isEditing: false };
+      const newRow = row.map((cell: ICellData) => {
+        return { ...cell, isFocused: false, isEditing: false };
       });
       return newRow;
     });
@@ -178,19 +186,27 @@ const Spreadsheet = ({
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
   const handleCellFocus = (columnIdx: number, rowIdx: number) => {
-    changeCellState({ isEditing: false, isSelected: true }, columnIdx, rowIdx);
+    changeCellState({
+      columnIdx,
+      rowIdx,
+      cellUpdate: { isEditing: false, isFocused: true },
+    });
   };
 
-  const handleCellValueChange = (
-    columnIdx: number,
-    newValue: string,
-    rowIdx: number
-  ) => {
+  const handleCellValueChange = ({
+    rowIdx,
+    columnIdx,
+    newValue,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+    newValue: string;
+  }) => {
     const currentCell = spreadsheetState[rowIdx][columnIdx];
     // If the new value is the same as the current value, then don't update the cell value.
     if (currentCell.value === newValue) return;
     // When calling moveFocusTo function we end up calling setSpreadsheetState more than once. In order for all the setSpreadsheetState calls to work as intended, we need to use the functional form of setState.
-    changeCellState({ value: newValue }, columnIdx, rowIdx);
+    changeCellState({ columnIdx, rowIdx, cellUpdate: { value: newValue } });
   };
 
   const moveFocusTo = (columnIdx: number, rowIdx: number) => {
@@ -225,16 +241,15 @@ const Spreadsheet = ({
         rowIdx,
       });
     }
-    
+
     // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
     const spreadSheetCopy = [...spreadsheetState];
     const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
-      const rowCopy = [...row];
-      const newRow = rowCopy.map((column, colI) => {
+      const newRow = row.map((column, colI) => {
         if (rowI === rowIdx && colI === columnIdx) {
-          return { ...column, isSelected: true };
+          return { ...column, isFocused: true };
         }
-        return { ...column, isSelected: false };
+        return { ...column, isFocused: false };
       });
       return newRow;
     });
@@ -242,30 +257,10 @@ const Spreadsheet = ({
     setSpreadsheetState(newSpreadSheetState);
 
     setSelectedCells((selectedCells) => {
-      const currentCell = {
-        rowIdxStart: rowIdx,
-        rowIdxEnd: rowIdx,
-        columnIdxStart: columnIdx,
-        columnIdxEnd: columnIdx,
-      };
-      console.log("onCellClick currentCell --->", currentCell);
-
-      // If there is something in the selectedCellsGroup, then unselect everything,
-      // select the current cell and return.
-      if (selectedCells.selectedCellsGroups.length > 0) {
-        return {
-          ...selectedCells,
-          previousDirection: undefined,
-          previouslySelectedCell: currentCell,
-          selectedCellsGroups: [],
-        };
-      }
-
+      const currentCell = { rowIdx, columnIdx };
       return {
-        ...selectedCells,
-        previousDirection: undefined,
-        previouslySelectedCell: currentCell,
-        selectedCellsGroups: [currentCell],
+        previousCell: currentCell,
+        allSelectedCells: [currentCell],
       };
     });
 
@@ -273,7 +268,11 @@ const Spreadsheet = ({
   };
 
   const handleDoubleClick = (columnIdx: number, rowIdx: number) => {
-    changeCellState({ isEditing: true, isSelected: true }, columnIdx, rowIdx);
+    changeCellState({
+      rowIdx,
+      columnIdx,
+      cellUpdate: { isEditing: true, isFocused: true },
+    });
   };
 
   /* Drag and drop */
@@ -292,11 +291,11 @@ const Spreadsheet = ({
     // If the cell was dropped on the same cell, then don't change the cell state.
     if (previousCell.columnIdx === columnIdx && previousCell.rowIdx === rowIdx)
       return;
-    changeCellState(
-      { isEditing: false, isSelected: false, value: "" },
+    changeCellState({
+      rowIdx,
       columnIdx,
-      rowIdx
-    );
+      cellUpdate: { isEditing: false, isFocused: false, value: "" },
+    });
   };
 
   const handleCellWrapperDragStart = (
@@ -323,16 +322,16 @@ const Spreadsheet = ({
     console.log("onDrop rowIdx ---->", rowIdx);
     console.log("onDrop data ---->", data);
     setPreviousCell({ columnIdx, rowIdx });
-    changeCellState(
-      { isEditing: false, isSelected: true, value: data },
+    changeCellState({
+      rowIdx,
       columnIdx,
-      rowIdx
-    );
+      cellUpdate: { isEditing: false, isFocused: true, value: data },
+    });
     moveFocusTo(columnIdx, rowIdx);
   };
 
   // Update the whole spreadsheet in the database.
-  const handleDBUpdate = async (spreadsheetState: OneCell[][]) => {
+  const handleDBUpdate = async (spreadsheetState: ICellData[][]) => {
     try {
       const responseBody = await fetch("/sp/set", {
         method: "POST",
@@ -384,48 +383,48 @@ const Spreadsheet = ({
 
     // If `isEditing` is `false` when user starts to type, then set the cell `isEditing` to `true`.
     if (event.key.length === 1) {
-      if (currentCell.isSelected && !currentCell.isEditing) {
+      if (currentCell.isFocused && !currentCell.isEditing) {
         // Clear the cell value.
         console.log("isEditing is false and event.key is --->", event.key);
-        changeCellState(
-          { isEditing: true, isSelected: true, value: "" },
+        changeCellState({
+          rowIdx,
           columnIdx,
-          rowIdx
-        );
+          cellUpdate: { isEditing: true, isFocused: true, value: "" },
+        });
       }
     }
 
     if (event.key === "Enter") {
       // event.preventDefault();
-      if (currentCell.isSelected && currentCell.isEditing) {
-        // Previous cell state: onBlur callback sets the previous cell isEditing and isSelected to false (we don't need to write any extra code for this).
+      if (currentCell.isFocused && currentCell.isEditing) {
+        // Previous cell state: onBlur callback sets the previous cell isEditing and isFocused to false (we don't need to write any extra code for this).
 
         // If on the last row, then do an early return.
         if (rowIdx === spreadsheetState.length - 1) {
-          changeCellState(
-            { isEditing: false, isSelected: true },
+          changeCellState({
+            rowIdx,
             columnIdx,
-            rowIdx
-          );
+            cellUpdate: { isEditing: false, isFocused: true },
+          });
           closeContextMenu();
           return;
         }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
         moveFocusTo(columnIdx, rowIdx + 1);
-        // Set the cell below state (isSelected to true).
-        changeCellState(
-          { isEditing: false, isSelected: true },
+        // Set the cell below state (isFocused to true).
+        changeCellState({
+          rowIdx: rowIdx + 1,
           columnIdx,
-          rowIdx + 1
-        );
+          cellUpdate: { isEditing: false, isFocused: true },
+        });
         closeContextMenu();
-      } else if (currentCell.isSelected && !currentCell.isEditing) {
+      } else if (currentCell.isFocused && !currentCell.isEditing) {
         // Set the current cell isEditing to true.
-        changeCellState(
-          { isEditing: true, isSelected: true },
+        changeCellState({
+          rowIdx,
           columnIdx,
-          rowIdx
-        );
+          cellUpdate: { isEditing: true, isFocused: true },
+        });
         closeContextMenu();
       }
     }
@@ -478,11 +477,13 @@ const Spreadsheet = ({
     }
   };
 
-  const handleMouseDown = (
-    columnIdx: number,
-    event: React.MouseEvent,
-    rowIdx: number
-  ) => {
+  const handleMouseDown = ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     console.log(
       "cell's onMouseDown called on columnIdx/rowIdx --->",
       columnIdx,
@@ -492,7 +493,7 @@ const Spreadsheet = ({
     setSelecting(true);
     const cell = spreadsheetState[rowIdx][columnIdx];
     // This is false if the cell is not selected.
-    console.log("onMouseDown cell.isSelected --->", cell.isSelected);
+    console.log("onMouseDown cell.isFocused --->", cell.isFocused);
     // TODO: fix this
     // setSelectedCells((selectedCells) => {
     //   const newState = {
@@ -533,119 +534,6 @@ const Spreadsheet = ({
         rowIdx
       );
     }
-
-    // if (selecting) {
-    //   let selectDirection: "left" | "right" | "up" | "down" | undefined =
-    //     undefined;
-    //   const currentCell = spreadsheetState[rowIdx][columnIdx];
-    //   const newRow = [...spreadsheetState[rowIdx]];
-    //   console.log(
-    //     "onMouseOver currentCell.isSelected --->",
-    //     currentCell.isSelected
-    //   );
-
-    //   // selectedTowardsLeft means (add cells to selection, update columnIdxStart): |newSelectedCell| <-- |selectedCell|
-    //   const selectedTowardsLeft = columnIdx < selectedCells.columnIdxStart!;
-    //   if (selectedTowardsLeft) {
-    //     // Update columnIdxStart only.
-    //     setSelectedCells({
-    //       ...selectedCells,
-    //       columnIdxStart: columnIdx,
-    //     });
-    //     // If we are selecting a cell, then we need to set isSelected to true in the selected cell.
-    //     newRow[columnIdx] = {
-    //       ...newRow[columnIdx],
-    //       isSelected: true,
-    //     };
-    //     const newSpreadsheet = [
-    //       ...spreadsheetState.slice(0, rowIdx),
-    //       newRow,
-    //       ...spreadsheetState.slice(rowIdx + 1),
-    //     ];
-    //     setSpreadsheetState(newSpreadsheet);
-    //     handleDBUpdate(newSpreadsheet);
-    //     return;
-    //   }
-
-    //   // unselectedTowardsRight means (remove cells from selection, update columnIdxStart): |selectedCell became unSelectedCell| --> |selectedCell|
-    //   let unselectedFromLeftCell: OneCell | undefined =
-    //     spreadsheetState[rowIdx][columnIdx - 1];
-    //   const unselectedTowardsRight =
-    //     unselectedFromLeftCell.isSelected &&
-    //     columnIdx > selectedCells.columnIdxStart!;
-    //   // TODO: fix the unselected cell issue unselectingTowardsRight and unselectingTowardsLeft.
-    //   // if (unselectedCell === undefined) {
-    //   //   unselectedCell = spreadsheetState[rowIdx][columnIdx];
-    //   // }
-    //   console.log(
-    //     `%conMouseOver unselectedCell ---> ${JSON.stringify(
-    //       unselectedFromLeftCell
-    //     )}`,
-    //     "background: #222; color: #bada55"
-    //   );
-    //   // Loop over spreadsheetState's correct row and change the isSelected value to true or false depending are we selecting/unselecting.
-    //   // If we are unselecting a cell, then we ONLY need to set isSelected to false in the unselected cell. We do an early return.
-    //   if (unselectedTowardsRight) {
-    //     // Update columnIdxStart only.
-    //     setSelectedCells({
-    //       ...selectedCells,
-    //       columnIdxStart: columnIdx,
-    //     });
-    //     newRow[columnIdx - 1] = {
-    //       ...newRow[columnIdx - 1],
-    //       isSelected: false,
-    //     };
-    //     const newSpreadsheet = [
-    //       ...spreadsheetState.slice(0, rowIdx),
-    //       newRow,
-    //       ...spreadsheetState.slice(rowIdx + 1),
-    //     ];
-    //     setSpreadsheetState(newSpreadsheet);
-    //     handleDBUpdate(newSpreadsheet);
-    //     return;
-    //   }
-
-    //   // selectedTowardsRight means (add cells to selection, update columnIdxEnd): |selectedCell| --> |newSelectedCell|
-    //   const selectedTowardsRight = columnIdx > selectedCells.columnIdxStart!;
-    //   // unselectedTowardsLeft means (remove cells from selection, update columnIdxEnd): |selectedCell| <-- |selectedCell became unSelectedCell|
-    //   const unselectedTowardsLeft =
-    //     !currentCell.isSelected && columnIdx < selectedCells.columnIdxStart!;
-    //   if (selectedTowardsRight) {
-    //     // Update columnIdxEnd only.
-    //     setSelectedCells({
-    //       ...selectedCells,
-    //       columnIdxEnd: columnIdx,
-    //     });
-    //     newRow[columnIdx] = { ...newRow[columnIdx], isSelected: true };
-    //     const newSpreadsheet = [
-    //       ...spreadsheetState.slice(0, rowIdx),
-    //       newRow,
-    //       ...spreadsheetState.slice(rowIdx + 1),
-    //     ];
-    //     setSpreadsheetState(newSpreadsheet);
-    //     handleDBUpdate(newSpreadsheet);
-    //     return;
-    //   }
-    //   if (unselectedTowardsLeft) {
-    //     // Update columnIdxEnd only.
-    //     setSelectedCells({
-    //       ...selectedCells,
-    //       columnIdxEnd: columnIdx,
-    //     });
-    //     newRow[columnIdx + 1] = {
-    //       ...newRow[columnIdx + 1],
-    //       isSelected: false,
-    //     };
-    //     const newSpreadsheet = [
-    //       ...spreadsheetState.slice(0, rowIdx),
-    //       newRow,
-    //       ...spreadsheetState.slice(rowIdx + 1),
-    //     ];
-    //     setSpreadsheetState(newSpreadsheet);
-    //     handleDBUpdate(newSpreadsheet);
-    //     return;
-    //   }
-    // }
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
@@ -666,45 +554,45 @@ const Spreadsheet = ({
     await navigator.clipboard.writeText(
       spreadsheetState[rowIdx][columnIdx].value!
     );
-    changeCellState(
-      { isEditing: false, isSelected: true, value: "" },
+    changeCellState({
+      rowIdx,
       columnIdx,
-      rowIdx
-    );
+      cellUpdate: { isEditing: false, isFocused: true, value: "" },
+    });
   };
 
   const handleOnPaste = (columnIdx: number, rowIdx: number) => {
     // If isEditing is false, then paste the clipboard text to the cell.
     if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
       navigator.clipboard.readText().then((clipText) => {
-        handleCellValueChange(columnIdx, clipText, rowIdx);
+        handleCellValueChange({ rowIdx, columnIdx, newValue: clipText });
       });
     }
   };
 
   /** Add "columnsCount" number of new empty columns at the columnIdxStart. */
-  const addColumns = ({ columnIdxStart, columnsCount }: ColumnsToAdd) => {
-    console.log("addColumns, columnIdxStart --->", columnIdxStart);
+  const addColumns = ({ columnIdx, columnsCount }: ColumnsToAdd) => {
+    console.log("addColumns, columnIdxStart --->", columnIdx);
     // Loop over the spreadSheetCopy and for each row, add "x" new empty cells at the columnIdxStart.
     const newSpreadSheetState = spreadsheetState.map((row, rowIndex) => {
-      const startChunkOfTheRow = row.slice(0, columnIdxStart!);
+      const startChunkOfTheRow = row.slice(0, columnIdx!);
       const newCellsChunk = Array.from({ length: columnsCount }, (v, i) => {
         return {
-          columnIdx: columnIdxStart! + i,
-          isSelected: false,
-          isEditing: false,
+          columnIdx: columnIdx! + i,
           rowIdx: rowIndex,
+          isFocused: false,
+          isEditing: false,
           value: "",
-        } as OneCell;
+        } as ICellData;
       });
       // Update the column indices of the rest of the cells in the row.
       const endChunkOfTheRow = [];
-      for (let i = columnIdxStart!; i < row.length; i++) {
+      for (let i = columnIdx!; i < row.length; i++) {
         const newColumnIdxStart = i! + columnsCount;
         endChunkOfTheRow.push({
           ...row[i],
           columnIdx: newColumnIdxStart,
-        } as OneCell);
+        } as ICellData);
       }
       // Construct new row.
       const newRow = [
@@ -719,6 +607,7 @@ const Spreadsheet = ({
     setContextMenu({ ...contextMenu, isContextMenuOpen: false });
   };
 
+  // TODO: fix this
   /** Delete selected columns from the spreadsheet. */
   const deleteSelectedColumns = ({
     columnIdxEnd,
@@ -750,7 +639,7 @@ const Spreadsheet = ({
       return Array.from({ length: columnsCount }, (v, columnI) => {
         return {
           columnIdx: columnI,
-          isSelected: false,
+          isFocused: false,
           isEditing: false,
           rowIdx: rowIdxStart! + rowI,
           value: "",
@@ -889,13 +778,17 @@ const Spreadsheet = ({
                     }}
                   >
                     <Cell
-                      columnIdx={columnIdx}
-                      isEditing={column.isEditing}
-                      isSelected={column.isSelected}
+                      cellData={{
+                        rowIdx,
+                        columnIdx,
+                        isEditing: column.isEditing,
+                        isFocused: column.isFocused,
+                        value: column.value,
+                      }}
                       key={`cell-${rowIdx}/${columnIdx}`}
-                      onBlur={() => handleCellBlur(columnIdx, rowIdx)}
+                      onBlur={() => handleCellBlur({ rowIdx, columnIdx })}
                       onChange={(newValue) => {
-                        handleCellValueChange(columnIdx, newValue, rowIdx);
+                        handleCellValueChange({ rowIdx, columnIdx, newValue });
                       }}
                       onClick={(event: React.MouseEvent) =>
                         handleCellClick(columnIdx, event, rowIdx)
@@ -917,10 +810,8 @@ const Spreadsheet = ({
                       onKeyDown={(
                         event: React.KeyboardEvent<HTMLInputElement>
                       ) => handleKeyDown(columnIdx, event, rowIdx)}
-                      onMouseDown={(
-                        event: React.MouseEvent<HTMLInputElement>
-                      ) => {
-                        handleMouseDown(columnIdx, event, rowIdx);
+                      onMouseDown={() => {
+                        handleMouseDown({ rowIdx, columnIdx });
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
@@ -938,7 +829,7 @@ const Spreadsheet = ({
                         );
                         console.log(
                           "onMouseUp current cell is selected -->",
-                          spreadsheetState[rowIdx][columnIdx].isSelected
+                          spreadsheetState[rowIdx][columnIdx].isFocused
                         );
                         setSelecting(false);
                       }}
@@ -946,8 +837,6 @@ const Spreadsheet = ({
                       ref={(element: HTMLInputElement) =>
                         handleAddRef(element, columnIdx, rowIdx)
                       }
-                      rowIdx={rowIdx}
-                      value={column.value}
                     />
                   </CellWrapper>
                   {/* TODO: maintain focus after rows/cols have been deleted/added. */}
@@ -958,11 +847,15 @@ const Spreadsheet = ({
                       deleteSelectedColumns={deleteSelectedColumns}
                       deleteSelectedRows={deleteSelectedRows}
                       /* TODO: fix the hardcoded values */
-                      selectedCells={{
-                        columnIdxEnd: 1,
-                        columnIdxStart: 1,
-                        rowIdxEnd: 1,
-                        rowIdxStart: 1,
+                      selectionStartAndEndCells={{
+                        selectionStartCell: {
+                          rowIdx: 0,
+                          columnIdx: 0,
+                        },
+                        selectionEndCell: {
+                          rowIdx: 0,
+                          columnIdx: 0,
+                        },
                       }}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}
