@@ -65,3 +65,26 @@ Then use CSS to style the svg element.
   height: 20px;
 }
 ```
+
+
+## Events and the order they get called
+
+- While holding down the mouse on a cell (onMouseDown), then move the cursor over the next cell, onMouseOver gets called on the currently hovered cell. When releasing the mouse button, onMouseUp gets called on the currently hovered cell:
+  1. onMouseDown
+  2. onMouseOver
+  3. onMouseUp
+  - Note: onClick event handler will not be called!!
+
+- When holding down the mouse on a cell (onMouseDown), then releasing the mouse button over the same cell, the following event handlers get called:
+  1. onMouseDown
+  2. onMouseUp
+  3. onClick
+
+
+## How selectionGroup gets added to selectionGroups array
+- onClick doesn't add a cell ({rowIdx, columnIdx}) to selectionGroup array. If user clicks on a cell then all the selections get cleared (selectionGroup array gets emptied).
+- Ctrl + click on cell adds clicked cell to selectionGroup array
+- If one cell is focused, then Shift + click empties selectionGroup array and then adds all the cells between the focused cell and the clicked cell to selectionGroup array
+- Dragging mouse over cells adds all cells between the first cell and the last cell to selectionGroup array
+
+If user clicks on a cell then all the selections get cleared (selectionGroups array gets empties).

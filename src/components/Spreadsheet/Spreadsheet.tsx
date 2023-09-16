@@ -165,7 +165,6 @@ const Spreadsheet = ({
   };
 
   const handleCellBlur = (columnIdx: number, rowIdx: number) => {
-    // TODO: fix this
     // Change all the selectedCells isSelected and isEditing values to false.
     const newSpreadsheet = spreadsheetState.map((row) => {
       const newRow = row.map((cell) => {
@@ -174,7 +173,7 @@ const Spreadsheet = ({
       return newRow;
     });
     setSpreadsheetState(newSpreadsheet);
-    handleDBUpdate(newSpreadsheet)
+    handleDBUpdate(newSpreadsheet);
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -211,6 +210,7 @@ const Spreadsheet = ({
     event: React.MouseEvent,
     rowIdx: number
   ) => {
+    console.log("cell's onClick got called --> ", columnIdx, "/", rowIdx);
     if (event.type === "click") {
       // If context menu is open, then close it.
       if (contextMenu.isContextMenuOpen)
@@ -225,10 +225,7 @@ const Spreadsheet = ({
         rowIdx,
       });
     }
-
-    const cell = spreadsheetState[rowIdx][columnIdx];
-    // if (cell.isEditing) return;
-    // if (cell.isSelected) return;
+    
     // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
     const spreadSheetCopy = [...spreadsheetState];
     const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
@@ -241,13 +238,7 @@ const Spreadsheet = ({
       });
       return newRow;
     });
-    console.log(
-      "newSpreadSheetState inside click event handler -->",
-      newSpreadSheetState
-    );
-
     handleDBUpdate(newSpreadSheetState);
-
     setSpreadsheetState(newSpreadSheetState);
 
     setSelectedCells((selectedCells) => {
@@ -493,7 +484,7 @@ const Spreadsheet = ({
     rowIdx: number
   ) => {
     console.log(
-      "onMouseDown called on columnIdx/rowIdx --->",
+      "cell's onMouseDown called on columnIdx/rowIdx --->",
       columnIdx,
       "/",
       rowIdx
@@ -536,7 +527,7 @@ const Spreadsheet = ({
     event.stopPropagation();
     if (selecting) {
       console.log(
-        "onMouseOver got called on columnIdx/rowIdx ---->",
+        "cell's onMouseOver got called on columnIdx/rowIdx ---->",
         columnIdx,
         "/",
         rowIdx
@@ -813,6 +804,8 @@ const Spreadsheet = ({
   };
 
   useEffect(() => {
+    // TODO: this code fetches data every time we reload the page. Update this to use cache, so
+    // TODO: we don't make a call to our API unnecessarily.
     // Fetch for the data from the server.
     let spreadsheetData;
     const fetchData = async () => {
@@ -938,7 +931,7 @@ const Spreadsheet = ({
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
                         console.log(
-                          "onMouseUp called on columnIdx/rowIdx --->",
+                          "cell's onMouseUp called on columnIdx/rowIdx --->",
                           columnIdx,
                           "/",
                           rowIdx
