@@ -65,7 +65,10 @@ Then use CSS to style the svg element.
   height: 20px;
 }
 ```
-
+## Selected and Focused cell
+- Selected and focused cell are two different things. They can be the same cell but they don't have to be.
+- Selected cell is the cell that is clicked on and there can be multiple selected cells at the same time.
+- Focused cell is the cell that is focused (by pressing Tab key or clicking on a cell). There can be only one focused cell. We use focused cell to select multiple cells by pressing Shift key and clicking on another cell.
 
 ## Events and the order they get called
 
