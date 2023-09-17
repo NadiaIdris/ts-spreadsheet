@@ -116,7 +116,10 @@ const Spreadsheet = ({
     allSelectedCells: [],
   });
   const [ selecting, setSelecting ] = useState(false);
-  // const [ previousCell, setPreviousCell ] = useState<SelectedCell>({});
+  const [ previousCell, setPreviousCell ] = useState<SelectedCell>({
+    rowIdx: null,
+    columnIdx: null,
+  });
   const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
@@ -264,6 +267,11 @@ const Spreadsheet = ({
       };
     });
 
+    setSelectionStartAndEndCells({
+      selectionStartCell: { rowIdx, columnIdx },
+      selectionEndCell: { rowIdx, columnIdx },
+    })
+
     moveFocusTo(columnIdx, rowIdx);
   };
 
@@ -276,6 +284,20 @@ const Spreadsheet = ({
   };
 
   /* Drag and drop */
+  const handleCellWrapperDragStart = (
+    columnIdx: number,
+    event: React.DragEvent<HTMLDivElement>,
+    rowIdx: number
+  ) => {
+    // TODO: write code to ignore drag start if dragging from the inner cell and not the cell wrapper.
+    const dt = event.dataTransfer;
+    dt.setData("text/plain", spreadsheetState[rowIdx][columnIdx].value!);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.dropEffect = "move";
+    console.log("drag start");
+    console.log("onDragStart event.dataTransfer ---->", event.dataTransfer);
+  };
+
   const handleCellWrapperDragEnd = (
     columnIdx: number,
     event: React.DragEvent<HTMLDivElement>,
@@ -291,25 +313,12 @@ const Spreadsheet = ({
     // If the cell was dropped on the same cell, then don't change the cell state.
     if (previousCell.columnIdx === columnIdx && previousCell.rowIdx === rowIdx)
       return;
+
     changeCellState({
       rowIdx,
       columnIdx,
       cellUpdate: { isEditing: false, isFocused: false, value: "" },
     });
-  };
-
-  const handleCellWrapperDragStart = (
-    columnIdx: number,
-    event: React.DragEvent<HTMLDivElement>,
-    rowIdx: number
-  ) => {
-    // TODO: write code to ignore drag start if dragging from the inner cell and not the cell wrapper.
-    const dt = event.dataTransfer;
-    dt.setData("text/plain", spreadsheetState[rowIdx][columnIdx].value!);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.dropEffect = "move";
-    console.log("drag start");
-    console.log("onDragStart event.dataTransfer ---->", event.dataTransfer);
   };
 
   const handleCellWrapperDrop = (
@@ -632,8 +641,8 @@ const Spreadsheet = ({
   };
 
   /** Add "rowsCount" number of new empty rows at the rowIdxStart. */
-  const addRows = ({ rowIdxStart, rowsCount }: RowsToAdd) => {
-    const firstChunkOfRows = spreadsheetState.slice(0, rowIdxStart!);
+  const addRows = ({ rowIdx, rowsCount }: RowsToAdd) => {
+    const firstChunkOfRows = spreadsheetState.slice(0, rowIdx!);
     const columnsCount = spreadsheetState[0].length;
     const newRowsChunk = Array.from({ length: rowsCount }, (v, rowI) => {
       return Array.from({ length: columnsCount }, (v, columnI) => {
@@ -641,14 +650,14 @@ const Spreadsheet = ({
           columnIdx: columnI,
           isFocused: false,
           isEditing: false,
-          rowIdx: rowIdxStart! + rowI,
+          rowIdx: rowIdx! + rowI,
           value: "",
         };
       });
     });
     // Update the row indices of the rest of the rows.
     const endChunkOfRows = [];
-    for (let i = rowIdxStart!; i < spreadsheetState.length; i++) {
+    for (let i = rowIdx!; i < spreadsheetState.length; i++) {
       const newRowIdxStart = i + rowsCount;
       endChunkOfRows.push(
         spreadsheetState[i].map((cell) => {
@@ -846,15 +855,14 @@ const Spreadsheet = ({
                       addRows={addRows}
                       deleteSelectedColumns={deleteSelectedColumns}
                       deleteSelectedRows={deleteSelectedRows}
-                      /* TODO: fix the hardcoded values */
                       selectionStartAndEndCells={{
                         selectionStartCell: {
-                          rowIdx: 0,
-                          columnIdx: 0,
+                          rowIdx: selectionStartAndEndCells.selectionStartCell.rowIdx,
+                          columnIdx: selectionStartAndEndCells.selectionStartCell.columnIdx,
                         },
                         selectionEndCell: {
-                          rowIdx: 0,
-                          columnIdx: 0,
+                          rowIdx: selectionStartAndEndCells.selectionEndCell.rowIdx,
+                          columnIdx: selectionStartAndEndCells.selectionEndCell.columnIdx,
                         },
                       }}
                       left={contextMenu.locationX}
