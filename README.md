@@ -1,7 +1,8 @@
 # Spreadsheet app written in TypeScript
 
 ## Icons
->💡 React uses [SVGR](https://react-svgr.com/) to convert svg icons to React components.
+
+> 💡 React uses [SVGR](https://react-svgr.com/) to convert svg icons to React components.
 
 1. Add svg icons to the `src/assets/icons` folder.
 
@@ -21,7 +22,7 @@
 
 > Change the `fill` attribute of the SVG element to `currentColor` like this:
 
-````xml
+```xml
   <span className="search-icon">
     <svg viewBox="0 0 731 731" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -30,12 +31,13 @@
       />
     </svg>
  </span>
- ````
+```
 
 > This allows us to style the icon with the `color` CSS property.
+
 ```css
 .search-icon {
-    color: red;
+  color: red;
 }
 ```
 
@@ -65,7 +67,9 @@ Then use CSS to style the svg element.
   height: 20px;
 }
 ```
+
 ## Selected and Focused cell
+
 - Selected and focused cell are two different things. They can be the same cell but they don't have to be.
 - Selected cell is the cell that is clicked on and there can be multiple selected cells at the same time.
 - Focused cell is the cell that is focused (by pressing Tab key or clicking on a cell). There can be only one focused cell. We use focused cell to select multiple cells by pressing Shift key and clicking on another cell.
@@ -73,18 +77,22 @@ Then use CSS to style the svg element.
 ## Events and the order they get called
 
 - While holding down the mouse on a cell (onMouseDown), then move the cursor over the next cell, onMouseOver gets called on the currently hovered cell. When releasing the mouse button, onMouseUp gets called on the currently hovered cell:
+
   1. onMouseDown
   2. onMouseOver
   3. onMouseUp
+
   - Note: onClick event handler will not be called!!
+
+  4.  onDrag, onDragEnd, onDragEnter, onDragExit, onDragLeave, onDragOver, onDragStart, onDrop: These are HTML5 drag and drop events. They are not part of the normal mouse event flow and need to be triggered manually by calling event.dataTransfer.setData() in an onMouseDown or onDragStart event handler.
 
 - When holding down the mouse on a cell (onMouseDown), then releasing the mouse button over the same cell, the following event handlers get called:
   1. onMouseDown
   2. onMouseUp
   3. onClick
 
-
 ## How selectionGroup gets added to selectionGroups array
+
 - onClick doesn't add a cell ({rowIdx, columnIdx}) to selectionGroup array. If user clicks on a cell then all the selections get cleared (selectionGroup array gets emptied).
 - Ctrl + click on cell adds clicked cell to selectionGroup array
 - If one cell is focused, then Shift + click empties selectionGroup array and then adds all the cells between the focused cell and the clicked cell to selectionGroup array

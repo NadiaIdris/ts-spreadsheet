@@ -115,8 +115,8 @@ const Spreadsheet = ({
     previousCell: { rowIdx: null, columnIdx: null },
     allSelectedCells: [],
   });
-  const [ selecting, setSelecting ] = useState(false);
-  const [ previousCell, setPreviousCell ] = useState<SelectedCell>({
+  const [selecting, setSelecting] = useState(false);
+  const [currentCell, setCurrentCell] = useState<SelectedCell>({
     rowIdx: null,
     columnIdx: null,
   });
@@ -270,7 +270,7 @@ const Spreadsheet = ({
     setSelectionStartAndEndCells({
       selectionStartCell: { rowIdx, columnIdx },
       selectionEndCell: { rowIdx, columnIdx },
-    })
+    });
 
     moveFocusTo(columnIdx, rowIdx);
   };
@@ -284,11 +284,15 @@ const Spreadsheet = ({
   };
 
   /* Drag and drop */
-  const handleCellWrapperDragStart = (
-    columnIdx: number,
-    event: React.DragEvent<HTMLDivElement>,
-    rowIdx: number
-  ) => {
+  const handleCellWrapperDragStart = ({
+    rowIdx,
+    columnIdx,
+    event,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+    event: React.DragEvent<HTMLDivElement>;
+  }) => {
     // TODO: write code to ignore drag start if dragging from the inner cell and not the cell wrapper.
     const dt = event.dataTransfer;
     dt.setData("text/plain", spreadsheetState[rowIdx][columnIdx].value!);
@@ -298,20 +302,25 @@ const Spreadsheet = ({
     console.log("onDragStart event.dataTransfer ---->", event.dataTransfer);
   };
 
-  const handleCellWrapperDragEnd = (
-    columnIdx: number,
-    event: React.DragEvent<HTMLDivElement>,
-    rowIdx: number
-  ) => {
+  const handleCellWrapperDragEnd = ({
+    rowIdx,
+    columnIdx,
+    event,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+    event: React.DragEvent<HTMLDivElement>;
+  }) => {
     console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-    console.log(
-      `onDragEnd event.dataTransfer.dropEffect ---->`,
-      event.dataTransfer.dropEffect
-    );
+    // console.log(
+    //   `onDragEnd event.dataTransfer.dropEffect ---->`,
+    //   event.dataTransfer.dropEffect
+    // );
     // If cell was dragged to a cell that is not droppable, then early return.
     if (event.dataTransfer.dropEffect === "none") return;
     // If the cell was dropped on the same cell, then don't change the cell state.
-    if (previousCell.columnIdx === columnIdx && previousCell.rowIdx === rowIdx)
+    console.log("currentCell on DragEnd ---->", currentCell);
+    if (currentCell.columnIdx === columnIdx && currentCell.rowIdx === rowIdx)
       return;
 
     changeCellState({
@@ -321,16 +330,20 @@ const Spreadsheet = ({
     });
   };
 
-  const handleCellWrapperDrop = (
-    columnIdx: number,
-    event: React.DragEvent<HTMLDivElement>,
-    rowIdx: number
-  ) => {
+  const handleCellWrapperDrop = ({
+    rowIdx,
+    columnIdx,
+    event,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+    event: React.DragEvent<HTMLDivElement>;
+  }) => {
     const data = event.dataTransfer.getData("text/plain");
     console.log("onDrop columnIdx ---->", columnIdx);
     console.log("onDrop rowIdx ---->", rowIdx);
     console.log("onDrop data ---->", data);
-    setPreviousCell({ columnIdx, rowIdx });
+    setCurrentCell({ columnIdx, rowIdx });
     changeCellState({
       rowIdx,
       columnIdx,
@@ -768,17 +781,17 @@ const Spreadsheet = ({
                       handleCellClick(columnIdx, event, rowIdx)
                     }
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
-                      handleCellWrapperDragEnd(columnIdx, event, rowIdx)
+                      handleCellWrapperDragEnd({rowIdx, columnIdx, event})
                     }
                     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
-                      handleCellWrapperDragStart(columnIdx, event, rowIdx);
+                      handleCellWrapperDragStart({rowIdx, columnIdx, event});
                     }}
                     /* Do not remove onDragOver. We need it. */
                     onDragOver={(event: React.DragEvent<HTMLDivElement>) => {
                       event.preventDefault();
                     }}
                     onDrop={(event) => {
-                      handleCellWrapperDrop(columnIdx, event, rowIdx);
+                      handleCellWrapperDrop({rowIdx, columnIdx, event});
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) {
@@ -857,12 +870,18 @@ const Spreadsheet = ({
                       deleteSelectedRows={deleteSelectedRows}
                       selectionStartAndEndCells={{
                         selectionStartCell: {
-                          rowIdx: selectionStartAndEndCells.selectionStartCell.rowIdx,
-                          columnIdx: selectionStartAndEndCells.selectionStartCell.columnIdx,
+                          rowIdx:
+                            selectionStartAndEndCells.selectionStartCell.rowIdx,
+                          columnIdx:
+                            selectionStartAndEndCells.selectionStartCell
+                              .columnIdx,
                         },
                         selectionEndCell: {
-                          rowIdx: selectionStartAndEndCells.selectionEndCell.rowIdx,
-                          columnIdx: selectionStartAndEndCells.selectionEndCell.columnIdx,
+                          rowIdx:
+                            selectionStartAndEndCells.selectionEndCell.rowIdx,
+                          columnIdx:
+                            selectionStartAndEndCells.selectionEndCell
+                              .columnIdx,
                         },
                       }}
                       left={contextMenu.locationX}
