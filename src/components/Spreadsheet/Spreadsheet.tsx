@@ -236,16 +236,6 @@ const Spreadsheet = ({
     });
     handleDBUpdate(newSpreadSheetState);
     setSpreadsheetState(newSpreadSheetState);
-
-    // TODO: delete below because onMouseDown will be always called.
-    // const currentCell = { rowIdx, columnIdx };
-    // setSelectedCells({
-    //   previousCell: currentCell,
-    //   selectionStartCell: currentCell,
-    //   selectionEndCell: currentCell,
-    //   allSelectedCells: [currentCell],
-    // });
-
     moveFocusTo(columnIdx, rowIdx);
   };
 
@@ -517,16 +507,64 @@ const Spreadsheet = ({
     event.preventDefault();
     event.stopPropagation();
     if (selecting) {
-      console.log(
-        "cell's onMouseOver got called on columnIdx/rowIdx ---->",
-        columnIdx,
-        "/",
-        rowIdx
-      );
-
       setSelectedCells((selectedCells) => {
-        const { allSelectedCells } = selectedCells;
+        const { previousCell, allSelectedCells } = selectedCells;
         const currentCell = { rowIdx, columnIdx };
+
+        // If previousCell has selected cells to left of it (we unselected to up, prevDirection was "right" and currectDirestion is "up").
+        // If previousCell has selected cells to right of it (we unselected to up, )
+        const movedUp = selectedCells.previousCell.rowIdx! > rowIdx;
+        const movedDown = selectedCells.previousCell.rowIdx! < rowIdx;
+        const movedLeft = selectedCells.previousCell.columnIdx! > columnIdx;
+        const movedRight = selectedCells.previousCell.columnIdx! < columnIdx;
+        if (movedUp) {
+          // SELECT cell or cells UP (currCell + cells on right of currCell or currCell + cells on left of currCell).
+          // ----
+          // Add currCell to allSelectedCells.
+          allSelectedCells.push(currentCell);
+          // ----
+          // Check if there are any selected cells to the right of the prevCell.
+          const cellsToTheRightOfPrevCell = allSelectedCells.filter(
+            (cell) => cell.columnIdx! > previousCell.columnIdx!
+          );
+          // If there are selected cells to the right of the prevCell, then add the cell above each of them to the allSelectedCells.
+          if (cellsToTheRightOfPrevCell.length > 0) {
+            cellsToTheRightOfPrevCell.forEach((cell) => {
+              allSelectedCells.push({
+                rowIdx: cell.rowIdx! - 1,
+                columnIdx: cell.columnIdx!,
+              });
+            });
+          }
+          // ----
+          // Check if there are any selected cells to the left of the prevCell.
+          // TODO: continue here...
+          const cellsToTheLeftOfPrevCell = allSelectedCells.filter(
+            (cell) => cell.columnIdx! < previousCell.columnIdx!
+          );
+          // If there are selected cells to the left of the prevCell, then add the cell above each of them to the allSelectedCells.
+          if (cellsToTheLeftOfPrevCell.length > 0) {
+            cellsToTheLeftOfPrevCell.forEach((cell) => {
+              allSelectedCells.push({
+                rowIdx: cell.rowIdx! - 1,
+                columnIdx: cell.columnIdx!,
+              });
+            });
+          }
+          // ----
+          // UNSELECT cell or cells UP (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
+          // If currentCell is already selected, then we need to UNSELECT the previous cell.
+        } else if (movedDown) {
+          // SELECT cell or cells DOWN (currCell + cells on right of currCell or currCell + cells on left of currCell).
+          // UNSELECT cell or cells DOWN (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
+        } else if (movedLeft) {
+          // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
+          // UNSELECT cell or cells LEFT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
+        } else if (movedRight) {
+          // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
+          // UNSELECT cell or cells RIGHT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
+        }
+
         console.log("onMouseOver currentCell --->", currentCell);
         const newSelectedCells = [...allSelectedCells, currentCell];
         if (newSelectedCells.length === 1) {
@@ -555,16 +593,7 @@ const Spreadsheet = ({
     columnIdx: number;
     rowIdx: number;
   }) => {
-    console.log(
-      "cell's onMouseUp called on columnIdx/rowIdx --->",
-      columnIdx,
-      "/",
-      rowIdx
-    );
-    console.log(
-      "onMouseUp current cell is selected -->",
-      spreadsheetState[rowIdx][columnIdx].isFocused
-    );
+    console.log("cell's onMouseUp called on cell --->", { rowIdx, columnIdx });
     setSelecting(false);
   };
 
