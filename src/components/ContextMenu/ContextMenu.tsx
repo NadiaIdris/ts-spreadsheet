@@ -12,7 +12,7 @@ import {
   ColumnsToDelete,
   RowsToAdd,
   RowsToDelete,
-  SelectionRangeStartAndEndCells,
+  SelectedCells,
 } from "../Spreadsheet";
 import MenuItem from "./MenuItem";
 
@@ -29,8 +29,9 @@ interface ContextMenuProps {
     rowIdxStart,
     rowsCount,
   }: RowsToDelete) => void;
+  selectionStartCell: SelectedCells[ "selectionStartCell" ];
+  selectionEndCell: SelectedCells[ "selectionEndCell" ];
   left: number;
-  selectionStartAndEndCells: SelectionRangeStartAndEndCells;
   top: number;
 }
 
@@ -39,12 +40,11 @@ const ContextMenu = ({
   addRows,
   deleteSelectedColumns,
   deleteSelectedRows,
+  selectionStartCell,
+  selectionEndCell,
   left,
-  selectionStartAndEndCells,
   top,
 }: ContextMenuProps) => {
-  const { selectionStartCell, selectionEndCell } =
-    selectionStartAndEndCells;
   const { columnIdx: columnIdxStart, rowIdx: rowIdxStart } = selectionStartCell;
   const { columnIdx: columnIdxEnd, rowIdx: rowIdxEnd } = selectionEndCell;
   const iconAdd = (

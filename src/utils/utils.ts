@@ -1,4 +1,4 @@
-import { SelectionRangeStartAndEndCells } from "../components/Spreadsheet/Spreadsheet";
+import { SelectedCells } from "../components/Spreadsheet";
 const SPREADSHEET_HEADING = "spreadsheetHeading";
 
 const setInitialHeading = (defaultHeading: string) => {
@@ -13,8 +13,8 @@ const calculateRowCount = ({
   rowIdxStart,
   rowIdxEnd,
 }: {
-  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
-  rowIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["rowIdx"];
+  rowIdxStart: SelectedCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectedCells["selectionEndCell"]["rowIdx"];
 }): number => {
   if (rowIdxStart === null || rowIdxEnd === null) return 0;
   return rowIdxEnd - rowIdxStart + 1;
@@ -24,8 +24,8 @@ const calculateColumnCount = ({
   columnIdxStart,
   columnIdxEnd,
 }: {
-  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
-  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
+  columnIdxStart: SelectedCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectedCells["selectionEndCell"]["columnIdx"];
 }): number => {
   if (columnIdxStart === null || columnIdxEnd === null) return 0;
   return columnIdxEnd - columnIdxStart + 1;
@@ -35,8 +35,8 @@ const calculateColumnRange = ({
   columnIdxStart,
   columnIdxEnd,
 }: {
-  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
-  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
+  columnIdxStart: SelectedCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectedCells["selectionEndCell"]["columnIdx"];
 }) => {
   if (columnIdxStart === null || columnIdxEnd === null) return "";
   if (columnIdxStart === columnIdxEnd) return `${columnIdxStart! + 1}C`;
@@ -47,8 +47,8 @@ const calculateRowRange = ({
   rowIdxStart,
   rowIdxEnd,
 }: {
-  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
-  rowIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["rowIdx"];
+  rowIdxStart: SelectedCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectedCells["selectionEndCell"]["rowIdx"];
 }) => {
   if (rowIdxStart === null || rowIdxEnd === null) return "";
   if (rowIdxStart === rowIdxEnd) return `${rowIdxStart! + 1}R`;

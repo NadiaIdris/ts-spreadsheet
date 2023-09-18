@@ -7,11 +7,11 @@ import {
   useState,
 } from "react";
 import styled from "styled-components";
+import { IContextMenu } from "../../App";
 import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
-import { IContextMenu } from "../../App";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -35,14 +35,10 @@ export interface SelectedCell {
   columnIdx: number | null;
 }
 
-// We need SelectionRange for ContextMenu component.
-export interface SelectionRangeStartAndEndCells {
+export interface SelectedCells {
+  previousCell: SelectedCell;
   selectionStartCell: SelectedCell;
   selectionEndCell: SelectedCell;
-}
-
-export interface Selected {
-  previousCell: SelectedCell;
   allSelectedCells: SelectedCell[];
 }
 
@@ -57,8 +53,8 @@ export interface ColumnsToAdd {
 }
 
 export interface ColumnsToDelete {
-  columnIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["columnIdx"];
-  columnIdxEnd: SelectionRangeStartAndEndCells["selectionEndCell"]["columnIdx"];
+  columnIdxStart: SelectedCells["selectionStartCell"]["columnIdx"];
+  columnIdxEnd: SelectedCells["selectionEndCell"]["columnIdx"];
   columnsCount: RowAndColumnCount["columnsCount"];
 }
 
@@ -68,8 +64,8 @@ export interface RowsToAdd {
 }
 
 export interface RowsToDelete {
-  rowIdxStart: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
-  rowIdxEnd: SelectionRangeStartAndEndCells["selectionStartCell"]["rowIdx"];
+  rowIdxStart: SelectedCells["selectionStartCell"]["rowIdx"];
+  rowIdxEnd: SelectedCells["selectionStartCell"]["rowIdx"];
   rowsCount: RowAndColumnCount["rowsCount"];
 }
 
@@ -91,13 +87,10 @@ const Spreadsheet = ({
     })
   );
   const [spreadsheetState, setSpreadsheetState] = useState<ICellData[][]>(grid);
-  const [selectionStartAndEndCells, setSelectionStartAndEndCells] =
-    useState<SelectionRangeStartAndEndCells>({
-      selectionStartCell: { rowIdx: null, columnIdx: null },
-      selectionEndCell: { rowIdx: null, columnIdx: null },
-    });
-  const [selectedCells, setSelectedCells] = useState<Selected>({
+  const [selectedCells, setSelectedCells] = useState<SelectedCells>({
     previousCell: { rowIdx: null, columnIdx: null },
+    selectionStartCell: { rowIdx: null, columnIdx: null },
+    selectionEndCell: { rowIdx: null, columnIdx: null },
     allSelectedCells: [],
   });
   const [selecting, setSelecting] = useState(false);
@@ -244,18 +237,14 @@ const Spreadsheet = ({
     handleDBUpdate(newSpreadSheetState);
     setSpreadsheetState(newSpreadSheetState);
 
-    setSelectedCells((selectedCells) => {
-      const currentCell = { rowIdx, columnIdx };
-      return {
-        previousCell: currentCell,
-        allSelectedCells: [currentCell],
-      };
-    });
-
-    setSelectionStartAndEndCells({
-      selectionStartCell: { rowIdx, columnIdx },
-      selectionEndCell: { rowIdx, columnIdx },
-    });
+    // TODO: delete below because onMouseDown will be always called.
+    // const currentCell = { rowIdx, columnIdx };
+    // setSelectedCells({
+    //   previousCell: currentCell,
+    //   selectionStartCell: currentCell,
+    //   selectionEndCell: currentCell,
+    //   allSelectedCells: [currentCell],
+    // });
 
     moveFocusTo(columnIdx, rowIdx);
   };
@@ -512,6 +501,8 @@ const Spreadsheet = ({
       () =>
         setSelectedCells({
           previousCell: currentCell,
+          selectionStartCell: currentCell,
+          selectionEndCell: currentCell,
           allSelectedCells: [currentCell],
         }),
       0
@@ -532,15 +523,7 @@ const Spreadsheet = ({
         "/",
         rowIdx
       );
-      // TODO: Update the selectionEndCell or selectionStartCell based on the direction of the mouse movement.
-      // setSelectionStartAndEndCells((selectionStartAndEndCells) => {
-      //   const { selectionStartCell } = selectionStartAndEndCells;
-      //   const selectionEndCell = { rowIdx, columnIdx };
-      //   return {
-      //     selectionStartCell,
-      //     selectionEndCell,
-      //   };
-      // });
+
       setSelectedCells((selectedCells) => {
         const { allSelectedCells } = selectedCells;
         const currentCell = { rowIdx, columnIdx };
@@ -549,11 +532,16 @@ const Spreadsheet = ({
         if (newSelectedCells.length === 1) {
           return {
             previousCell: currentCell,
+            selectionStartCell: currentCell,
+            selectionEndCell: currentCell,
             allSelectedCells: newSelectedCells,
           };
         }
+        // TODO: Update the selectionEndCell or selectionStartCell based on the direction of the mouse movement.
         return {
           previousCell: newSelectedCells[newSelectedCells.length - 2],
+          selectionStartCell: newSelectedCells[0],
+          selectionEndCell: newSelectedCells[newSelectedCells.length - 1],
           allSelectedCells: newSelectedCells,
         };
       });
@@ -880,21 +868,13 @@ const Spreadsheet = ({
                       addRows={addRows}
                       deleteSelectedColumns={deleteSelectedColumns}
                       deleteSelectedRows={deleteSelectedRows}
-                      selectionStartAndEndCells={{
-                        selectionStartCell: {
-                          rowIdx:
-                            selectionStartAndEndCells.selectionStartCell.rowIdx,
-                          columnIdx:
-                            selectionStartAndEndCells.selectionStartCell
-                              .columnIdx,
-                        },
-                        selectionEndCell: {
-                          rowIdx:
-                            selectionStartAndEndCells.selectionEndCell.rowIdx,
-                          columnIdx:
-                            selectionStartAndEndCells.selectionEndCell
-                              .columnIdx,
-                        },
+                      selectionStartCell={{
+                        rowIdx: selectedCells.selectionStartCell.rowIdx,
+                        columnIdx: selectedCells.selectionStartCell.columnIdx,
+                      }}
+                      selectionEndCell={{
+                        rowIdx: selectedCells.selectionEndCell.rowIdx,
+                        columnIdx: selectedCells.selectionEndCell.columnIdx,
                       }}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}

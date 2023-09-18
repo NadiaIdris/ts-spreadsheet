@@ -4,7 +4,7 @@ import Spreadsheet, {
   ICellData,
   RowsToAdd,
   RowsToDelete,
-  SelectionRangeStartAndEndCells,
+  SelectedCells,
 } from "./Spreadsheet";
 export default Spreadsheet;
 export type {
@@ -13,5 +13,5 @@ export type {
   ICellData,
   RowsToAdd,
   RowsToDelete,
-  SelectionRangeStartAndEndCells,
+  SelectedCells,
 };
