@@ -20,7 +20,7 @@ interface ICell {
   onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onMouseDown: () => void;
+  onMouseDown: (event: React.MouseEvent) => void;
   onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
   onMouseUp: (event: React.MouseEvent<HTMLInputElement>) => void;
   onPaste: () => void;

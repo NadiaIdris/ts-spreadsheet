@@ -3,10 +3,18 @@ import Spreadsheet from "./components/Spreadsheet";
 import { useState } from "react";
 import { SPREADSHEET_HEADING, setInitialHeading } from "./utils/utils";
 
+export interface IContextMenu {
+  isContextMenuOpen: boolean;
+  locationX: number;
+  locationY: number;
+  rowIdx: number;
+  columnIdx: number;
+}
+
 function App() {
   const [ heading, setHeading ] = useState(setInitialHeading("Spreadsheet"));
   // TODO: change contextMenu state to useContextMenu custom hook?
-  const [contextMenu, setContextMenu] = useState({
+  const [contextMenu, setContextMenu] = useState<IContextMenu>({
     isContextMenuOpen: false,
     locationX: 0,
     locationY: 0,

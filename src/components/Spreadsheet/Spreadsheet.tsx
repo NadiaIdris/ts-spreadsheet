@@ -11,28 +11,13 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
-
-interface IContextMenu {
-  isContextMenuOpen: boolean;
-  locationX: number;
-  locationY: number;
-  rowIdx: number;
-  columnIdx: number;
-}
+import { IContextMenu } from "../../App";
 
 interface SpreadsheetProps {
   columns?: number;
   contextMenu: IContextMenu;
   rows?: number;
-  setContextMenu: Dispatch<
-    SetStateAction<{
-      isContextMenuOpen: boolean;
-      locationX: number;
-      locationY: number;
-      rowIdx: number;
-      columnIdx: number;
-    }>
-  >;
+  setContextMenu: Dispatch<SetStateAction<IContextMenu>>;
 }
 
 // TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
@@ -111,7 +96,7 @@ const Spreadsheet = ({
       selectionStartCell: { rowIdx: null, columnIdx: null },
       selectionEndCell: { rowIdx: null, columnIdx: null },
     });
-  const [selected, setSelectedCells] = useState<Selected>({
+  const [selectedCells, setSelectedCells] = useState<Selected>({
     previousCell: { rowIdx: null, columnIdx: null },
     allSelectedCells: [],
   });
@@ -502,10 +487,14 @@ const Spreadsheet = ({
   const handleMouseDown = ({
     rowIdx,
     columnIdx,
+    event,
   }: {
     rowIdx: number;
     columnIdx: number;
+    event: React.MouseEvent;
   }) => {
+    event.preventDefault();
+    event.stopPropagation();
     console.log(
       "cell's onMouseDown called on columnIdx/rowIdx --->",
       columnIdx,
@@ -514,31 +503,19 @@ const Spreadsheet = ({
     );
     setSelecting(true);
     const cell = spreadsheetState[rowIdx][columnIdx];
-    // This is false if the cell is not selected.
-    console.log("onMouseDown cell.isFocused --->", cell.isFocused);
-    // TODO: fix this
-    // setSelectedCells((selectedCells) => {
-    //   const newState = {
-    //     ...selectedCells, // previous state
-    //     previouslySelectedCell: {
-    //       rowIdxStart: rowIdx,
-    //       rowIdxEnd: rowIdx,
-    //       columnIdxStart: columnIdx,
-    //       columnIdxEnd: columnIdx,
-    //     },
-    //     selectedCellsGroups: [
-    //       ...selectedCells.selectedCellsGroups,
-    //       {
-    //         rowIdxStart: rowIdx,
-    //         rowIdxEnd: rowIdx,
-    //         columnIdxStart: columnIdx,
-    //         columnIdxEnd: columnIdx,
-    //       },
-    //     ],
-    //   };
-    //   console.log("onMouseDown selected cells state is --> ", newState);
-    //   return newState;
-    // });
+    // If the cell is already selected, then don't update the cell state.
+    if (cell.isFocused) return;
+
+    const currentCell = { rowIdx, columnIdx };
+    // Add state update function inside setTimeout, so that setSelecting(true) will be called first.
+    setTimeout(
+      () =>
+        setSelectedCells({
+          previousCell: currentCell,
+          allSelectedCells: [currentCell],
+        }),
+      0
+    );
   };
 
   const handleOnMouseOver = (
@@ -555,7 +532,52 @@ const Spreadsheet = ({
         "/",
         rowIdx
       );
+      // TODO: Update the selectionEndCell or selectionStartCell based on the direction of the mouse movement.
+      // setSelectionStartAndEndCells((selectionStartAndEndCells) => {
+      //   const { selectionStartCell } = selectionStartAndEndCells;
+      //   const selectionEndCell = { rowIdx, columnIdx };
+      //   return {
+      //     selectionStartCell,
+      //     selectionEndCell,
+      //   };
+      // });
+      setSelectedCells((selectedCells) => {
+        const { allSelectedCells } = selectedCells;
+        const currentCell = { rowIdx, columnIdx };
+        console.log("onMouseOver currentCell --->", currentCell);
+        const newSelectedCells = [...allSelectedCells, currentCell];
+        if (newSelectedCells.length === 1) {
+          return {
+            previousCell: currentCell,
+            allSelectedCells: newSelectedCells,
+          };
+        }
+        return {
+          previousCell: newSelectedCells[newSelectedCells.length - 2],
+          allSelectedCells: newSelectedCells,
+        };
+      });
     }
+  };
+
+  const handleOnMouseUp = ({
+    columnIdx,
+    rowIdx,
+  }: {
+    columnIdx: number;
+    rowIdx: number;
+  }) => {
+    console.log(
+      "cell's onMouseUp called on columnIdx/rowIdx --->",
+      columnIdx,
+      "/",
+      rowIdx
+    );
+    console.log(
+      "onMouseUp current cell is selected -->",
+      spreadsheetState[rowIdx][columnIdx].isFocused
+    );
+    setSelecting(false);
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
@@ -726,14 +748,14 @@ const Spreadsheet = ({
           "Content-Type": "application/json",
         },
       });
-      console.log("response ---> ", responseBody);
+      // console.log("response ---> ", responseBody);
       // Check if the response is not ok.
       if (!responseBody.ok)
         throw new Error(
           `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
         );
       const data = await responseBody.json();
-      console.log("data ----> ", data);
+      // console.log("data ----> ", data);
       spreadsheetData = data;
       // Empty array means there is no data in the database.
       if (data.length === 0) return;
@@ -781,17 +803,17 @@ const Spreadsheet = ({
                       handleCellClick(columnIdx, event, rowIdx)
                     }
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
-                      handleCellWrapperDragEnd({rowIdx, columnIdx, event})
+                      handleCellWrapperDragEnd({ rowIdx, columnIdx, event })
                     }
                     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
-                      handleCellWrapperDragStart({rowIdx, columnIdx, event});
+                      handleCellWrapperDragStart({ rowIdx, columnIdx, event });
                     }}
                     /* Do not remove onDragOver. We need it. */
                     onDragOver={(event: React.DragEvent<HTMLDivElement>) => {
                       event.preventDefault();
                     }}
                     onDrop={(event) => {
-                      handleCellWrapperDrop({rowIdx, columnIdx, event});
+                      handleCellWrapperDrop({ rowIdx, columnIdx, event });
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) {
@@ -832,8 +854,8 @@ const Spreadsheet = ({
                       onKeyDown={(
                         event: React.KeyboardEvent<HTMLInputElement>
                       ) => handleKeyDown(columnIdx, event, rowIdx)}
-                      onMouseDown={() => {
-                        handleMouseDown({ rowIdx, columnIdx });
+                      onMouseDown={(event: React.MouseEvent) => {
+                        handleMouseDown({ rowIdx, columnIdx, event });
                       }}
                       onMouseOver={(
                         event: React.MouseEvent<HTMLInputElement>
@@ -843,17 +865,7 @@ const Spreadsheet = ({
                       onMouseUp={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        console.log(
-                          "cell's onMouseUp called on columnIdx/rowIdx --->",
-                          columnIdx,
-                          "/",
-                          rowIdx
-                        );
-                        console.log(
-                          "onMouseUp current cell is selected -->",
-                          spreadsheetState[rowIdx][columnIdx].isFocused
-                        );
-                        setSelecting(false);
+                        handleOnMouseUp({ rowIdx, columnIdx });
                       }}
                       onPaste={() => handleOnPaste(columnIdx, rowIdx)}
                       ref={(element: HTMLInputElement) =>
