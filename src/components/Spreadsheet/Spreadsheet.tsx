@@ -12,6 +12,7 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
+import { arrayIncludesObject } from "../../utils/utils";
 
 interface SpreadsheetProps {
   columns?: number;
@@ -518,7 +519,10 @@ const Spreadsheet = ({
         const movedLeft = selectedCells.previousCell.columnIdx! > columnIdx;
         const movedRight = selectedCells.previousCell.columnIdx! < columnIdx;
         if (movedUp) {
-          // SELECT cell or cells UP (currCell + cells on right of currCell or currCell + cells on left of currCell).
+          // TODO: fix the checking. Can't use includes mehtod on objects. Each object is unique.
+          if (!arrayIncludesObject(allSelectedCells, currentCell)) { 
+            console.log("currentCell is already selected --->", currentCell);
+                      // SELECT cell or cells UP (currCell + cells on right of currCell or currCell + cells on left of currCell).
           // ----
           // Add currCell to allSelectedCells.
           allSelectedCells.push(currentCell);
@@ -551,6 +555,8 @@ const Spreadsheet = ({
               });
             });
           }
+          }
+
           // ----
           // UNSELECT cell or cells UP (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
           // If currentCell is already selected, then we need to UNSELECT the previous cell.
