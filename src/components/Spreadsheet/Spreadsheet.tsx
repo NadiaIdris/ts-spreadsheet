@@ -521,7 +521,6 @@ const Spreadsheet = ({
         } = selectedCells;
         const currentCell = { rowIdx, columnIdx };
 
-
         // If previousCell has selected cells to left of it (we unselected to up, prevDirection was "right" and currectDirestion is "up").
         // If previousCell has selected cells to right of it (we unselected to up, )
         const movedUp = selectedCells.previousCell.rowIdx! > rowIdx;
@@ -549,23 +548,30 @@ const Spreadsheet = ({
             allSelectedCells.push(currentCell);
             console.table(allSelectedCells);
             // ----
+            console.log("🐧🐧🐧 previousCell --> ", previousCell);
+            console.log("🐧🐧🐧 allSelectedCells")
+            console.table(allSelectedCells)
             const cellsToTheRightOfPrevCell = allSelectedCells.filter(
               (cell) => cell.columnIdx! > previousCell.columnIdx!
             );
             const cellsToTheLeftOfPrevCell = allSelectedCells.filter(
-              (cell) => cell.columnIdx! < selectedCells.previousCell.columnIdx!
+              (cell) => (cell.columnIdx! < selectedCells.previousCell.columnIdx! && cell.rowIdx! === selectedCells.previousCell.rowIdx!)
             );
+            console.log("🐧🐧🐧cellsToTheLeftOfPrevCell")
+            console.table(cellsToTheLeftOfPrevCell)
 
             if (cellsToTheRightOfPrevCell.length > 0) {
-              cellsToTheRightOfPrevCell.forEach(addCellsToAllSelectedCells);
+              console.log("cellsToTheRightOfPrevCell.length > 0");
+
+              cellsToTheRightOfPrevCell.forEach((cell) => {
+                allSelectedCells.push({
+                  rowIdx: cell.rowIdx! - 1,
+                  columnIdx: cell.columnIdx!,
+                });
+              });
             } else if (cellsToTheLeftOfPrevCell.length > 0) {
-              console.log(
-                "there were cells on the left that needed to be added to allSelectedCells"
-              );
-              console.log(
-                "selectedCellsToTheLeftOfPrevCell ---> ",
-                cellsToTheLeftOfPrevCell
-              );
+              console.log("cellsToTheLeftOfPrevCell.length > 0");
+              console.log("🟡🟡🟡🟡cellsToTheLeftOfPrevCell ---> ", cellsToTheLeftOfPrevCell)
               cellsToTheLeftOfPrevCell.forEach((cell) => {
                 allSelectedCells.push({
                   rowIdx: cell.rowIdx! - 1,
@@ -574,10 +580,8 @@ const Spreadsheet = ({
               });
             }
             // UPDATE START CELL
-            console.log("currentCell.rowIdx ==> ", currentCell.rowIdx)
-            console.log("selectionStartCell.rowIdx ==> ", selectionStartCell.rowIdx) // TODO: fix this. currently returns null
             if (currentCell.rowIdx < selectionStartCell.rowIdx!) {
-              console.log("currentCell.rowIdx < selectionStartCell.rowIdx!)")
+              console.log("currentCell.rowIdx < selectionStartCell.rowIdx!)");
               newSelectionStartCell = {
                 rowIdx: currentCell.rowIdx,
                 columnIdx: selectionStartCell.columnIdx,
@@ -694,7 +698,7 @@ const Spreadsheet = ({
         }
 
         const newSelectedCells = [...allSelectedCells];
-        console.table(newSelectedCells);
+        // console.table(newSelectedCells);
 
         return {
           previousCell: currentCell,
