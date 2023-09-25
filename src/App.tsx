@@ -12,7 +12,8 @@ export interface IContextMenu {
 }
 
 function App() {
-  const [ heading, setHeading ] = useState(setInitialHeading("Spreadsheet"));
+  const [heading, setHeading] = useState(setInitialHeading("Spreadsheet"));
+  const [selecting, setSelecting] = useState(false);
   // TODO: change contextMenu state to useContextMenu custom hook?
   const [contextMenu, setContextMenu] = useState<IContextMenu>({
     isContextMenuOpen: false,
@@ -27,6 +28,10 @@ function App() {
     setHeading(e.target.value);
   };
 
+  const handleMouseUp = () => {
+    if (selecting) setSelecting(false);
+  };
+
   return (
     <AppContainer
       onClick={() => {
@@ -34,6 +39,7 @@ function App() {
           setContextMenu({ ...contextMenu, isContextMenuOpen: false });
         }
       }}
+      onMouseUp={handleMouseUp}
     >
       <H1
         value={heading}
@@ -41,7 +47,12 @@ function App() {
           handleHeadingChange(event)
         }
       />
-      <Spreadsheet contextMenu={contextMenu} setContextMenu={setContextMenu} />
+      <Spreadsheet
+        contextMenu={contextMenu}
+        selecting={selecting}
+        setSelecting={setSelecting}
+        setContextMenu={setContextMenu}
+      />
     </AppContainer>
   );
 }

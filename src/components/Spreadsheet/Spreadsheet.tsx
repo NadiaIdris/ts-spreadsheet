@@ -15,9 +15,11 @@ import ContextMenu from "../ContextMenu";
 import { arrayIncludesObject } from "../../utils/utils";
 
 interface SpreadsheetProps {
+  rows?: number;
   columns?: number;
   contextMenu: IContextMenu;
-  rows?: number;
+  selecting: boolean;
+  setSelecting: Dispatch<SetStateAction<boolean>>;
   setContextMenu: Dispatch<SetStateAction<IContextMenu>>;
 }
 
@@ -71,9 +73,11 @@ export interface RowsToDelete {
 }
 
 const Spreadsheet = ({
+  rows = 10,
   columns = 10,
   contextMenu,
-  rows = 10,
+  selecting,
+  setSelecting,
   setContextMenu,
 }: SpreadsheetProps) => {
   const grid: ICellData[][] = Array.from({ length: rows }, (v, rowI) =>
@@ -94,7 +98,7 @@ const Spreadsheet = ({
     selectionEndCell: { rowIdx: null, columnIdx: null },
     allSelectedCells: [],
   });
-  const [selecting, setSelecting] = useState(false);
+
   const [currentCell, setCurrentCell] = useState<SelectedCell>({
     rowIdx: null,
     columnIdx: null,
@@ -518,6 +522,7 @@ const Spreadsheet = ({
     };
 
     if (selecting) {
+      console.log("isSelecting is true");
       setSelectedCells((selectedCells) => {
         const {
           previousCell,
@@ -537,9 +542,16 @@ const Spreadsheet = ({
           allSelectedCells,
           currentCell
         );
-        const addCellInSameRowToAllSelectedCells = (cell: SelectedCell) => {
+        const addCellAboveRowToAllSelectedCells = (cell: SelectedCell) => {
           allSelectedCells.push({
             rowIdx: cell.rowIdx! - 1,
+            columnIdx: cell.columnIdx!,
+          });
+        };
+
+        const addCellBelowRowToAllSelectedCells = (cell: SelectedCell) => {
+          allSelectedCells.push({
+            rowIdx: cell.rowIdx! + 1,
             columnIdx: cell.columnIdx!,
           });
         };
@@ -575,17 +587,11 @@ const Spreadsheet = ({
 
         if (movedUp) {
           if (!cellIsSelected) {
-            console.log(
-              "⬆🎁 currentCell is not already selected --->",
-              currentCell
-            );
             // SELECT cell or cells UPWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
             // ----
             allSelectedCells.push(currentCell);
-            console.table(allSelectedCells);
             // ----
 
-            // TODO:
             /** Selected cells to the right of the previous cell:
              * ```
              * | currCell |
@@ -597,17 +603,20 @@ const Spreadsheet = ({
             );
 
             /** Selected cells to the left of the previous cell:
+             * ```
+             *                                | currCell |
              * | selectedCell | selectedCell | prevCell |
+             * ```
              * */
             const cellsToTheLeft = allSelectedCells.filter(
               selectedCellsToTheLeftOfPrevCell
             );
 
             if (cellsToTheRight)
-              cellsToTheRight.forEach(addCellInSameRowToAllSelectedCells);
+              cellsToTheRight.forEach(addCellAboveRowToAllSelectedCells);
 
             if (cellsToTheLeft)
-              cellsToTheLeft.forEach(addCellInSameRowToAllSelectedCells);
+              cellsToTheLeft.forEach(addCellAboveRowToAllSelectedCells);
 
             // UPDATE START CELL
             newSelectionStartCell = {
@@ -630,14 +639,9 @@ const Spreadsheet = ({
           }
         } else if (movedDown) {
           if (!cellIsSelected) {
-            console.log(
-              "⬇️🎁 currentCell is not already selected --->",
-              currentCell
-            );
             // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
             // ----
             allSelectedCells.push(currentCell);
-            console.table(allSelectedCells);
             // ----
 
             /** Selected cells to the right of the previous cell:
@@ -660,28 +664,11 @@ const Spreadsheet = ({
               selectedCellsToTheLeftOfPrevCell
             );
 
-            if (cellsToTheRight) {
-              console.log("cellsToTheRight");
-              console.table(cellsToTheRight);
-              // TODO: check this fn
-              cellsToTheRight.forEach((cell: SelectedCell) => {
-                allSelectedCells.push({
-                  rowIdx: cell.rowIdx! + 1,
-                  columnIdx: cell.columnIdx!,
-                });
-              });
-            }
+            if (cellsToTheRight)
+              cellsToTheRight.forEach(addCellBelowRowToAllSelectedCells);
 
-            if (cellsToTheLeft) {
-              console.log("cellsToTheLeft");
-              console.table(cellsToTheLeft);
-              cellsToTheLeft.forEach((selectedCell: SelectedCell) => {
-                allSelectedCells.push({
-                  rowIdx: selectedCell.rowIdx! + 1,
-                  columnIdx: selectedCell.columnIdx!,
-                });
-              });
-            }
+            if (cellsToTheLeft)
+              cellsToTheLeft.forEach(addCellBelowRowToAllSelectedCells);
 
             // UPDATE END CELL
             newSelectionEndCell = {
