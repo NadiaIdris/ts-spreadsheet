@@ -551,6 +551,28 @@ const Spreadsheet = ({
           });
         };
 
+        const selectedCellsToTheRightOfPrevCell = (
+          selectedCell: SelectedCell
+        ) => {
+          const cellIsOnTheSameRowAsPrevCell =
+            selectedCell.rowIdx! === previousCell.rowIdx!;
+          const cellIsOnTheRightOfPrevCell =
+            selectedCell.columnIdx! > previousCell.columnIdx!;
+
+          return cellIsOnTheSameRowAsPrevCell && cellIsOnTheRightOfPrevCell;
+        };
+
+        const selectedCellsToTheLeftOfPrevCell = (
+          selectedCell: SelectedCell
+        ) => {
+          const cellIsOnTheSameRowAsPrevCell =
+            selectedCell.rowIdx! === previousCell.rowIdx!;
+          const cellIsOnTheLeftOfPrevCell =
+            selectedCell.columnIdx! < previousCell.columnIdx!;
+
+          return cellIsOnTheSameRowAsPrevCell && cellIsOnTheLeftOfPrevCell;
+        };
+
         if (movedUp) {
           if (!cellIsSelected) {
             console.log(
@@ -563,32 +585,23 @@ const Spreadsheet = ({
             console.table(allSelectedCells);
             // ----
 
+            // TODO:
             /** Selected cells to the right of the previous cell:
              * ```
              * | currCell |
              * | prevCell | selectedCell | selectedCell |
              * ```
              */
-            const cellsToTheRight = allSelectedCells.filter((selectedCell) => {
-              const cellIsOnTheSameRowAsPrevCell =
-                selectedCell.rowIdx! === previousCell.rowIdx!;
-              const cellIsOnTheRightOfPrevCell =
-                selectedCell.columnIdx! > previousCell.columnIdx!;
-
-              return cellIsOnTheSameRowAsPrevCell && cellIsOnTheRightOfPrevCell;
-            });
+            const cellsToTheRight = allSelectedCells.filter(
+              selectedCellsToTheRightOfPrevCell
+            );
 
             /** Selected cells to the left of the previous cell:
              * | selectedCell | selectedCell | prevCell |
              * */
-            const cellsToTheLeft = allSelectedCells.filter((selectedCell) => {
-              const cellIsOnTheSameRowAsPrevCell =
-                selectedCell.rowIdx! === previousCell.rowIdx!;
-              const cellIsOnTheLeftOfPrevCell =
-                selectedCell.columnIdx! < previousCell.columnIdx!;
-
-              return cellIsOnTheSameRowAsPrevCell && cellIsOnTheLeftOfPrevCell;
-            });
+            const cellsToTheLeft = allSelectedCells.filter(
+              selectedCellsToTheLeftOfPrevCell
+            );
 
             if (cellsToTheRight)
               cellsToTheRight.forEach(addCellInSameRowToAllSelectedCells);
@@ -633,14 +646,9 @@ const Spreadsheet = ({
              * | currCell |
              * ```
              */
-            const cellsToTheRight = allSelectedCells.filter((selectedCell) => {
-              const cellIsOnTheSameRowAsPrevCell =
-                selectedCell.rowIdx! === previousCell.rowIdx!;
-              const cellIsOnTheRightOfPrevCell =
-                selectedCell.columnIdx! > previousCell.columnIdx!;
-
-              return cellIsOnTheSameRowAsPrevCell && cellIsOnTheRightOfPrevCell;
-            });
+            const cellsToTheRight = allSelectedCells.filter(
+              selectedCellsToTheRightOfPrevCell
+            );
 
             /** Selected cells to the left of the previous cell:
              * ```
@@ -648,14 +656,9 @@ const Spreadsheet = ({
              *                                | currCell |
              * ```
              * */
-            const cellsToTheLeft = allSelectedCells.filter((selectedCell) => {
-              const cellIsOnTheSameRowAsPrevCell =
-                selectedCell.rowIdx! === previousCell.rowIdx!;
-              const cellIsOnTheLeftOfPrevCell =
-                selectedCell.columnIdx! < previousCell.columnIdx!;
-
-              return cellIsOnTheSameRowAsPrevCell && cellIsOnTheLeftOfPrevCell;
-            });
+            const cellsToTheLeft = allSelectedCells.filter(
+              selectedCellsToTheLeftOfPrevCell
+            );
 
             if (cellsToTheRight) {
               console.log("cellsToTheRight");
@@ -666,10 +669,10 @@ const Spreadsheet = ({
                   rowIdx: cell.rowIdx! + 1,
                   columnIdx: cell.columnIdx!,
                 });
-              }); 
+              });
             }
 
-            if (cellsToTheLeft) { 
+            if (cellsToTheLeft) {
               console.log("cellsToTheLeft");
               console.table(cellsToTheLeft);
               cellsToTheLeft.forEach((selectedCell: SelectedCell) => {
@@ -678,8 +681,15 @@ const Spreadsheet = ({
                   columnIdx: selectedCell.columnIdx!,
                 });
               });
-
             }
+
+            // UPDATE END CELL
+            newSelectionEndCell = {
+              rowIdx: currentCell.rowIdx,
+              columnIdx: selectionEndCell.columnIdx,
+            };
+            //----------------------------------
+            //----------------------------------
           }
 
           if (cellIsSelected) {
