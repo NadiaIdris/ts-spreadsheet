@@ -531,6 +531,7 @@ const Spreadsheet = ({
           allSelectedCells,
         } = selectedCells;
         const currentCell = { rowIdx, columnIdx };
+        const newAllSelectedCells = [...allSelectedCells];
 
         // If previousCell has selected cells to left of it (we unselected to up, prevDirection was "right" and currectDirestion is "up").
         // If previousCell has selected cells to right of it (we unselected to up, )
@@ -539,25 +540,26 @@ const Spreadsheet = ({
         const movedLeft = selectedCells.previousCell.columnIdx! > columnIdx;
         const movedRight = selectedCells.previousCell.columnIdx! < columnIdx;
         const cellIsSelected = arrayIncludesObject(
-          allSelectedCells,
+          newAllSelectedCells,
           currentCell
         );
+        // TODO: possibly move functions below to separate spreadsheet-selection-utils.ts file.
         const addCellAboveRowToAllSelectedCells = (cell: SelectedCell) => {
-          allSelectedCells.push({
+          newAllSelectedCells.push({
             rowIdx: cell.rowIdx! - 1,
             columnIdx: cell.columnIdx!,
           });
         };
 
         const addCellBelowRowToAllSelectedCells = (cell: SelectedCell) => {
-          allSelectedCells.push({
+          newAllSelectedCells.push({
             rowIdx: cell.rowIdx! + 1,
             columnIdx: cell.columnIdx!,
           });
         };
 
         const addCellInSameColumnToAllSelectedCells = (cell: SelectedCell) => {
-          allSelectedCells.push({
+          newAllSelectedCells.push({
             rowIdx: cell.rowIdx!,
             columnIdx: cell.columnIdx! + 1,
           });
@@ -604,14 +606,14 @@ const Spreadsheet = ({
         if (movedUp) {
           if (!cellIsSelected) {
             // SELECT cell or cells UPWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            allSelectedCells.push(currentCell);
+            newAllSelectedCells.push(currentCell);
 
             /**
              * Selected cells to the right of the previous cell.
              * @example
              * | previousCell | selectedCell | selectedCell |
              */
-            const cellsToTheRight = allSelectedCells.filter(
+            const cellsToTheRight = newAllSelectedCells.filter(
               selectedCellsToTheRightOfPrevCell
             );
 
@@ -620,7 +622,7 @@ const Spreadsheet = ({
              * @example
              * | selectedCell | selectedCell | previousCell |
              * */
-            const cellsToTheLeft = allSelectedCells.filter(
+            const cellsToTheLeft = newAllSelectedCells.filter(
               selectedCellsToTheLeftOfPrevCell
             );
 
@@ -652,14 +654,14 @@ const Spreadsheet = ({
         } else if (movedDown) {
           if (!cellIsSelected) {
             // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            allSelectedCells.push(currentCell);
+            newAllSelectedCells.push(currentCell);
 
             /**
              * Selected cells to the right of the previous cell.
              * @example
              * | previousCell | selectedCell | selectedCell |
              */
-            const cellsToTheRight = allSelectedCells.filter(
+            const cellsToTheRight = newAllSelectedCells.filter(
               selectedCellsToTheRightOfPrevCell
             );
 
@@ -668,7 +670,7 @@ const Spreadsheet = ({
              * @example
              * | selectedCell | selectedCell | previousCell |
              * */
-            const cellsToTheLeft = allSelectedCells.filter(
+            const cellsToTheLeft = newAllSelectedCells.filter(
               selectedCellsToTheLeftOfPrevCell
             );
 
@@ -683,8 +685,6 @@ const Spreadsheet = ({
               rowIdx: currentCell.rowIdx,
               columnIdx: selectionEndCell.columnIdx,
             };
-            //----------------------------------
-            //----------------------------------
           }
 
           if (cellIsSelected) {
@@ -697,18 +697,7 @@ const Spreadsheet = ({
         } else if (movedLeft) {
           if (!cellIsSelected) {
             // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
-            allSelectedCells.push(currentCell);
-          } else if (cellIsSelected) {
-            console.log(
-              "⬅️✅ currentCell is already selected --->",
-              currentCell
-            );
-            // UNSELECT cell or cells LEFT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
-          }
-        } else if (movedRight) {
-          if (!cellIsSelected) {
-            // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
-            allSelectedCells.push(currentCell);
+            newAllSelectedCells.push(currentCell);
 
             /**
              * Selected cells above previous cell.
@@ -717,7 +706,7 @@ const Spreadsheet = ({
              * | selectedCell |
              * | previousCell |
              */
-            const cellsAbove = allSelectedCells.filter(
+            const cellsAbove = newAllSelectedCells.filter(
               selectedCellAbovePrevCell
             );
 
@@ -728,13 +717,77 @@ const Spreadsheet = ({
              * | selectedCell |
              * | selectedCell |
              */
-            const cellsBelow = allSelectedCells.filter(
+            const cellsBelow = newAllSelectedCells.filter(
               selectedCellBelowPrevCell
             );
 
-            // if (cellsAbove)
-            //   cellsAbove.forEach(addCellInSameColumnToAllSelectedCells);
-            cellsAbove &&
+            if (cellsAbove) {
+              cellsAbove.forEach((cell) => {
+                newAllSelectedCells.push({
+                  rowIdx: cell.rowIdx!,
+                  columnIdx: cell.columnIdx! - 1,
+                });
+              });
+            }
+            if (cellsBelow) {
+              cellsBelow.forEach((cell) => {
+                newAllSelectedCells.push({
+                  rowIdx: cell.rowIdx!,
+                  columnIdx: cell.columnIdx! - 1,
+                });
+              });
+            }
+
+            // UPDATE SELECTION START CELL.
+            const currentCellIsInSameRowAsStartCell =
+              currentCell.rowIdx === selectionStartCell.rowIdx!;
+            const currentCellIsBelowStartCell =
+              currentCell.rowIdx > selectionStartCell.rowIdx!;
+
+            if (currentCellIsInSameRowAsStartCell)
+              newSelectionStartCell = currentCell;
+
+            if (currentCellIsBelowStartCell) {
+              newSelectionStartCell = {
+                rowIdx: selectionStartCell.rowIdx,
+                columnIdx: currentCell.columnIdx,
+              };
+            }
+          } else if (cellIsSelected) {
+            console.log(
+              "⬅️✅ currentCell is already selected --->",
+              currentCell
+            );
+            // UNSELECT cell or cells LEFT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
+          }
+        } else if (movedRight) {
+          if (!cellIsSelected) {
+            // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
+            newAllSelectedCells.push(currentCell);
+
+            /**
+             * Selected cells above previous cell.
+             * @example
+             * | selectedCell |
+             * | selectedCell |
+             * | previousCell |
+             */
+            const cellsAbove = newAllSelectedCells.filter(
+              selectedCellAbovePrevCell
+            );
+
+            /**
+             * Selected cells below previous cell.
+             * @example
+             * | previousCell |
+             * | selectedCell |
+             * | selectedCell |
+             */
+            const cellsBelow = newAllSelectedCells.filter(
+              selectedCellBelowPrevCell
+            );
+
+            if (cellsAbove)
               cellsAbove.forEach(addCellInSameColumnToAllSelectedCells);
 
             if (cellsBelow)
@@ -765,14 +818,11 @@ const Spreadsheet = ({
           }
         }
 
-        const newSelectedCells = [...allSelectedCells];
-        // console.table(newSelectedCells);
-
         return {
           previousCell: currentCell,
           selectionStartCell: newSelectionStartCell,
           selectionEndCell: newSelectionEndCell,
-          allSelectedCells: newSelectedCells,
+          allSelectedCells: newAllSelectedCells,
         };
       });
     }
