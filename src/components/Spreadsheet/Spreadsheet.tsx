@@ -585,28 +585,40 @@ const Spreadsheet = ({
           return cellIsOnTheSameRowAsPrevCell && cellIsOnTheLeftOfPrevCell;
         };
 
+        const selectedCellAbovePrevCell = (cell: SelectedCell) => {
+          const cellIsOnTheSameColumnAsPrevCell =
+            cell.columnIdx! === previousCell.columnIdx!;
+          const cellIsAboveThePrevCell = cell.rowIdx! < previousCell.rowIdx!;
+
+          return cellIsOnTheSameColumnAsPrevCell && cellIsAboveThePrevCell;
+        };
+
+        const selectedCellBelowPrevCell = (cell: SelectedCell) => {
+          const cellIsOnTheSameColumnAsPrevCell =
+            cell.columnIdx! === previousCell.columnIdx!;
+          const cellIsBelowThePrevCell = cell.rowIdx! > previousCell.rowIdx!;
+
+          return cellIsOnTheSameColumnAsPrevCell && cellIsBelowThePrevCell;
+        };
+
         if (movedUp) {
           if (!cellIsSelected) {
             // SELECT cell or cells UPWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            // ----
             allSelectedCells.push(currentCell);
-            // ----
 
-            /** Selected cells to the right of the previous cell:
-             * ```
-             * | currCell |
-             * | prevCell | selectedCell | selectedCell |
-             * ```
+            /**
+             * Selected cells to the right of the previous cell.
+             * @example
+             * | previousCell | selectedCell | selectedCell |
              */
             const cellsToTheRight = allSelectedCells.filter(
               selectedCellsToTheRightOfPrevCell
             );
 
-            /** Selected cells to the left of the previous cell:
-             * ```
-             *                                | currCell |
-             * | selectedCell | selectedCell | prevCell |
-             * ```
+            /**
+             * Selected cells to the left of the previous cell.
+             * @example
+             * | selectedCell | selectedCell | previousCell |
              * */
             const cellsToTheLeft = allSelectedCells.filter(
               selectedCellsToTheLeftOfPrevCell
@@ -640,25 +652,21 @@ const Spreadsheet = ({
         } else if (movedDown) {
           if (!cellIsSelected) {
             // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            // ----
             allSelectedCells.push(currentCell);
-            // ----
 
-            /** Selected cells to the right of the previous cell:
-             * ```
-             * | prevCell    | selectedCell | selectedCell |
-             * | currCell |
-             * ```
+            /**
+             * Selected cells to the right of the previous cell.
+             * @example
+             * | previousCell | selectedCell | selectedCell |
              */
             const cellsToTheRight = allSelectedCells.filter(
               selectedCellsToTheRightOfPrevCell
             );
 
-            /** Selected cells to the left of the previous cell:
-             * ```
-             * | selectedCell | selectedCell | prevCell |
-             *                                | currCell |
-             * ```
+            /**
+             * Selected cells to the left of the previous cell.
+             * @example
+             * | selectedCell | selectedCell | previousCell |
              * */
             const cellsToTheLeft = allSelectedCells.filter(
               selectedCellsToTheLeftOfPrevCell
@@ -688,12 +696,7 @@ const Spreadsheet = ({
           }
         } else if (movedLeft) {
           if (!cellIsSelected) {
-            console.log(
-              "⬅️🎁 currentCell is not already selected --->",
-              currentCell
-            );
             // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
-
             allSelectedCells.push(currentCell);
           } else if (cellIsSelected) {
             console.log(
@@ -704,66 +707,50 @@ const Spreadsheet = ({
           }
         } else if (movedRight) {
           if (!cellIsSelected) {
-            console.log(
-              "➡️🎁 currentCell is not already selected --->",
-              currentCell
-            );
             // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
             allSelectedCells.push(currentCell);
-            const selectedCellsAbovePrevCell = allSelectedCells.filter(
-              (cell) => {
-                const cellIsOnTheSameColumnAsPrevCell =
-                  cell.columnIdx! === previousCell.columnIdx!;
-                const cellIsAboveThePrevCell =
-                  cell.rowIdx! < previousCell.rowIdx!;
 
-                return (
-                  cellIsOnTheSameColumnAsPrevCell && cellIsAboveThePrevCell
-                );
-              }
-            );
-            const selectedCellsBelowPrevCell = allSelectedCells.filter(
-              (cell) => {
-                const cellIsOnTheSameColumnAsPrevCell =
-                  cell.columnIdx! === previousCell.columnIdx!;
-                const cellIsBelowThePrevCell =
-                  cell.rowIdx! > previousCell.rowIdx!;
-
-                return (
-                  cellIsOnTheSameColumnAsPrevCell && cellIsBelowThePrevCell
-                );
-              }
+            /**
+             * Selected cells above previous cell.
+             * @example
+             * | selectedCell |
+             * | selectedCell |
+             * | previousCell |
+             */
+            const cellsAbove = allSelectedCells.filter(
+              selectedCellAbovePrevCell
             );
 
-            if (selectedCellsAbovePrevCell.length > 0) {
-              selectedCellsAbovePrevCell.forEach(
-                addCellInSameColumnToAllSelectedCells
-              );
-            }
+            /**
+             * Selected cells below previous cell.
+             * @example
+             * | previousCell |
+             * | selectedCell |
+             * | selectedCell |
+             */
+            const cellsBelow = allSelectedCells.filter(
+              selectedCellBelowPrevCell
+            );
 
-            if (selectedCellsBelowPrevCell.length > 0) {
-              selectedCellsBelowPrevCell.forEach(
-                addCellInSameColumnToAllSelectedCells
-              );
-            }
+            // if (cellsAbove)
+            //   cellsAbove.forEach(addCellInSameColumnToAllSelectedCells);
+            cellsAbove &&
+              cellsAbove.forEach(addCellInSameColumnToAllSelectedCells);
 
-            // UPDATE SELECTION END CELL
-            const isCurrentCellInSameRowAsEndCell =
+            if (cellsBelow)
+              cellsBelow.forEach(addCellInSameColumnToAllSelectedCells);
+
+            // UPDATE SELECTION END CELL.
+            const currentCellIsInSameRowAsEndCell =
               currentCell.rowIdx === selectionEndCell.rowIdx!;
             const currentCellIsAboveEndCell =
               currentCell.rowIdx < selectionEndCell.rowIdx!;
-            if (isCurrentCellInSameRowAsEndCell) {
-              console.log(
-                "isCurrentCellInSameRowAsEndCell --->",
-                isCurrentCellInSameRowAsEndCell
-              );
+
+            if (currentCellIsInSameRowAsEndCell) {
               newSelectionEndCell = currentCell;
-              console.log("newSelectionEndCell --->", newSelectionEndCell);
-            } else if (currentCellIsAboveEndCell) {
-              console.log(
-                "currentCellIsAboveEndCell --->",
-                currentCellIsAboveEndCell
-              );
+            }
+
+            if (currentCellIsAboveEndCell) {
               newSelectionEndCell = {
                 rowIdx: selectionEndCell.rowIdx,
                 columnIdx: currentCell.columnIdx,
@@ -774,9 +761,8 @@ const Spreadsheet = ({
               "➡️✅ currentCell is already selected --->",
               currentCell
             );
-            console.log("RIGHT previousCell --->", previousCell);
+            // UNSELECT cell or cells RIGHT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
           }
-          // UNSELECT cell or cells RIGHT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
         }
 
         const newSelectedCells = [...allSelectedCells];
