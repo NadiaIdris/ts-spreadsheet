@@ -522,7 +522,6 @@ const Spreadsheet = ({
     };
 
     if (selecting) {
-      console.log("isSelecting is true");
       setSelectedCells((selectedCells) => {
         const {
           previousCell,
@@ -559,10 +558,17 @@ const Spreadsheet = ({
           });
         };
 
-        const addCellInSameColumnToAllSelectedCells = (cell: SelectedCell) => {
+        const addCellInRightColumnToAllSelectedCells = (cell: SelectedCell) => {
           newAllSelectedCells.push({
             rowIdx: cell.rowIdx!,
             columnIdx: cell.columnIdx! + 1,
+          });
+        };
+
+        const addCellInLeftColumnToAllSelectedCells = (cell: SelectedCell) => {
+          newAllSelectedCells.push({
+            rowIdx: cell.rowIdx!,
+            columnIdx: cell.columnIdx! - 1,
           });
         };
 
@@ -572,14 +578,14 @@ const Spreadsheet = ({
           cellsToRemove.forEach(removeCellFromAllSelectedCells);
         };
 
-        const removeCellFromAllSelectedCells = (cell: SelectedCell) => { 
+        const removeCellFromAllSelectedCells = (cell: SelectedCell) => {
           const prevCellIdx = newAllSelectedCells.findIndex(
             (selectedCell) =>
               selectedCell.rowIdx === cell.rowIdx &&
               selectedCell.columnIdx === cell.columnIdx
           );
           newAllSelectedCells.splice(prevCellIdx, 1);
-        }
+        };
 
         const selectedCellsToTheRightOfPrevCell = (
           selectedCell: SelectedCell
@@ -659,6 +665,7 @@ const Spreadsheet = ({
               removeCellsFromAllSelectedCells(cellsToTheRight);
               removeCellFromAllSelectedCells(previousCell);
             }
+
             if (cellsToTheLeft.length > 0) {
               removeCellsFromAllSelectedCells(cellsToTheLeft);
               removeCellFromAllSelectedCells(previousCell);
@@ -669,29 +676,29 @@ const Spreadsheet = ({
               columnIdx: selectionEndCell.columnIdx,
             };
           }
-        } else if (movedDown) {
+        }
+        if (movedDown) {
+          /**
+           * Selected cells to the right of the previous cell.
+           * @example
+           * | previousCell | selectedCell | selectedCell |
+           */
+          const cellsToTheRight = newAllSelectedCells.filter(
+            selectedCellsToTheRightOfPrevCell
+          );
+
+          /**
+           * Selected cells to the left of the previous cell.
+           * @example
+           * | selectedCell | selectedCell | previousCell |
+           * */
+          const cellsToTheLeft = newAllSelectedCells.filter(
+            selectedCellsToTheLeftOfPrevCell
+          );
+
           if (!cellIsSelected) {
-            console.log("⬇️ 🎁 moved down and cell is not selected");
             // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
             newAllSelectedCells.push(currentCell);
-
-            /**
-             * Selected cells to the right of the previous cell.
-             * @example
-             * | previousCell | selectedCell | selectedCell |
-             */
-            const cellsToTheRight = newAllSelectedCells.filter(
-              selectedCellsToTheRightOfPrevCell
-            );
-
-            /**
-             * Selected cells to the left of the previous cell.
-             * @example
-             * | selectedCell | selectedCell | previousCell |
-             * */
-            const cellsToTheLeft = newAllSelectedCells.filter(
-              selectedCellsToTheLeftOfPrevCell
-            );
 
             if (cellsToTheRight.length > 0)
               cellsToTheRight.forEach(addCellBelowRowToAllSelectedCells);
@@ -707,54 +714,54 @@ const Spreadsheet = ({
           }
 
           if (cellIsSelected) {
-            console.log(
-              "⬇️✅ currentCell is already selected --->",
-              currentCell
-            );
             // UNSELECT cell or cells DOWNWARDS (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
+            if (cellsToTheRight.length > 0) {
+              removeCellsFromAllSelectedCells(cellsToTheRight);
+              removeCellFromAllSelectedCells(previousCell);
+            }
+
+            if (cellsToTheLeft.length > 0) {
+              removeCellsFromAllSelectedCells(cellsToTheLeft);
+              removeCellFromAllSelectedCells(previousCell);
+            }
+            newSelectionStartCell = {
+              rowIdx: currentCell.rowIdx,
+              columnIdx: selectionStartCell.columnIdx,
+            };
           }
-        } else if (movedLeft) {
+        }
+        if (movedLeft) {
+          /**
+           * Selected cells above previous cell.
+           * @example
+           * | selectedCell |
+           * | selectedCell |
+           * | previousCell |
+           */
+          const cellsAbove = newAllSelectedCells.filter(
+            selectedCellAbovePrevCell
+          );
+
+          /**
+           * Selected cells below previous cell.
+           * @example
+           * | previousCell |
+           * | selectedCell |
+           * | selectedCell |
+           */
+          const cellsBelow = newAllSelectedCells.filter(
+            selectedCellBelowPrevCell
+          );
+
           if (!cellIsSelected) {
             // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
             newAllSelectedCells.push(currentCell);
 
-            /**
-             * Selected cells above previous cell.
-             * @example
-             * | selectedCell |
-             * | selectedCell |
-             * | previousCell |
-             */
-            const cellsAbove = newAllSelectedCells.filter(
-              selectedCellAbovePrevCell
-            );
-
-            /**
-             * Selected cells below previous cell.
-             * @example
-             * | previousCell |
-             * | selectedCell |
-             * | selectedCell |
-             */
-            const cellsBelow = newAllSelectedCells.filter(
-              selectedCellBelowPrevCell
-            );
-
             if (cellsAbove.length > 0) {
-              cellsAbove.forEach((cell) => {
-                newAllSelectedCells.push({
-                  rowIdx: cell.rowIdx!,
-                  columnIdx: cell.columnIdx! - 1,
-                });
-              });
+              cellsAbove.forEach(addCellInLeftColumnToAllSelectedCells);
             }
             if (cellsBelow.length > 0) {
-              cellsBelow.forEach((cell) => {
-                newAllSelectedCells.push({
-                  rowIdx: cell.rowIdx!,
-                  columnIdx: cell.columnIdx! - 1,
-                });
-              });
+              cellsBelow.forEach(addCellInLeftColumnToAllSelectedCells);
             }
 
             // UPDATE SELECTION START CELL.
@@ -773,13 +780,24 @@ const Spreadsheet = ({
               };
             }
           } else if (cellIsSelected) {
-            console.log(
-              "⬅️✅ currentCell is already selected --->",
-              currentCell
-            );
             // UNSELECT cell or cells LEFT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
+            if (cellsAbove.length > 0) {
+              removeCellsFromAllSelectedCells(cellsAbove);
+              removeCellFromAllSelectedCells(previousCell);
+            }
+
+            if (cellsBelow.length > 0) {
+              removeCellsFromAllSelectedCells(cellsBelow);
+              removeCellFromAllSelectedCells(previousCell);
+            }
+
+            newSelectionEndCell = {
+              rowIdx: selectionEndCell.rowIdx,
+              columnIdx: currentCell.columnIdx,
+            };
           }
-        } else if (movedRight) {
+        }
+        if (movedRight) {
           if (!cellIsSelected) {
             // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
             newAllSelectedCells.push(currentCell);
@@ -807,10 +825,14 @@ const Spreadsheet = ({
             );
 
             if (cellsAbove.length > 0)
-              cellsAbove.forEach(addCellInSameColumnToAllSelectedCells);
+              console.log("cellsAbove --->");
+              console.table(cellsAbove)
+              cellsAbove.forEach(addCellInRightColumnToAllSelectedCells);
 
             if (cellsBelow.length > 0)
-              cellsBelow.forEach(addCellInSameColumnToAllSelectedCells);
+              console.log("cellsBelow --->");
+              console.table(cellsBelow)
+              cellsBelow.forEach(addCellInRightColumnToAllSelectedCells);
 
             // UPDATE SELECTION END CELL.
             const currentCellIsInSameRowAsEndCell =
@@ -837,8 +859,6 @@ const Spreadsheet = ({
           }
         }
 
-        console.log("newAllSelectedCells before setting state--->");
-        console.table(newAllSelectedCells);
         return {
           previousCell: currentCell,
           selectionStartCell: newSelectionStartCell,
