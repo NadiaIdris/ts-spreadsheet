@@ -93,8 +93,13 @@ Then use CSS to style the svg element.
 
 ## Multiselect cells
 
-- First we check direction: if the user selected up, down, right or left. 
+- First we check direction: if the user selected up, down, right or left.
 - Then we check selection/unselection: if user selected or unselected cells.
 - Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
+## Code style guide
 
+- Truth/falsy and control flow:
+  - Arrays: always use `myArray.length > 0` instead of `myArray.length`. This is more explicit and easier to read. Also don't use just `myArray` and expect it to return falsy if the array is empty. This is not true. An empty array is truthy in JavaScript (same as empty object). 
+    - MDN docs on [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
+    - MDN docs on [false](https://developer.mozilla.org/en-US/docs/Glossary/Falsy).
