@@ -637,8 +637,6 @@ const Spreadsheet = ({
               rowIdx: currentCell.rowIdx,
               columnIdx: selectionStartCell.columnIdx,
             };
-            //----------------------------------
-            //----------------------------------
           }
 
           if (cellIsSelected) {

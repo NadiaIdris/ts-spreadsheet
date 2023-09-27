@@ -91,11 +91,10 @@ Then use CSS to style the svg element.
   2. onMouseUp
   3. onClick
 
-## How selectionGroup gets added to selectionGroups array
+## Multiselect cells
 
-- onClick doesn't add a cell ({rowIdx, columnIdx}) to selectionGroup array. If user clicks on a cell then all the selections get cleared (selectionGroup array gets emptied).
-- Ctrl + click on cell adds clicked cell to selectionGroup array
-- If one cell is focused, then Shift + click empties selectionGroup array and then adds all the cells between the focused cell and the clicked cell to selectionGroup array
-- Dragging mouse over cells adds all cells between the first cell and the last cell to selectionGroup array
+- First we check direction: if the user selected up, down, right or left. 
+- Then we check selection/unselection: if user selected or unselected cells.
+- Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
-If user clicks on a cell then all the selections get cleared (selectionGroups array gets empties).
+
