@@ -97,6 +97,9 @@ Then use CSS to style the svg element.
 - Then we check selection/unselection: if user selected or unselected cells.
 - Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
+### Multiselect mental model
+// TODO: add image.
+
 ## Code style guide
 
 - Truth/falsy and control flow:

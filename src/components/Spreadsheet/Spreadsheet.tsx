@@ -499,6 +499,7 @@ const Spreadsheet = ({
     );
   };
 
+  /** Learn more about selection mental model from README.md. */
   const handleOnMouseOver = (
     columnIdx: number,
     event: React.MouseEvent,
@@ -538,12 +539,12 @@ const Spreadsheet = ({
         const movedDown = selectedCells.previousCell.rowIdx! < rowIdx;
         const movedLeft = selectedCells.previousCell.columnIdx! > columnIdx;
         const movedRight = selectedCells.previousCell.columnIdx! < columnIdx;
-        const cellIsSelected = arrayIncludesObject(
+        const currentCellIsSelected = arrayIncludesObject(
           newAllSelectedCells,
           currentCell
         );
 
-        // TODO: possibly move functions below to separate spreadsheet-selection-utils.ts file.
+        // TODO: possibly move functions below to separate selection.ts file.
         const addCellAboveRowToAllSelectedCells = (cell: SelectedCell) => {
           newAllSelectedCells.push({
             rowIdx: cell.rowIdx! - 1,
@@ -625,246 +626,201 @@ const Spreadsheet = ({
           return cellIsOnTheSameColumnAsPrevCell && cellIsBelowThePrevCell;
         };
 
-        if (movedUp) {
-          /**
-           * Selected cells to the right of the previous cell.
-           * @example
-           * | previousCell | selectedCell | selectedCell |
-           */
-          const cellsToTheRight = newAllSelectedCells.filter(
-            selectedCellsToTheRightOfPrevCell
-          );
+        /**
+         * Selected cells to the right of the previous cell.
+         * @example
+         * | previousCell | selectedCell | selectedCell |
+         */
+        const cellsToTheRight = newAllSelectedCells.filter(
+          selectedCellsToTheRightOfPrevCell
+        );
 
-          /**
-           * Selected cells to the left of the previous cell.
-           * @example
-           * | selectedCell | selectedCell | previousCell |
-           * */
-          const cellsToTheLeft = newAllSelectedCells.filter(
-            selectedCellsToTheLeftOfPrevCell
-          );
-          if (!cellIsSelected) {
-            // SELECT cell or cells UPWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            newAllSelectedCells.push(currentCell);
+        /**
+         * Selected cells to the left of the previous cell.
+         * @example
+         * | selectedCell | selectedCell | previousCell |
+         * */
+        const cellsToTheLeft = newAllSelectedCells.filter(
+          selectedCellsToTheLeftOfPrevCell
+        );
 
-            if (cellsToTheRight.length > 0)
-              cellsToTheRight.forEach(addCellAboveRowToAllSelectedCells);
+        /**
+         * Selected cells above previous cell.
+         * @example
+         * | selectedCell |
+         * | selectedCell |
+         * | previousCell |
+         */
+        const cellsAbove = newAllSelectedCells.filter(
+          selectedCellAbovePrevCell
+        );
 
-            if (cellsToTheLeft.length > 0)
-              cellsToTheLeft.forEach(addCellAboveRowToAllSelectedCells);
+        /**
+         * Selected cells below previous cell.
+         * @example
+         * | previousCell |
+         * | selectedCell |
+         * | selectedCell |
+         */
+        const cellsBelow = newAllSelectedCells.filter(
+          selectedCellBelowPrevCell
+        );
 
-            newSelectionStartCell = {
-              rowIdx: currentCell.rowIdx,
-              columnIdx: selectionStartCell.columnIdx,
-            };
+        // TODO: update the comments below (all of them).
+        // SELECT cell or cells UPWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
+        if (movedUp && !currentCellIsSelected) {
+          newAllSelectedCells.push(currentCell);
+
+          if (cellsToTheRight.length > 0)
+            cellsToTheRight.forEach(addCellAboveRowToAllSelectedCells);
+
+          if (cellsToTheLeft.length > 0)
+            cellsToTheLeft.forEach(addCellAboveRowToAllSelectedCells);
+
+          newSelectionStartCell = {
+            rowIdx: currentCell.rowIdx,
+            columnIdx: selectionStartCell.columnIdx,
+          };
+        }
+
+        // UNSELECT cell or cells UPWARDS (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
+        if (movedUp && currentCellIsSelected) {
+          if (cellsToTheRight.length > 0) {
+            removeCellsFromAllSelectedCells(cellsToTheRight);
+            removeCellFromAllSelectedCells(previousCell);
           }
 
-          if (cellIsSelected) {
-            // UNSELECT cell or cells UPWARDS (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
-            if (cellsToTheRight.length > 0) {
-              removeCellsFromAllSelectedCells(cellsToTheRight);
-              removeCellFromAllSelectedCells(previousCell);
-            }
+          if (cellsToTheLeft.length > 0) {
+            removeCellsFromAllSelectedCells(cellsToTheLeft);
+            removeCellFromAllSelectedCells(previousCell);
+          }
 
-            if (cellsToTheLeft.length > 0) {
-              removeCellsFromAllSelectedCells(cellsToTheLeft);
-              removeCellFromAllSelectedCells(previousCell);
-            }
+          newSelectionEndCell = {
+            rowIdx: currentCell.rowIdx,
+            columnIdx: selectionEndCell.columnIdx,
+          };
+        }
 
-            newSelectionEndCell = {
-              rowIdx: currentCell.rowIdx,
-              columnIdx: selectionEndCell.columnIdx,
+        // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
+        if (movedDown && !currentCellIsSelected) {
+          newAllSelectedCells.push(currentCell);
+
+          if (cellsToTheRight.length > 0)
+            cellsToTheRight.forEach(addCellBelowRowToAllSelectedCells);
+
+          if (cellsToTheLeft.length > 0)
+            cellsToTheLeft.forEach(addCellBelowRowToAllSelectedCells);
+
+          newSelectionEndCell = {
+            rowIdx: currentCell.rowIdx,
+            columnIdx: selectionEndCell.columnIdx,
+          };
+        }
+
+        // UNSELECT cell or cells DOWNWARDS (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
+        if (movedDown && currentCellIsSelected) {
+          if (cellsToTheRight.length > 0) {
+            removeCellsFromAllSelectedCells(cellsToTheRight);
+            removeCellFromAllSelectedCells(previousCell);
+          }
+
+          if (cellsToTheLeft.length > 0) {
+            removeCellsFromAllSelectedCells(cellsToTheLeft);
+            removeCellFromAllSelectedCells(previousCell);
+          }
+          newSelectionStartCell = {
+            rowIdx: currentCell.rowIdx,
+            columnIdx: selectionStartCell.columnIdx,
+          };
+        }
+
+        // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
+        if (movedLeft && !currentCellIsSelected) {
+          newAllSelectedCells.push(currentCell);
+
+          if (cellsAbove.length > 0) {
+            cellsAbove.forEach(addCellInLeftColumnToAllSelectedCells);
+          }
+          if (cellsBelow.length > 0) {
+            cellsBelow.forEach(addCellInLeftColumnToAllSelectedCells);
+          }
+
+          const currentCellIsInSameRowAsStartCell =
+            currentCell.rowIdx === selectionStartCell.rowIdx!;
+          const currentCellIsBelowStartCell =
+            currentCell.rowIdx > selectionStartCell.rowIdx!;
+
+          if (currentCellIsInSameRowAsStartCell)
+            newSelectionStartCell = currentCell;
+
+          if (currentCellIsBelowStartCell) {
+            newSelectionStartCell = {
+              rowIdx: selectionStartCell.rowIdx,
+              columnIdx: currentCell.columnIdx,
             };
           }
         }
-        if (movedDown) {
-          /**
-           * Selected cells to the right of the previous cell.
-           * @example
-           * | previousCell | selectedCell | selectedCell |
-           */
-          const cellsToTheRight = newAllSelectedCells.filter(
-            selectedCellsToTheRightOfPrevCell
-          );
 
-          /**
-           * Selected cells to the left of the previous cell.
-           * @example
-           * | selectedCell | selectedCell | previousCell |
-           * */
-          const cellsToTheLeft = newAllSelectedCells.filter(
-            selectedCellsToTheLeftOfPrevCell
-          );
-
-          if (!cellIsSelected) {
-            // SELECT cell or cells DOWNWARDS (currCell + cells on right of currCell or currCell + cells on left of currCell).
-            newAllSelectedCells.push(currentCell);
-
-            if (cellsToTheRight.length > 0)
-              cellsToTheRight.forEach(addCellBelowRowToAllSelectedCells);
-
-            if (cellsToTheLeft.length > 0)
-              cellsToTheLeft.forEach(addCellBelowRowToAllSelectedCells);
-
-            // UPDATE END CELL
-            newSelectionEndCell = {
-              rowIdx: currentCell.rowIdx,
-              columnIdx: selectionEndCell.columnIdx,
-            };
+        // UNSELECT cell or cells (prevCell + cells above prevCell or prevCell + cells below prevCell).
+        if (movedLeft && currentCellIsSelected) {
+          if (cellsAbove.length > 0) {
+            removeCellsFromAllSelectedCells(cellsAbove);
+            removeCellFromAllSelectedCells(previousCell);
           }
 
-          if (cellIsSelected) {
-            // UNSELECT cell or cells DOWNWARDS (prevCell + cells on right of prevCell or prevCell + cells on left of prevCell).
-            if (cellsToTheRight.length > 0) {
-              removeCellsFromAllSelectedCells(cellsToTheRight);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-
-            if (cellsToTheLeft.length > 0) {
-              removeCellsFromAllSelectedCells(cellsToTheLeft);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-            newSelectionStartCell = {
-              rowIdx: currentCell.rowIdx,
-              columnIdx: selectionStartCell.columnIdx,
-            };
+          if (cellsBelow.length > 0) {
+            removeCellsFromAllSelectedCells(cellsBelow);
+            removeCellFromAllSelectedCells(previousCell);
           }
+
+          newSelectionEndCell = {
+            rowIdx: selectionEndCell.rowIdx,
+            columnIdx: currentCell.columnIdx,
+          };
         }
-        if (movedLeft) {
-          /**
-           * Selected cells above previous cell.
-           * @example
-           * | selectedCell |
-           * | selectedCell |
-           * | previousCell |
-           */
-          const cellsAbove = newAllSelectedCells.filter(
-            selectedCellAbovePrevCell
-          );
 
-          /**
-           * Selected cells below previous cell.
-           * @example
-           * | previousCell |
-           * | selectedCell |
-           * | selectedCell |
-           */
-          const cellsBelow = newAllSelectedCells.filter(
-            selectedCellBelowPrevCell
-          );
+        // SELECT cell or cells (currCell + cells above currCell or currCell + cells below currCell).
+        if (movedRight && !currentCellIsSelected) {
+          newAllSelectedCells.push(currentCell);
 
-          if (!cellIsSelected) {
-            // SELECT cell or cells LEFT (currCell + cells on up of currCell or currCell + cells on down of currCell).
-            newAllSelectedCells.push(currentCell);
+          if (cellsAbove.length > 0)
+            cellsAbove.forEach(addCellInRightColumnToAllSelectedCells);
 
-            if (cellsAbove.length > 0) {
-              cellsAbove.forEach(addCellInLeftColumnToAllSelectedCells);
-            }
-            if (cellsBelow.length > 0) {
-              cellsBelow.forEach(addCellInLeftColumnToAllSelectedCells);
-            }
+          if (cellsBelow.length > 0)
+            cellsBelow.forEach(addCellInRightColumnToAllSelectedCells);
 
-            // UPDATE SELECTION START CELL.
-            const currentCellIsInSameRowAsStartCell =
-              currentCell.rowIdx === selectionStartCell.rowIdx!;
-            const currentCellIsBelowStartCell =
-              currentCell.rowIdx > selectionStartCell.rowIdx!;
+          const currentCellIsInSameRowAsEndCell =
+            currentCell.rowIdx === selectionEndCell.rowIdx!;
+          const currentCellIsAboveEndCell =
+            currentCell.rowIdx < selectionEndCell.rowIdx!;
 
-            if (currentCellIsInSameRowAsStartCell)
-              newSelectionStartCell = currentCell;
+          if (currentCellIsInSameRowAsEndCell)
+            newSelectionEndCell = currentCell;
 
-            if (currentCellIsBelowStartCell) {
-              newSelectionStartCell = {
-                rowIdx: selectionStartCell.rowIdx,
-                columnIdx: currentCell.columnIdx,
-              };
-            }
-          }
-          if (cellIsSelected) {
-            // UNSELECT cell or cells LEFT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
-            if (cellsAbove.length > 0) {
-              removeCellsFromAllSelectedCells(cellsAbove);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-
-            if (cellsBelow.length > 0) {
-              removeCellsFromAllSelectedCells(cellsBelow);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-
+          if (currentCellIsAboveEndCell) {
             newSelectionEndCell = {
               rowIdx: selectionEndCell.rowIdx,
               columnIdx: currentCell.columnIdx,
             };
           }
         }
-        if (movedRight) {
-          /**
-           * Selected cells above previous cell.
-           * @example
-           * | selectedCell |
-           * | selectedCell |
-           * | previousCell |
-           */
-          const cellsAbove = newAllSelectedCells.filter(
-            selectedCellAbovePrevCell
-          );
 
-          /**
-           * Selected cells below previous cell.
-           * @example
-           * | previousCell |
-           * | selectedCell |
-           * | selectedCell |
-           */
-          const cellsBelow = newAllSelectedCells.filter(
-            selectedCellBelowPrevCell
-          );
-
-          if (!cellIsSelected) {
-            // SELECT cell or cells RIGHT (currCell + cells on up of currCell or currCell + cells on down of currCell).
-            newAllSelectedCells.push(currentCell);
-
-            if (cellsAbove.length > 0)
-              cellsAbove.forEach(addCellInRightColumnToAllSelectedCells);
-
-            if (cellsBelow.length > 0)
-              cellsBelow.forEach(addCellInRightColumnToAllSelectedCells);
-
-            const currentCellIsInSameRowAsEndCell =
-              currentCell.rowIdx === selectionEndCell.rowIdx!;
-            const currentCellIsAboveEndCell =
-              currentCell.rowIdx < selectionEndCell.rowIdx!;
-
-            if (currentCellIsInSameRowAsEndCell) {
-              newSelectionEndCell = currentCell;
-            }
-
-            if (currentCellIsAboveEndCell) {
-              newSelectionEndCell = {
-                rowIdx: selectionEndCell.rowIdx,
-                columnIdx: currentCell.columnIdx,
-              };
-            }
+        // UNSELECT cell or cells (prevCell + cells above prevCell or prevCell + cells below prevCell).
+        if (movedRight && currentCellIsSelected) {
+          if (cellsAbove.length > 0) {
+            removeCellsFromAllSelectedCells(cellsAbove);
+            removeCellFromAllSelectedCells(previousCell);
           }
 
-          if (cellIsSelected) {
-            // UNSELECT cell or cells RIGHT (prevCell + cells on up of prevCell or prevCell + cells on down of prevCell).
-            if (cellsAbove.length > 0) {
-              removeCellsFromAllSelectedCells(cellsAbove);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-
-            if (cellsBelow.length > 0) {
-              removeCellsFromAllSelectedCells(cellsBelow);
-              removeCellFromAllSelectedCells(previousCell);
-            }
-
-            newSelectionStartCell = {
-              rowIdx: selectionStartCell.rowIdx,
-              columnIdx: currentCell.columnIdx,
-            };
+          if (cellsBelow.length > 0) {
+            removeCellsFromAllSelectedCells(cellsBelow);
+            removeCellFromAllSelectedCells(previousCell);
           }
+
+          newSelectionStartCell = {
+            rowIdx: selectionStartCell.rowIdx,
+            columnIdx: currentCell.columnIdx,
+          };
         }
 
         return {
