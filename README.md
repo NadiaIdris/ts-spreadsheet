@@ -91,14 +91,15 @@ Then use CSS to style the svg element.
   2. onMouseUp
   3. onClick
 
-## Multiselect cells
+##  Select/multi-select cells
 
 - First we check direction: if the user selected up, down, right or left.
-- Then we check selection/unselection: if user selected or unselected cells.
+- Then we check selection/unselection: if user is in the process of selecting or unselecting cells.
 - Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
-### Multiselect mental model
-// TODO: add image.
+<div style="width: 500px;">
+  <img src="./docs/images/select-mental-model.svg" alt="Image description"/>
+</div>
 
 ## Code style guide
 
