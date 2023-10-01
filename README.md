@@ -97,9 +97,22 @@ Then use CSS to style the svg element.
 - Then we check selection/unselection: if user is in the process of selecting or unselecting cells.
 - Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
-<div style="width: 500px;">
-  <img src="./docs/images/select-mental-model.svg" alt="Image description"/>
-</div>
+### Selection data structure
+```typescript
+interface SelectedCell {
+  rowIdx: number | null;
+  columnIdx: number | null;
+}
+
+interface SelectedCells {
+  previousCell: SelectedCell;
+  selectionStartCell: SelectedCell;
+  selectionEndCell: SelectedCell;
+  allSelectedCells: SelectedCell[];
+}
+```
+
+  <img src="./docs/images/select-mental-model.svg" alt="Image description" width="500"/>
 
 ## Code style guide
 
