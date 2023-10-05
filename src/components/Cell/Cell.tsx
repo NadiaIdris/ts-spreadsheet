@@ -21,6 +21,7 @@ interface ICell {
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onMouseDown: (event: React.MouseEvent) => void;
+  onMouseMove: () => void;
   onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
   onMouseUp: (event: React.MouseEvent<HTMLInputElement>) => void;
   onPaste: () => void;
@@ -47,6 +48,7 @@ const Cell = forwardRef(
       onFocus,
       onKeyDown,
       onMouseDown,
+      onMouseMove,
       onMouseOver,
       onMouseUp,
       onPaste,
@@ -83,6 +85,7 @@ const Cell = forwardRef(
         onFocus={onFocus}
         onKeyDown={(event: any) => onKeyDown(event)}
         onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
         onMouseOver={onMouseOver}
         onMouseUp={onMouseUp}
         onPaste={onPaste}
