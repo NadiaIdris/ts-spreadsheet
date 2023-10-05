@@ -53,7 +53,8 @@ const Cell = forwardRef(
     }: ICell,
     ref: ForwardedRef<HTMLInputElement>
   ) => {
-    const { rowIdx, columnIdx, isEditing, isFocused, value } = cellData;
+    const { rowIdx, columnIdx, isEditing, isFocused, isSelected, value } =
+      cellData;
     const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(event.target.value);
     };
@@ -64,6 +65,7 @@ const Cell = forwardRef(
         data-rowidx={rowIdx}
         draggable={true}
         isFocused={isFocused}
+        isSelected={isSelected}
         onBlur={onBlur}
         onChange={onChangeHander}
         onClick={onClick}
@@ -95,8 +97,8 @@ const Cell = forwardRef(
 export default Cell;
 export type { ICell };
 
-const CellStyled = styled.input<{ isFocused?: boolean }>`
-  background-color: ${(props) => (props.isFocused ? "blue" : "")};
+const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
+  background-color: ${(props) => (props.isSelected ? "blue" : "")};
   border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;

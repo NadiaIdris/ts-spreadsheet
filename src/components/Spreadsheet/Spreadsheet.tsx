@@ -42,6 +42,7 @@ export interface ICellData {
   columnIdx?: number;
   isEditing?: boolean;
   isFocused?: boolean;
+  isSelected?: boolean;
   value?: string;
 }
 
@@ -103,7 +104,7 @@ const Spreadsheet = ({
       } as ICellData;
     })
   );
-  const [ spreadsheetState, setSpreadsheetState ] = useState<ICellData[][]>(grid);
+  const [spreadsheetState, setSpreadsheetState] = useState<ICellData[][]>(grid);
   const [selectedCells, setSelectedCells] = useState<SelectedCells>({
     previousCell: { rowIdx: null, columnIdx: null },
     selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -631,10 +632,11 @@ const Spreadsheet = ({
         if (cellsToTheRight.length > 0) {
           removeCellsFromAllSelectedCells(cellsToTheRight, newAllSelectedCells);
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-        }
-
-        if (cellsToTheLeft.length > 0) {
+        } else if (cellsToTheLeft.length > 0) {
           removeCellsFromAllSelectedCells(cellsToTheLeft, newAllSelectedCells);
+          removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
+        } else {
+          // Single column selection.
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
         }
 
@@ -671,12 +673,14 @@ const Spreadsheet = ({
         if (cellsToTheRight.length > 0) {
           removeCellsFromAllSelectedCells(cellsToTheRight, newAllSelectedCells);
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-        }
-
-        if (cellsToTheLeft.length > 0) {
+        } else if (cellsToTheLeft.length > 0) {
           removeCellsFromAllSelectedCells(cellsToTheLeft, newAllSelectedCells);
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
+        } else {
+          // Single column selection.
+          removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
         }
+
         newSelectionStartCell = {
           rowIdx: currentCell.rowIdx,
           columnIdx: selectionStartCell.columnIdx,
@@ -692,6 +696,7 @@ const Spreadsheet = ({
             addCellInLeftColumnToAllSelectedCells(cell, newAllSelectedCells)
           );
         }
+
         if (cellsBelow.length > 0) {
           cellsBelow.forEach((cell) =>
             addCellInLeftColumnToAllSelectedCells(cell, newAllSelectedCells)
@@ -720,10 +725,11 @@ const Spreadsheet = ({
         if (cellsAbove.length > 0) {
           removeCellsFromAllSelectedCells(cellsAbove, newAllSelectedCells);
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-        }
-
-        if (cellsBelow.length > 0) {
+        } else if (cellsBelow.length > 0) {
           removeCellsFromAllSelectedCells(cellsBelow, newAllSelectedCells);
+          removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
+        } else {
+          // Single row selection.
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
         }
 
@@ -771,10 +777,11 @@ const Spreadsheet = ({
         if (cellsAbove.length > 0) {
           removeCellsFromAllSelectedCells(cellsAbove, newAllSelectedCells);
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-        }
-
-        if (cellsBelow.length > 0) {
+        } else if (cellsBelow.length > 0) {
           removeCellsFromAllSelectedCells(cellsBelow, newAllSelectedCells);
+          removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
+        } else {
+          // Single row selection.
           removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
         }
 
@@ -783,6 +790,11 @@ const Spreadsheet = ({
           columnIdx: currentCell.columnIdx,
         };
       }
+
+      allSelectedCells.forEach((cell) => {
+        // Change the cell's background color to blue.
+      });
+
       setSelectedCells({
         previousCell: currentCell,
         selectionStartCell: newSelectionStartCell,
@@ -1050,6 +1062,10 @@ const Spreadsheet = ({
                         columnIdx,
                         isEditing: column.isEditing,
                         isFocused: column.isFocused,
+                        isSelected: arrayIncludesObject(
+                          selectedCells.allSelectedCells,
+                          { rowIdx, columnIdx }
+                        ),
                         value: column.value,
                       }}
                       key={`cell-${rowIdx}/${columnIdx}`}
