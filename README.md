@@ -1,5 +1,33 @@
 # Spreadsheet app written in TypeScript
 
+## Features
+
+- [x] Flexible grid cells
+
+## Features using mouse
+
+- [x] Single select cell and multi-select cells
+- [x] Add/remove rows and columns
+- [x] Drag and drop one or more cells using mouse
+- [ ] Undo/redo (version history)
+- [ ] Resize columns and rows
+- [ ] Freeze columns and rows
+- [ ] Sort columns
+- 
+- [ ] Add comments to cells. Comments are displayed in a tooltip when hovering over a cell. Add images to comments.
+  - [ ] Option to edit comments in a modal dialog
+  - [ ] Option to delete comment
+  - [ ] Option to mark comment resolved.
+  - [ ] Get link to this comment. Copy the link to clipboard.
+
+## Features using keyboard
+
+- [ ] Single select cell and multi-select cells
+- [x] Copy/paste one or more cells
+- [x] Move up, down, left, right
+- [x] Drag and drop one or more cells using keyboard
+- [ ] Undo/redo (version history)
+
 ## Icons
 
 > 💡 React uses [SVGR](https://react-svgr.com/) to convert svg icons to React components.
@@ -91,13 +119,14 @@ Then use CSS to style the svg element.
   2. onMouseUp
   3. onClick
 
-##  Select/multi-select cells
+## Select/multi-select cells
 
 - First we check direction: if the user selected up, down, right or left.
 - Then we check selection/unselection: if user is in the process of selecting or unselecting cells.
 - Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
 
 ### Selection data structure
+
 ```typescript
 interface SelectedCell {
   rowIdx: number | null;
@@ -117,6 +146,6 @@ interface SelectedCells {
 ## Code style guide
 
 - Truth/falsy and control flow:
-  - Arrays: always use `myArray.length > 0` instead of `myArray.length`. This is more explicit and easier to read. Also don't use just `myArray` and expect it to return falsy if the array is empty. This is not true. An empty array is truthy in JavaScript (same as empty object). 
+  - Arrays: always use `myArray.length > 0` instead of `myArray.length`. This is more explicit and easier to read. Also don't use just `myArray` and expect it to return falsy if the array is empty. This is not true. An empty array is truthy in JavaScript (same as empty object).
     - MDN docs on [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
     - MDN docs on [false](https://developer.mozilla.org/en-US/docs/Glossary/Falsy).
