@@ -1,6 +1,6 @@
+import { useState } from "react";
 import styled from "styled-components";
 import Spreadsheet from "./components/Spreadsheet";
-import { useState } from "react";
 import { SPREADSHEET_HEADING, setInitialHeading } from "./utils/utils";
 
 export interface IContextMenu {
@@ -13,7 +13,7 @@ export interface IContextMenu {
 
 function App() {
   const [heading, setHeading] = useState(setInitialHeading("Spreadsheet"));
-  const [selecting, setSelecting] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
   // TODO: change contextMenu state to useContextMenu custom hook?
   const [contextMenu, setContextMenu] = useState<IContextMenu>({
     isContextMenuOpen: false,
@@ -29,7 +29,7 @@ function App() {
   };
 
   const handleMouseUp = () => {
-    if (selecting) setSelecting(false);
+    if (isSelecting) setIsSelecting(false);
   };
 
   return (
@@ -49,8 +49,8 @@ function App() {
       />
       <Spreadsheet
         contextMenu={contextMenu}
-        selecting={selecting}
-        setSelecting={setSelecting}
+        isSelecting={isSelecting}
+        setIsSelecting={setIsSelecting}
         setContextMenu={setContextMenu}
       />
     </AppContainer>

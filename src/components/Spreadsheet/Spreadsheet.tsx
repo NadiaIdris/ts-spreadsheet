@@ -13,29 +13,15 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
-import {
-  addCellAboveToAllSelectedCells,
-  addCellBelowToAllSelectedCells,
-  addCellInLeftColumnToAllSelectedCells,
-  addCellInRightColumnToAllSelectedCells,
-  removeCellFromAllSelectedCells,
-  removeCellsFromAllSelectedCells,
-  selectedCellAbovePrevCell,
-  selectedCellBelowPrevCell,
-  selectedCellToTheLeftOfPrevCell,
-  selectedCellToTheRightOfPrevCell,
-} from "./selection";
 
 interface SpreadsheetProps {
   rows?: number;
   columns?: number;
   contextMenu: IContextMenu;
-  selecting: boolean;
-  setSelecting: Dispatch<SetStateAction<boolean>>;
+  isSelecting: boolean;
+  setIsSelecting: Dispatch<SetStateAction<boolean>>;
   setContextMenu: Dispatch<SetStateAction<IContextMenu>>;
 }
-
-// TODO: fix resetting the cells isSelected and isEditing values when move to the next cell.
 
 export interface ICellData {
   rowIdx?: number;
@@ -89,8 +75,8 @@ const Spreadsheet = ({
   rows = 10,
   columns = 10,
   contextMenu,
-  selecting,
-  setSelecting,
+  isSelecting,
+  setIsSelecting,
   setContextMenu,
 }: SpreadsheetProps) => {
   const grid: ICellData[][] = Array.from({ length: rows }, (v, rowI) =>
@@ -493,14 +479,14 @@ const Spreadsheet = ({
     event.preventDefault();
     event.stopPropagation();
     console.log("cell's onMouseDown called on --->", { rowIdx, columnIdx });
-    setSelecting(true);
+    setIsSelecting(true);
     moveFocusTo(columnIdx, rowIdx);
     const cell = spreadsheetState[rowIdx][columnIdx];
     // If the cell is already selected, then don't update the cell state.
     if (cell.isFocused) return;
 
     const currentCell = { rowIdx, columnIdx };
-    // Add state update function inside setTimeout, so that setSelecting(true) will be called first.
+    // Add state update function inside setTimeout, so that setIsSelecting(true) will be called first.
     setTimeout(
       () =>
         setSelectedCells({
@@ -800,8 +786,7 @@ const Spreadsheet = ({
 
   function handleMouseMove(cell: SelectedCell) {
     const { selectionStartCell, previousCell } = selectedCells;
-    // TODO: if this works, rename selecting to isSelecting
-    if (selecting) {
+    if (isSelecting) {
       // Do an early return if we are still on current cell.
       if (
         cell.rowIdx === previousCell.rowIdx &&
@@ -810,7 +795,7 @@ const Spreadsheet = ({
         return;
 
       // Determine the cells that are currently selected.
-      const selectedCells = [];
+      const selectedCells: SelectedCell[] = [];
 
       // TODO: add if statements to make sure all the for loops don't run all the time.
       // Moving downwards and/or rightwards.
@@ -839,27 +824,32 @@ const Spreadsheet = ({
 
       // Moving upwards (column) and/or leftwards (row).
       for (let row = selectionStartCell.rowIdx; row! >= cell.rowIdx!; row!--) {
-        console.log("Moving upwards (column) and/or leftwards (row).");
-        for (
-          let col = selectionStartCell.columnIdx;
-          col! >= cell.columnIdx!;
-          col!--
-        ) {
-          selectedCells.push({ rowIdx: row, columnIdx: col });
+        if (selectionStartCell.columnIdx! >= cell.columnIdx!) {
+          console.log("Moving row left");
+          for (
+            let col = selectionStartCell.columnIdx;
+            col! >= cell.columnIdx!;
+            col!--
+          ) {
+            selectedCells.push({ rowIdx: row, columnIdx: col });
+          }
+        } else if (selectionStartCell.columnIdx! <= cell.columnIdx!) { 
+          console.log("Moving row right");
+          for (
+            let col = selectionStartCell.columnIdx;
+            col! <= cell.columnIdx!;
+            col!++
+          ) {
+            selectedCells.push({ rowIdx: row, columnIdx: col });
+          }
         }
       }
 
-      // Move upwards (column) and/or rightwards (row).
-      for (let row = selectionStartCell.rowIdx; row! >= cell.rowIdx!; row!--) {
-        console.log("Move upwards (column) and/or rightwards (row).");
-        for (
-          let col = selectionStartCell.columnIdx;
-          col! <= cell.columnIdx!;
-          col!++
-        ) {
-          selectedCells.push({ rowIdx: row, columnIdx: col });
-        }
-      }
+      // // Move downward (column) and/or rightwards (row).
+      // for (let row = selectionStartCell.rowIdx; row! >= cell.rowIdx!; row!--) {
+      //   console.log("Move upwards (column) and/or rightwards (row).");
+        
+      // }
 
       setSelectedCells({
         previousCell: cell,
@@ -878,7 +868,7 @@ const Spreadsheet = ({
     rowIdx: number;
   }) => {
     console.log("cell's onMouseUp called on cell --->", { rowIdx, columnIdx });
-    setSelecting(false);
+    setIsSelecting(false);
   };
 
   const handleOnCopy = (columnIdx: number, rowIdx: number) => {
