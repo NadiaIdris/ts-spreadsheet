@@ -167,6 +167,9 @@ const Spreadsheet = ({
       selectionEndCell: { rowIdx: null, columnIdx: null },
       allSelectedCells: [],
     });
+    if (contextMenu.isContextMenuOpen) { 
+      setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    }
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -833,7 +836,7 @@ const Spreadsheet = ({
           ) {
             selectedCells.push({ rowIdx: row, columnIdx: col });
           }
-        } else if (selectionStartCell.columnIdx! <= cell.columnIdx!) { 
+        } else if (selectionStartCell.columnIdx! <= cell.columnIdx!) {
           console.log("Moving row right");
           for (
             let col = selectionStartCell.columnIdx;
@@ -848,7 +851,7 @@ const Spreadsheet = ({
       // // Move downward (column) and/or rightwards (row).
       // for (let row = selectionStartCell.rowIdx; row! >= cell.rowIdx!; row!--) {
       //   console.log("Move upwards (column) and/or rightwards (row).");
-        
+
       // }
 
       setSelectedCells({
