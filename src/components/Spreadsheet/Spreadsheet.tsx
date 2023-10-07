@@ -167,7 +167,7 @@ const Spreadsheet = ({
       selectionEndCell: { rowIdx: null, columnIdx: null },
       allSelectedCells: [],
     });
-    if (contextMenu.isContextMenuOpen) { 
+    if (contextMenu.isContextMenuOpen) {
       setContextMenu({ ...contextMenu, isContextMenuOpen: false });
     }
   };
@@ -1093,6 +1093,9 @@ const Spreadsheet = ({
                   {/* Add the rest of row items.  */}
                   <CellWrapper
                     key={`cell-wrapper-${rowIdx}/${columnIdx}`}
+                    onClick={(event: React.MouseEvent) =>
+                      handleCellClick(columnIdx, event, rowIdx)
+                    }
                     onContextMenu={(event: React.MouseEvent<HTMLDivElement>) =>
                       handleCellClick(columnIdx, event, rowIdx)
                     }
