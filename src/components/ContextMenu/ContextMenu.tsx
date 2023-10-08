@@ -20,8 +20,8 @@ interface ContextMenuProps {
   addColumns: ({ columnIdx, columnsCount }: ColumnsToAdd) => void;
   addRows: ({ rowIdx, rowsCount }: RowsToAdd) => void;
   deleteSelectedColumns: ({
-    columnIdxEnd,
     columnIdxStart,
+    columnIdxEnd,
     columnsCount,
   }: ColumnsToDelete) => void;
   deleteSelectedRows: ({
@@ -55,11 +55,14 @@ const ContextMenu = ({
   );
 
   const addColumnsMenuItem = () => {
-    const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
+    const columnsCount = calculateColumnCount({ columnIdxStart, columnIdxEnd });
     const hasZeroColumns = columnsCount === 0;
     const hasOneColumn = columnsCount === 1;
     const hasOneOrMoreColumns = columnsCount >= 1;
     if (hasZeroColumns) return;
+    if (hasZeroColumns) { 
+      console.log("hasZeroColumns")
+    }
     return (
       <MenuItem
         icon={iconAdd}
@@ -149,7 +152,7 @@ const ContextMenu = ({
   };
 
   return (
-    <ContextMenuStyled left={left} onContextMenu={() => {}} top={top}>
+    <ContextMenuStyled left={left} onContextMenu={() => { }} top={top}>
       {addColumnsMenuItem()}
       {addRowsMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}
