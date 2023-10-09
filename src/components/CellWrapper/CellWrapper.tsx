@@ -11,6 +11,7 @@ interface CellWrapperProps {
   onDragLeave?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onMouseOver?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
@@ -25,6 +26,7 @@ const CellWrapper = ({
   onDragLeave,
   onDragOver,
   onDrop,
+  onFocus,
   onMouseOver,
 }: CellWrapperProps) => {
   return (
@@ -39,6 +41,7 @@ const CellWrapper = ({
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}
       onDrop={onDrop}
+      onFocus={onFocus}
       onMouseOver={onMouseOver}
     >
       {children}

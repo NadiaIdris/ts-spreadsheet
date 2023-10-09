@@ -29,8 +29,8 @@ interface ContextMenuProps {
     rowIdxStart,
     rowsCount,
   }: RowsToDelete) => void;
-  selectionStartCell: SelectedCells[ "selectionStartCell" ];
-  selectionEndCell: SelectedCells[ "selectionEndCell" ];
+  selectionStartCell: SelectedCells["selectionStartCell"];
+  selectionEndCell: SelectedCells["selectionEndCell"];
   left: number;
   top: number;
 }
@@ -60,13 +60,14 @@ const ContextMenu = ({
     const hasOneColumn = columnsCount === 1;
     const hasOneOrMoreColumns = columnsCount >= 1;
     if (hasZeroColumns) return;
-    if (hasZeroColumns) { 
-      console.log("hasZeroColumns")
-    }
+
     return (
       <MenuItem
         icon={iconAdd}
-        onClick={() => addColumns({ columnIdx: columnIdxStart, columnsCount })}
+        onClick={() => {
+          console.log("<MenuItem> onClick (addColumns)");
+          addColumns({ columnIdx: columnIdxStart, columnsCount });
+        }}
       >
         {hasOneOrMoreColumns && (
           <ContextMenuItemTextStyled>
@@ -152,7 +153,11 @@ const ContextMenu = ({
   };
 
   return (
-    <ContextMenuStyled left={left} onContextMenu={() => { }} top={top}>
+    <ContextMenuStyled
+      left={left}
+      onContextMenu={(event: React.MouseEvent) => event?.preventDefault()}
+      top={top}
+    >
       {addColumnsMenuItem()}
       {addRowsMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}
