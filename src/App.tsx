@@ -7,8 +7,8 @@ export interface IContextMenu {
   isContextMenuOpen: boolean;
   locationX: number;
   locationY: number;
-  rowIdx: number;
-  columnIdx: number;
+  // rowIdx: number;
+  // columnIdx: number;
 }
 
 function App() {
@@ -19,8 +19,6 @@ function App() {
     isContextMenuOpen: false,
     locationX: 0,
     locationY: 0,
-    rowIdx: 0,
-    columnIdx: 0,
   });
 
   const handleHeadingChange = (e: React.ChangeEvent<HTMLInputElement>) => {

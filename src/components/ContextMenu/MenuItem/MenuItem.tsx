@@ -14,13 +14,7 @@ const MenuItem = ({
   onClick,
 }: MenuItemProps) => {
   return (
-    /* onContextMenu prop is here to stop operating system context menu from appearing when user right clicks on MenuItem component. */
-    <MenuItemStyled
-      onClick={onClick}
-      // onContextMenu={(event: React.MouseEvent) => {
-      //   event?.preventDefault();
-      // }}
-    >
+    <MenuItemStyled onClick={onClick}>
       <div style={{ marginRight: iconMarginRight }}>{icon}</div>
       {children}
     </MenuItemStyled>

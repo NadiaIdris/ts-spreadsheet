@@ -4,7 +4,7 @@ import { ICellData } from "./../Spreadsheet";
 
 interface ICell {
   cellData: ICellData;
-  onBlur: () => void;
+  onBlur: (event: React.FocusEvent) => void;
   onChange: (newValue: string) => void;
   onClick: (event: React.MouseEvent) => void;
   onContextMenu: (event: React.MouseEvent) => void;
@@ -18,7 +18,7 @@ interface ICell {
   onDragLeave?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragOver?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
-  onFocus: () => void;
+  onFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onMouseDown: (event: React.MouseEvent) => void;
   onMouseMove: () => void;
