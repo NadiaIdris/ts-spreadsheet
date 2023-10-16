@@ -284,6 +284,8 @@ const Spreadsheet = ({
       locationX: event.clientX,
       locationY: event.clientY,
     });
+    // Add focus to the cell where the dragging started.
+    moveFocusTo(selectedCells.selectionStartCell.columnIdx!, selectedCells.selectionStartCell.rowIdx!);
     setIsSelecting(false);
   };
 
@@ -536,6 +538,7 @@ const Spreadsheet = ({
     event: React.MouseEvent;
   }) => {
     event.preventDefault();
+
     // If the current cell is already selected, then don't update the selectedCells state.
     const currentCell = { rowIdx, columnIdx };
     setIsSelecting(true);
@@ -1185,6 +1188,7 @@ const Spreadsheet = ({
                       handleCellWrapperDragEnd({ rowIdx, columnIdx, event })
                     }
                     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
+                      console.log("<CellWrapper> onDragStart called");
                       handleCellWrapperDragStart({ rowIdx, columnIdx, event });
                     }}
                     /* Do not remove onDragOver. We need it. */
@@ -1194,20 +1198,13 @@ const Spreadsheet = ({
                     onDrop={(event) => {
                       handleCellWrapperDrop({ rowIdx, columnIdx, event });
                     }}
-                    // onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
+                    // onMouseDown={(event: React.MouseEvent) => {
                     //   console.log(
-                    //     "<CellWrapper> %conFocus called",
-                    //     "color:green"
+                    //     "<CellWrapper> %conMouseDown called",
+                    //     "color: orange"
                     //   );
-                    //   handleCellFocus({ rowIdx, columnIdx, event });
+                    //   handleOnMouseDown({ rowIdx, columnIdx, event });
                     // }}
-                    onMouseDown={(event: React.MouseEvent) => {
-                      console.log(
-                        "<CellWrapper> %conMouseDown called",
-                        "color: orange"
-                      );
-                      handleOnMouseDown({ rowIdx, columnIdx, event });
-                    }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) {
                         return;
