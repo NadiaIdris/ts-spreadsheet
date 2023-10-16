@@ -164,7 +164,7 @@ const ContextMenu = ({
   return (
     <ContextMenuStyled
       left={left}
-      onContextMenu={(event: React.MouseEvent) => event?.preventDefault()}
+      onContextMenu={(event: React.MouseEvent) => event.preventDefault()}
       top={top}
     >
       {addColumnsMenuItem()}

@@ -242,38 +242,29 @@ const Spreadsheet = ({
     rowIdx: number;
     columnIdx: number;
     event: React.MouseEvent;
-  }) => {
-    if (event.type === "contextmenu") {
-      console.log("contextMenu got called in side onClick of cell");
-      // If the current cell is already selected, then don't update the selectedCells state.
-      const currentCell = { rowIdx, columnIdx };
-      if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-        console.log("current cell is already selected");
-        return;
-      }
-    } else if (event.type === "click") {
-      // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
-      const spreadSheetCopy = [...spreadsheetState];
-      const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
-        const newRow = row.map((column, colI) => {
-          if (rowI === rowIdx && colI === columnIdx) {
-            return { ...column, isFocused: true };
-          }
-          return { ...column, isFocused: false };
-        });
-        return newRow;
+    }) => {
+    event.stopPropagation();
+    // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
+    const spreadSheetCopy = [...spreadsheetState];
+    const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
+      const newRow = row.map((column, colI) => {
+        if (rowI === rowIdx && colI === columnIdx) {
+          return { ...column, isFocused: true };
+        }
+        return { ...column, isFocused: false };
       });
-      handleDBUpdate(newSpreadSheetState);
-      setSpreadsheetState(newSpreadSheetState);
-      moveFocusTo(columnIdx, rowIdx);
-      const currentCell = { rowIdx, columnIdx };
-      setSelectedCells({
-        previousCell: currentCell,
-        selectionStartCell: currentCell,
-        selectionEndCell: currentCell,
-        allSelectedCells: [currentCell],
-      });
-    }
+      return newRow;
+    });
+    handleDBUpdate(newSpreadSheetState);
+    setSpreadsheetState(newSpreadSheetState);
+    moveFocusTo(columnIdx, rowIdx);
+    const currentCell = { rowIdx, columnIdx };
+    setSelectedCells({
+      previousCell: currentCell,
+      selectionStartCell: currentCell,
+      selectionEndCell: currentCell,
+      allSelectedCells: [currentCell],
+    });
   };
 
   const handleCellOnContextMenu = ({ event }: { event: React.MouseEvent }) => {
@@ -285,7 +276,10 @@ const Spreadsheet = ({
       locationY: event.clientY,
     });
     // Add focus to the cell where the dragging started.
-    moveFocusTo(selectedCells.selectionStartCell.columnIdx!, selectedCells.selectionStartCell.rowIdx!);
+    moveFocusTo(
+      selectedCells.selectionStartCell.columnIdx!,
+      selectedCells.selectionStartCell.rowIdx!
+    );
     setIsSelecting(false);
   };
 
@@ -370,6 +364,13 @@ const Spreadsheet = ({
       cellUpdate: { isEditing: false, isFocused: true, value: data },
     });
     moveFocusTo(columnIdx, rowIdx);
+    const currentCell = { rowIdx, columnIdx };
+    setSelectedCells({
+      previousCell: currentCell,
+      selectionStartCell: currentCell,
+      selectionEndCell: currentCell,
+      allSelectedCells: [currentCell],
+    });
   };
 
   // Update the whole spreadsheet in the database.
@@ -544,17 +545,12 @@ const Spreadsheet = ({
     setIsSelecting(true);
 
     if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-      console.log("current cell is already selected");
+      console.log(" OnMouseDown current cell is already selected");
       return;
     }
 
     moveFocusTo(columnIdx, rowIdx);
 
-    // If the current cell is already selected, then don't update the selectedCells state.
-    if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-      console.log("current cell is already selected");
-      return;
-    }
     setSelectedCells({
       previousCell: currentCell,
       selectionStartCell: currentCell,
@@ -1278,24 +1274,24 @@ const Spreadsheet = ({
                         // console.log("<Cell> onMouseMove called");
                         handleMouseMove({ rowIdx, columnIdx });
                       }}
-                      onMouseOver={(
-                        event: React.MouseEvent<HTMLInputElement>
-                      ) => {
-                        // handleOnMouseOver(columnIdx, event, rowIdx);
-                      }}
-                      onMouseUp={(
-                        event: React.MouseEvent<HTMLInputElement>
-                      ) => {
-                        console.log(
-                          "<Cell> %conMouseUp called",
-                          "color: purple"
-                        );
-                        handleOnMouseUp({ rowIdx, columnIdx });
-                      }}
-                      onPaste={() => {
-                        console.log("<Cell> onPaste called");
-                        handleOnPaste(columnIdx, rowIdx);
-                      }}
+                      // onMouseOver={(
+                      //   event: React.MouseEvent<HTMLInputElement>
+                      // ) => {
+                      //   // handleOnMouseOver(columnIdx, event, rowIdx);
+                      // }}
+                      // onMouseUp={(
+                      //   event: React.MouseEvent<HTMLInputElement>
+                      // ) => {
+                      //   console.log(
+                      //     "<Cell> %conMouseUp called",
+                      //     "color: purple"
+                      //   );
+                      //   handleOnMouseUp({ rowIdx, columnIdx });
+                      // }}
+                      // onPaste={() => {
+                      //   console.log("<Cell> onPaste called");
+                      //   handleOnPaste(columnIdx, rowIdx);
+                      // }}
                       ref={(element: HTMLInputElement) =>
                         handleAddRef(element, columnIdx, rowIdx)
                       }

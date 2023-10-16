@@ -4,12 +4,12 @@ import { ICellData } from "./../Spreadsheet";
 
 interface ICell {
   cellData: ICellData;
-  onChange: (newValue: string) => void;
-  onClick: (event: React.MouseEvent) => void;
-  onContextMenu: (event: React.MouseEvent) => void;
-  onCopy: () => void;
-  onCut: () => void;
-  onDoubleClick: () => void;
+  onChange?: (newValue: string) => void;
+  onClick?: (event: React.MouseEvent) => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
+  onCopy?: () => void;
+  onCut?: () => void;
+  onDoubleClick?: () => void;
   onDrag?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragEnd?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDragStart?: (event: React.DragEvent<HTMLInputElement>) => void;
@@ -18,12 +18,12 @@ interface ICell {
   onDragOver?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onMouseDown: (event: React.MouseEvent) => void;
-  onMouseMove: () => void;
-  onMouseOver: (event: React.MouseEvent<HTMLInputElement>) => void;
-  onMouseUp: (event: React.MouseEvent<HTMLInputElement>) => void;
-  onPaste: () => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onMouseDown?: (event: React.MouseEvent) => void;
+  onMouseMove?: () => void;
+  onMouseOver?: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onMouseUp?: (event: React.MouseEvent<HTMLInputElement>) => void;
+  onPaste?: () => void;
 }
 
 const Cell = forwardRef(
@@ -56,7 +56,7 @@ const Cell = forwardRef(
     const { rowIdx, columnIdx, isEditing, isFocused, isSelected, value } =
       cellData;
     const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(event.target.value);
+      // onChange(event.target.value);
     };
 
     return (
@@ -80,7 +80,7 @@ const Cell = forwardRef(
         onDrop={onDrop}
         onDragStart={onDragStart}
         onFocus={onFocus}
-        onKeyDown={(event: any) => onKeyDown(event)}
+        // onKeyDown={(event: any) => onKeyDown(event)}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseOver={onMouseOver}
