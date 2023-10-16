@@ -170,22 +170,22 @@ const Spreadsheet = ({
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
 
-    // If click target is not a cell, then clear the selectedCells state.
-    const spreadSheetRefCellKey = formatKeyOfSpreadsheetRefMap(
-      columnIdx,
-      rowIdx
-    );
+    // // If click target is not a cell, then clear the selectedCells state.
+    // const spreadSheetRefCellKey = formatKeyOfSpreadsheetRefMap(
+    //   columnIdx,
+    //   rowIdx
+    // );
 
-    if (contextMenu.isContextMenuOpen) {
-      return;
-    }
+    // if (contextMenu.isContextMenuOpen) {
+    //   return;
+    // }
 
-    setSelectedCells({
-      previousCell: { rowIdx: null, columnIdx: null },
-      selectionStartCell: { rowIdx: null, columnIdx: null },
-      selectionEndCell: { rowIdx: null, columnIdx: null },
-      allSelectedCells: [],
-    });
+    // setSelectedCells({
+    //   previousCell: { rowIdx: null, columnIdx: null },
+    //   selectionStartCell: { rowIdx: null, columnIdx: null },
+    //   selectionEndCell: { rowIdx: null, columnIdx: null },
+    //   allSelectedCells: [],
+    // });
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -243,53 +243,46 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.MouseEvent;
   }) => {
-    // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
-    const spreadSheetCopy = [...spreadsheetState];
-    const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
-      const newRow = row.map((column, colI) => {
-        if (rowI === rowIdx && colI === columnIdx) {
-          return { ...column, isFocused: true };
-        }
-        return { ...column, isFocused: false };
+    if (event.type === "contextmenu") {
+      console.log("contextMenu got called in side onClick of cell");
+      // If the current cell is already selected, then don't update the selectedCells state.
+      const currentCell = { rowIdx, columnIdx };
+      if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
+        console.log("current cell is already selected");
+        return;
+      }
+    } else if (event.type === "click") {
+      // Update spreadsheet state: the cell selected is set to true, the rest of the cells selected value will be false.
+      const spreadSheetCopy = [...spreadsheetState];
+      const newSpreadSheetState = spreadSheetCopy.map((row, rowI) => {
+        const newRow = row.map((column, colI) => {
+          if (rowI === rowIdx && colI === columnIdx) {
+            return { ...column, isFocused: true };
+          }
+          return { ...column, isFocused: false };
+        });
+        return newRow;
       });
-      return newRow;
-    });
-    handleDBUpdate(newSpreadSheetState);
-    setSpreadsheetState(newSpreadSheetState);
-    moveFocusTo(columnIdx, rowIdx);
-    const currentCell = { rowIdx, columnIdx };
-    setSelectedCells({
-      previousCell: currentCell,
-      selectionStartCell: currentCell,
-      selectionEndCell: currentCell,
-      allSelectedCells: [currentCell],
-    });
+      handleDBUpdate(newSpreadSheetState);
+      setSpreadsheetState(newSpreadSheetState);
+      moveFocusTo(columnIdx, rowIdx);
+      const currentCell = { rowIdx, columnIdx };
+      setSelectedCells({
+        previousCell: currentCell,
+        selectionStartCell: currentCell,
+        selectionEndCell: currentCell,
+        allSelectedCells: [currentCell],
+      });
+    }
   };
 
-  const handleCellOnContextMenu = ({
-    rowIdx,
-    columnIdx,
-    event,
-  }: {
-    rowIdx: number;
-    columnIdx: number;
-    event: React.MouseEvent;
-  }) => {
+  const handleCellOnContextMenu = ({ event }: { event: React.MouseEvent }) => {
     event.preventDefault();
     event.stopPropagation();
-    const currentCell = { rowIdx, columnIdx };
-
     setContextMenu({
       isContextMenuOpen: true,
       locationX: event.clientX,
       locationY: event.clientY,
-    });
-
-    setSelectedCells({
-      previousCell: currentCell,
-      selectionStartCell: currentCell,
-      selectionEndCell: currentCell,
-      allSelectedCells: [currentCell],
     });
     setIsSelecting(false);
   };
@@ -543,9 +536,17 @@ const Spreadsheet = ({
     event: React.MouseEvent;
   }) => {
     event.preventDefault();
-    moveFocusTo(columnIdx, rowIdx);
-    setIsSelecting(true);
+    // If the current cell is already selected, then don't update the selectedCells state.
     const currentCell = { rowIdx, columnIdx };
+    setIsSelecting(true);
+
+    if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
+      console.log("current cell is already selected");
+      return;
+    }
+
+    moveFocusTo(columnIdx, rowIdx);
+
     // If the current cell is already selected, then don't update the selectedCells state.
     if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
       console.log("current cell is already selected");
@@ -851,9 +852,11 @@ const Spreadsheet = ({
       if (
         cell.rowIdx === previousCell.rowIdx &&
         cell.columnIdx === previousCell.columnIdx
-      )
+      ) {
         return;
+      }
 
+      console.log("<Cell> %conMouseMove called", "color: red;");
       // Determine the cells that are currently selected.
       const selectedCells: SelectedCell[] = [];
 
@@ -1171,9 +1174,7 @@ const Spreadsheet = ({
                       );
                       handleCellClick({ rowIdx, columnIdx, event });
                     }}
-                    onContextMenu={(
-                      event: React.MouseEvent<HTMLDivElement>
-                    ) => {
+                    onContextMenu={(event: React.MouseEvent) => {
                       console.log(
                         "<CellWrapper> %conContextMenu called",
                         "color: #0084c8"
@@ -1193,12 +1194,19 @@ const Spreadsheet = ({
                     onDrop={(event) => {
                       handleCellWrapperDrop({ rowIdx, columnIdx, event });
                     }}
-                    onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
+                    // onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
+                    //   console.log(
+                    //     "<CellWrapper> %conFocus called",
+                    //     "color:green"
+                    //   );
+                    //   handleCellFocus({ rowIdx, columnIdx, event });
+                    // }}
+                    onMouseDown={(event: React.MouseEvent) => {
                       console.log(
-                        "<CellWrapper> %conFocus called",
-                        "color:green"
+                        "<CellWrapper> %conMouseDown called",
+                        "color: orange"
                       );
-                      handleCellFocus({ rowIdx, columnIdx, event });
+                      handleOnMouseDown({ rowIdx, columnIdx, event });
                     }}
                     onMouseOver={(event: any) => {
                       if (event.target !== event.currentTarget) {
@@ -1219,10 +1227,10 @@ const Spreadsheet = ({
                         value: column.value,
                       }}
                       key={`cell-${rowIdx}/${columnIdx}`}
-                      onBlur={(event: React.FocusEvent) => {
-                        console.log("<Cell> %conBlur called", "color: red");
-                        handleCellBlur({ rowIdx, columnIdx, event });
-                      }}
+                      // onBlur={(event: React.FocusEvent) => {
+                      //   console.log("<Cell> %conBlur called", "color: red");
+                      //   handleCellBlur({ rowIdx, columnIdx, event });
+                      // }}
                       onChange={(newValue) => {
                         console.log("<Cell> onChange called");
                         handleCellValueChange({ rowIdx, columnIdx, newValue });
@@ -1236,7 +1244,7 @@ const Spreadsheet = ({
                           "<Cell> %conContextMenu called",
                           "color: #0084c8"
                         );
-                        handleCellOnContextMenu({ rowIdx, columnIdx, event });
+                        handleCellOnContextMenu({ event });
                       }}
                       onCopy={() => {
                         console.log("<Cell> onCopy called");
@@ -1255,10 +1263,6 @@ const Spreadsheet = ({
                         // Set the input prop "draggable={true}" in Cell and prevent default in onDragStart event.
                         // More info here: https://stackoverflow.com/a/44049369/10029397
                         event.preventDefault();
-                      }}
-                      onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
-                        console.log("<Cell> %conFocus called", "color: green");
-                        handleCellFocus({ rowIdx, columnIdx, event });
                       }}
                       onKeyDown={(
                         event: React.KeyboardEvent<HTMLInputElement>
