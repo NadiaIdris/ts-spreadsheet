@@ -45,14 +45,23 @@ const ContextMenu = ({
   left,
   top,
 }: ContextMenuProps) => {
-  const { columnIdx: columnIdxStart, rowIdx: rowIdxStart } = selectionStartCell;
-  const { columnIdx: columnIdxEnd, rowIdx: rowIdxEnd } = selectionEndCell;
+  let { columnIdx: columnIdxStart, rowIdx: rowIdxStart } = selectionStartCell;
+  let { columnIdx: columnIdxEnd, rowIdx: rowIdxEnd } = selectionEndCell;
   const iconAdd = (
     <IconAdd color="#1d2c37" height={10} width={10} title="plus-icon" />
   );
   const iconDelete = (
     <IconDelete color="#1d2c37" height={10} width={10} title="delete-icon" />
   );
+
+  // If columnIdxStart is larger than columnIdxEnd, then swap the values.
+  if (columnIdxStart! > columnIdxEnd!) {
+    [columnIdxStart, columnIdxEnd] = [columnIdxEnd, columnIdxStart];
+  }
+  if (rowIdxStart! > rowIdxEnd!) {
+    [rowIdxStart, rowIdxEnd] = [rowIdxEnd, rowIdxStart];
+  }
+
 
   const addColumnsMenuItem = () => {
     const columnsCount = calculateColumnCount({ columnIdxStart, columnIdxEnd });
@@ -79,7 +88,7 @@ const ContextMenu = ({
   };
 
   const addRowsMenuItem = () => {
-    const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
+    const rowsCount = calculateRowCount({ rowIdxStart, rowIdxEnd });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
     if (zeroRowsSelected) return;
@@ -96,7 +105,7 @@ const ContextMenu = ({
   };
 
   const deleteColumnsMenuItem = () => {
-    const columnsCount = calculateColumnCount({ columnIdxEnd, columnIdxStart });
+    const columnsCount = calculateColumnCount({ columnIdxStart, columnIdxEnd });
     const zeroColumnsSelected = columnsCount === 0;
     const oneColumnSelected = columnsCount === 1;
     if (zeroColumnsSelected) return;
@@ -119,7 +128,7 @@ const ContextMenu = ({
   };
 
   const deleteRowsMenuItem = () => {
-    const rowsCount = calculateRowCount({ rowIdxEnd, rowIdxStart });
+    const rowsCount = calculateRowCount({ rowIdxStart, rowIdxEnd });
     const zeroRowsSelected = rowsCount === 0;
     const oneRowSelected = rowsCount === 1;
     if (zeroRowsSelected) return;
