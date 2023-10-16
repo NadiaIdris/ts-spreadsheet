@@ -1179,7 +1179,7 @@ const Spreadsheet = ({
                         "<CellWrapper> %conContextMenu called",
                         "color: #0084c8"
                       );
-                      handleCellOnContextMenu({ rowIdx, columnIdx, event });
+                      handleCellOnContextMenu({ event });
                     }}
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
                       handleCellWrapperDragEnd({ rowIdx, columnIdx, event })
