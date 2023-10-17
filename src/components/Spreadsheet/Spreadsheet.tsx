@@ -172,15 +172,7 @@ const Spreadsheet = ({
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
 
-    // TODO: this is an id. Should I hard code it into ContextMenu component?
-    const contextMenuContainer = document.getElementById("cell-context-menu");
-    if (contextMenuContainer) {
-      // console.log(
-      //   "%cClick happened within the context menu container, so return early",
-      //   "color: lightpurple"
-      // );
-      return;
-    }
+    if (contextMenu.isContextMenuOpen) return;
 
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
@@ -188,7 +180,6 @@ const Spreadsheet = ({
       selectionEndCell: { rowIdx: null, columnIdx: null },
       allSelectedCells: [],
     });
-
   };
 
   // When "Tab" key is pressed, next cell gets focus an handleCellFocus is called.
@@ -413,6 +404,12 @@ const Spreadsheet = ({
     }
   };
 
+  const closeContextMenu = () => {
+    if (contextMenu.isContextMenuOpen) {
+      setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    }
+  };
+
   const handleKeyDown = (
     columnIdx: number,
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -420,12 +417,6 @@ const Spreadsheet = ({
   ) => {
     console.log("onKeyDown got called");
     const currentCell = spreadsheetState[rowIdx][columnIdx];
-
-    const closeContextMenu = () => {
-      if (contextMenu.isContextMenuOpen) {
-        setContextMenu({ ...contextMenu, isContextMenuOpen: false });
-      }
-    };
 
     // Keep ctrlKey combinations at the top.
     if (event.ctrlKey && event.key === "c") {
@@ -562,7 +553,7 @@ const Spreadsheet = ({
   }) => {
     event.stopPropagation();
     // Close contextMenu
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    closeContextMenu();
 
     // If the current cell is already selected, then don't update the selectedCells state.
     const currentCell = { rowIdx, columnIdx };
@@ -1026,7 +1017,7 @@ const Spreadsheet = ({
     });
     setSpreadsheetState(newSpreadSheetState);
     handleDBUpdate(newSpreadSheetState);
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
       selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -1055,7 +1046,7 @@ const Spreadsheet = ({
     });
     setSpreadsheetState(newSpreadSheetState);
     handleDBUpdate(newSpreadSheetState);
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
       selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -1099,7 +1090,7 @@ const Spreadsheet = ({
     ];
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
       selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -1126,7 +1117,7 @@ const Spreadsheet = ({
     const newSpreadsheet = [...firstChunkOfRows, ...endChunkOfRows];
     setSpreadsheetState(newSpreadsheet);
     handleDBUpdate(newSpreadsheet);
-    setContextMenu({ ...contextMenu, isContextMenuOpen: false });
+    closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
       selectionStartCell: { rowIdx: null, columnIdx: null },
