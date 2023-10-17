@@ -101,7 +101,7 @@ export default Cell;
 export type { ICell };
 
 const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
-  background-color: ${(props) => (props.isSelected ? "blue" : "")};
+  background-color: ${(props) => (props.isSelected ? "#630DA7" : "")};
   border: 1px solid transparent;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
@@ -114,5 +114,10 @@ const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
 
   &:hover {
     cursor: default;
+  }
+
+  ::selection {
+    background-color: orange;
+    color: white;
   }
 `;
