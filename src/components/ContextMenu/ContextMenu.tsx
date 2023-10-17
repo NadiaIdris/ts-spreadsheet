@@ -17,6 +17,7 @@ import {
 import MenuItem from "./MenuItem";
 
 interface ContextMenuProps {
+  id: string;
   addColumns: ({ columnIdx, columnsCount }: ColumnsToAdd) => void;
   addRows: ({ rowIdx, rowsCount }: RowsToAdd) => void;
   deleteSelectedColumns: ({
@@ -36,6 +37,7 @@ interface ContextMenuProps {
 }
 
 const ContextMenu = ({
+  id,
   addColumns,
   addRows,
   deleteSelectedColumns,
@@ -163,6 +165,7 @@ const ContextMenu = ({
 
   return (
     <ContextMenuStyled
+      id={id}
       left={left}
       onContextMenu={(event: React.MouseEvent) => event.preventDefault()}
       top={top}

@@ -7,8 +7,6 @@ export interface IContextMenu {
   isContextMenuOpen: boolean;
   locationX: number;
   locationY: number;
-  // rowIdx: number;
-  // columnIdx: number;
 }
 
 function App() {

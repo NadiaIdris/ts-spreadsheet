@@ -4,7 +4,8 @@ import { ICellData } from "./../Spreadsheet";
 
 interface ICell {
   cellData: ICellData;
-  onChange?: (newValue: string) => void;
+  onBlur?: (event: React.FocusEvent) => void;
+  onChange: (newValue: string) => void;
   onClick?: (event: React.MouseEvent) => void;
   onContextMenu?: (event: React.MouseEvent) => void;
   onCopy?: () => void;
@@ -18,7 +19,7 @@ interface ICell {
   onDragOver?: (event: React.DragEvent<HTMLInputElement>) => void;
   onDrop?: (event: React.DragEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onMouseDown?: (event: React.MouseEvent) => void;
   onMouseMove?: () => void;
   onMouseOver?: (event: React.MouseEvent<HTMLInputElement>) => void;
@@ -30,6 +31,7 @@ const Cell = forwardRef(
   (
     {
       cellData,
+      onBlur,
       onChange,
       onClick,
       onContextMenu,
@@ -56,7 +58,7 @@ const Cell = forwardRef(
     const { rowIdx, columnIdx, isEditing, isFocused, isSelected, value } =
       cellData;
     const onChangeHander = (event: React.ChangeEvent<HTMLInputElement>) => {
-      // onChange(event.target.value);
+      onChange(event.target.value);
     };
 
     return (
@@ -66,6 +68,7 @@ const Cell = forwardRef(
         draggable={true}
         isFocused={isFocused}
         isSelected={isSelected}
+        onBlur={onBlur}
         onChange={onChangeHander}
         onClick={onClick}
         onContextMenu={onContextMenu}
@@ -80,7 +83,7 @@ const Cell = forwardRef(
         onDrop={onDrop}
         onDragStart={onDragStart}
         onFocus={onFocus}
-        // onKeyDown={(event: any) => onKeyDown(event)}
+        onKeyDown={(event: any) => onKeyDown(event)}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseOver={onMouseOver}
