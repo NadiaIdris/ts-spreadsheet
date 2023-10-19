@@ -583,6 +583,7 @@ const Spreadsheet = ({
     });
   };
 
+  // Below is more perfomant section algorithm.
   /** Learn more about selection mental model from README.md. */
   // const handleOnMouseOver = (
   //   columnIdx: number,
@@ -868,73 +869,74 @@ const Spreadsheet = ({
   //   }
   // };
 
-  function handleMouseMove(cell: SelectedCell) {
+  function handleMouseMove(currentCell: SelectedCell) {
     const { selectionStartCell, previousCell } = selectedCells;
     if (isSelecting) {
-      // Do an early return if we are still on current cell.
       if (
-        cell.rowIdx === previousCell.rowIdx &&
-        cell.columnIdx === previousCell.columnIdx
+        currentCell.rowIdx === previousCell.rowIdx &&
+        currentCell.columnIdx === previousCell.columnIdx
       ) {
         return;
       }
 
-      console.log("<Cell> %conMouseMove called", "color: red;");
-      // Determine the cells that are currently selected.
       const selectedCells: SelectedCell[] = [];
 
-      // TODO: add if statements to make sure all the for loops don't run all the time.
-      // Moving downwards and/or rightwards.
-      for (let row = selectionStartCell.rowIdx; row! <= cell.rowIdx!; row!++) {
-        // console.log("Moving downwards and/or rightwards.");
+      if (currentCell.rowIdx! >= selectionStartCell.rowIdx!) {
         for (
-          let col = selectionStartCell.columnIdx;
-          col! <= cell.columnIdx!;
-          col!++
+          let rowIdx = selectionStartCell.rowIdx!;
+          currentCell.rowIdx! >= rowIdx!;
+          rowIdx!++
         ) {
-          selectedCells.push({ rowIdx: row, columnIdx: col });
-        }
-      }
-
-      // Moving downwards and/or leftwards.
-      for (let row = selectionStartCell.rowIdx; row! <= cell.rowIdx!; row!++) {
-        // console.log("Moving downwards and/or leftwards.");
-        for (
-          let col = selectionStartCell.columnIdx;
-          col! >= cell.columnIdx!;
-          col!--
-        ) {
-          selectedCells.push({ rowIdx: row, columnIdx: col });
-        }
-      }
-
-      // Moving upwards (column) and/or leftwards (row).
-      for (let row = selectionStartCell.rowIdx; row! >= cell.rowIdx!; row!--) {
-        if (selectionStartCell.columnIdx! >= cell.columnIdx!) {
-          // console.log("Moving row left");
-          for (
-            let col = selectionStartCell.columnIdx;
-            col! >= cell.columnIdx!;
-            col!--
-          ) {
-            selectedCells.push({ rowIdx: row, columnIdx: col });
+          if (currentCell.columnIdx! >= selectionStartCell.columnIdx!) {
+            for (
+              let columnIdx = selectionStartCell.columnIdx;
+              currentCell.columnIdx! >= columnIdx!;
+              columnIdx!++
+            ) {
+              selectedCells.push({ rowIdx, columnIdx });
+            }
+          } else if (currentCell.columnIdx! <= selectionStartCell.columnIdx!) {
+            for (
+              let columnIdx = selectionStartCell.columnIdx;
+              currentCell.columnIdx! <= columnIdx!;
+              columnIdx!--
+            ) {
+              selectedCells.push({ rowIdx, columnIdx });
+            }
           }
-        } else if (selectionStartCell.columnIdx! <= cell.columnIdx!) {
-          // console.log("Moving row right");
-          for (
-            let col = selectionStartCell.columnIdx;
-            col! <= cell.columnIdx!;
-            col!++
-          ) {
-            selectedCells.push({ rowIdx: row, columnIdx: col });
+        }
+      }
+
+      if (currentCell.rowIdx! < selectionStartCell.rowIdx!) {
+        for (
+          let rowIdx = selectionStartCell.rowIdx;
+          currentCell.rowIdx! <= rowIdx!;
+          rowIdx!--
+        ) {
+          if (currentCell.columnIdx! >= selectionStartCell.columnIdx!) {
+            for (
+              let columnIdx = selectionStartCell.columnIdx;
+              currentCell.columnIdx! >= columnIdx!;
+              columnIdx!++
+            ) {
+              selectedCells.push({ rowIdx, columnIdx });
+            }
+          } else if (currentCell.columnIdx! <= selectionStartCell.columnIdx!) {
+            for (
+              let columnIdx = selectionStartCell.columnIdx;
+              currentCell.columnIdx! <= columnIdx!;
+              columnIdx!--
+            ) {
+              selectedCells.push({ rowIdx, columnIdx });
+            }
           }
         }
       }
 
       setSelectedCells({
-        previousCell: cell,
+        previousCell: currentCell,
         selectionStartCell,
-        selectionEndCell: cell,
+        selectionEndCell: currentCell,
         allSelectedCells: selectedCells,
       });
     }
