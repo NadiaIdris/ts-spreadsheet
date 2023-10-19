@@ -118,6 +118,6 @@ const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
 
   ::selection {
     background-color: orange;
-    color: white;
+    color: purple;
   }
 `;
