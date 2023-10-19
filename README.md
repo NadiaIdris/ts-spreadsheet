@@ -121,9 +121,8 @@ Then use CSS to style the svg element.
 
 ## Select/multi-select cells
 
-- First we check direction: if the user selected up, down, right or left.
-- Then we check selection/unselection: if user is in the process of selecting or unselecting cells.
-- Then we check how many cells were selected/unselected: if the user selected a range of cells or just one cell.
+- First we check direction: if the user selected a cell in the same row as `selectionStartCell.rowIdx` or cell in a row down from `selectionStartCell.rowIdx`. If yes, then in that row add all the columns from `selectionStartCell.columnIdx` to `currentCell.columnIdx` to `selectedCells` array. 
+- If the user selected a cell in a row above `selectionStartCell.rowIdx`, then loop over all the rows from `selectionStartCell.rowIdx` to `currentCell.rowIdx` and add all the columns from `selectionStartCell.columnIdx` to `currentCell.columnIdx` to `selectedCells` array.
 
 ### Selection data structure
 

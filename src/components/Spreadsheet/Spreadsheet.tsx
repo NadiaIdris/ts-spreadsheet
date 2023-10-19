@@ -881,12 +881,15 @@ const Spreadsheet = ({
 
       const selectedCells: SelectedCell[] = [];
 
+      // If on the same row or moved down a row.
       if (currentCell.rowIdx! >= selectionStartCell.rowIdx!) {
+        // Start looping over the row.
         for (
           let rowIdx = selectionStartCell.rowIdx!;
           currentCell.rowIdx! >= rowIdx!;
           rowIdx!++
         ) {
+          // If moved right or on the same column as selectionStartCell.
           if (currentCell.columnIdx! >= selectionStartCell.columnIdx!) {
             for (
               let columnIdx = selectionStartCell.columnIdx;
@@ -895,7 +898,9 @@ const Spreadsheet = ({
             ) {
               selectedCells.push({ rowIdx, columnIdx });
             }
-          } else if (currentCell.columnIdx! <= selectionStartCell.columnIdx!) {
+          }
+          // If moved left.
+          else if (currentCell.columnIdx! < selectionStartCell.columnIdx!) {
             for (
               let columnIdx = selectionStartCell.columnIdx;
               currentCell.columnIdx! <= columnIdx!;
@@ -907,12 +912,14 @@ const Spreadsheet = ({
         }
       }
 
+      // If moved up a row.
       if (currentCell.rowIdx! < selectionStartCell.rowIdx!) {
         for (
           let rowIdx = selectionStartCell.rowIdx;
           currentCell.rowIdx! <= rowIdx!;
           rowIdx!--
         ) {
+          // If moved right or on the same column as selectionStartCell.
           if (currentCell.columnIdx! >= selectionStartCell.columnIdx!) {
             for (
               let columnIdx = selectionStartCell.columnIdx;
@@ -921,7 +928,9 @@ const Spreadsheet = ({
             ) {
               selectedCells.push({ rowIdx, columnIdx });
             }
-          } else if (currentCell.columnIdx! <= selectionStartCell.columnIdx!) {
+          }
+          // Moved left
+          else if (currentCell.columnIdx! < selectionStartCell.columnIdx!) {
             for (
               let columnIdx = selectionStartCell.columnIdx;
               currentCell.columnIdx! <= columnIdx!;
