@@ -431,13 +431,13 @@ const Spreadsheet = ({
     }
 
     if (event.ctrlKey && event.key === "x") {
-      handleOnCut(columnIdx, rowIdx);
+      handleOnCut({ rowIdx, columnIdx });
       closeContextMenu();
       return;
     }
 
     if (event.ctrlKey && event.key === "v") {
-      handleOnPaste(columnIdx, rowIdx);
+      handleOnPaste({ rowIdx, columnIdx });
       closeContextMenu();
       return;
     }
@@ -545,6 +545,16 @@ const Spreadsheet = ({
       moveFocusTo(columnIdx + 1, rowIdx);
       closeContextMenu();
     }
+
+    if (event.key === "Backspace") { 
+      event.preventDefault();
+      changeCellState({
+        rowIdx,
+        columnIdx,
+        cellUpdate: { isEditing: true, isFocused: true, value: "" },
+      });
+      closeContextMenu();
+    }
   };
 
   const handleOnMouseDown = ({
@@ -565,11 +575,6 @@ const Spreadsheet = ({
 
     if (event.button === 2) {
       // Right-click detected
-      console.log(
-        "%cContextMenu onMouseDown got called",
-        "color: #C3005E",
-        contextMenu
-      );
       setContextMenu({
         isContextMenuOpen: true,
         locationX: event.clientX,
@@ -1013,7 +1018,13 @@ const Spreadsheet = ({
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
-  const handleOnCut = async (columnIdx: number, rowIdx: number) => {
+  const handleOnCut = async ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     await navigator.clipboard.writeText(
       spreadsheetState[rowIdx][columnIdx].value!
     );
@@ -1024,7 +1035,13 @@ const Spreadsheet = ({
     });
   };
 
-  const handleOnPaste = (columnIdx: number, rowIdx: number) => {
+  const handleOnPaste = ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     // If isEditing is false, then paste the clipboard text to the cell.
     if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
       navigator.clipboard.readText().then((clipText) => {
@@ -1322,7 +1339,7 @@ const Spreadsheet = ({
                       }}
                       onCut={() => {
                         console.log("<Cell> onCut called");
-                        handleOnCut(columnIdx, rowIdx);
+                        handleOnCut({ rowIdx, columnIdx });
                       }}
                       onDoubleClick={() =>
                         handleDoubleClick({ rowIdx, columnIdx })
@@ -1367,7 +1384,7 @@ const Spreadsheet = ({
                       }}
                       onPaste={() => {
                         console.log("<Cell> onPaste called");
-                        handleOnPaste(columnIdx, rowIdx);
+                        handleOnPaste({ rowIdx, columnIdx });
                       }}
                       ref={(element: HTMLInputElement) =>
                         handleAddRef(element, columnIdx, rowIdx)
@@ -1393,6 +1410,8 @@ const Spreadsheet = ({
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}
                       onCopy={handleOnCopy}
+                      onCut={handleOnCut}
+                      onPaste={handleOnPaste}
                     />
                   )}
                 </>

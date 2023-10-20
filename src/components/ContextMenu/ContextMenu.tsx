@@ -2,6 +2,8 @@ import styled from "styled-components";
 import { ReactComponent as IconAdd } from "../../assets/icons/add.svg";
 import { ReactComponent as IconDelete } from "../../assets/icons/delete.svg";
 import { ReactComponent as IconCopy } from "../../assets/icons/copy.svg";
+import { ReactComponent as IconPaste } from "../../assets/icons/paste.svg";
+import { ReactComponent as IconCut } from "../../assets/icons/cut.svg";
 import {
   calculateColumnCount,
   calculateColumnRange,
@@ -42,6 +44,14 @@ interface ContextMenuProps {
     rowIdx: number;
     columnIdx: number;
   }) => void;
+  onCut: ({ rowIdx, columnIdx }: { rowIdx: number; columnIdx: number }) => void;
+  onPaste: ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => void;
 }
 
 const ContextMenu = ({
@@ -55,6 +65,8 @@ const ContextMenu = ({
   left,
   top,
   onCopy,
+  onCut,
+  onPaste,
 }: ContextMenuProps) => {
   console.log(
     "%ccontextmenu left -->",
@@ -71,7 +83,11 @@ const ContextMenu = ({
   const iconDelete = (
     <IconDelete color="#1d2c37" height={10} width={10} title="delete-icon" />
   );
-  const iconCopy = (<IconCopy color="#1d2c37" height={10} width={10} title="copy-icon" />);
+  const iconCopy = (
+    <IconCopy color="#1d2c37" height={10} width={10} title="copy-icon" />
+  );
+  const iconPaste = <IconPaste color="#1d2c37" height={10} width={10}  title="paste-icon"/>;
+  const iconCut = <IconCut color="#1d2c37" height={10} width={10} title="cut-icon"/>;
 
   // If columnIdxStart is larger than columnIdxEnd, then swap the values.
   if (columnIdxStart! > columnIdxEnd!) {
@@ -85,16 +101,46 @@ const ContextMenu = ({
     return (
       <MenuItem
         icon={iconCopy}
-        onMouseDown={() => {
-          console.log("<MenuItem> onClick (copy)");
-          console.log("selectionStartCell -->", selectionStartCell);
+        onMouseDown={() =>
           onCopy({
             rowIdx: selectionStartCell.rowIdx!,
             columnIdx: selectionStartCell.columnIdx!,
-          });
-        }}
+          })
+        }
       >
         <ContextMenuItemTextStyled>Copy</ContextMenuItemTextStyled>
+      </MenuItem>
+    );
+  };
+
+  const pasteMenuItem = () => {
+    return (
+      <MenuItem
+        icon={iconPaste}
+        onMouseDown={() =>
+          onPaste({
+            rowIdx: selectionStartCell.rowIdx!,
+            columnIdx: selectionStartCell.columnIdx!,
+          })
+        }
+      >
+        <ContextMenuItemTextStyled>Paste</ContextMenuItemTextStyled>
+      </MenuItem>
+    );
+  };
+
+  const cutMenuItem = () => {
+    return (
+      <MenuItem
+        icon={iconCut}
+        onMouseDown={() =>
+          onCut({
+            rowIdx: selectionStartCell.rowIdx!,
+            columnIdx: selectionStartCell.columnIdx!,
+          })
+        }
+      >
+        <ContextMenuItemTextStyled>Cut</ContextMenuItemTextStyled>
       </MenuItem>
     );
   };
@@ -205,6 +251,8 @@ const ContextMenu = ({
       top={top}
     >
       {copyMenuItem()}
+      {pasteMenuItem()}
+      {cutMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}
       {addColumnsMenuItem()}
       {addRowsMenuItem()}
