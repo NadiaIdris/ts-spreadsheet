@@ -161,7 +161,6 @@ const Spreadsheet = ({
     event: React.FocusEvent;
   }) => {
     event.preventDefault();
-
     // Change all the selectedCells isEditing and isFocused values to false.
     const newSpreadsheet = spreadsheetState.map((row) => {
       const newRow = row.map((cell: ICellData) => {
@@ -192,7 +191,7 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.FocusEvent<HTMLInputElement>;
   }) => {
-    console.log("cell onFocus got called");
+    console.log("%ccell onFocus got called", "color: #EA00C4");
     event.stopPropagation();
     changeCellState({
       columnIdx,
@@ -281,17 +280,23 @@ const Spreadsheet = ({
   const handleCellOnContextMenu = ({ event }: { event: React.MouseEvent }) => {
     event.preventDefault();
     event.stopPropagation();
-    setContextMenu({
-      isContextMenuOpen: true,
-      locationX: event.clientX,
-      locationY: event.clientY,
-    });
+    // console.log(
+    //   "%ccontextmenu event.clientX, event.clientY --->",
+    //   "color: #09B7EE",
+    //   event.clientX,
+    //   event.clientY
+    // );
+    // setContextMenu({
+    //   isContextMenuOpen: true,
+    //   locationX: event.clientX,
+    //   locationY: event.clientY,
+    // });
     // Add focus to the cell where the dragging started.
     moveFocusTo(
       selectedCells.selectionStartCell.columnIdx!,
       selectedCells.selectionStartCell.rowIdx!
     );
-    setIsSelecting(false);
+    // setIsSelecting(false);
   };
 
   const handleDoubleClick = ({
@@ -420,19 +425,19 @@ const Spreadsheet = ({
 
     // Keep ctrlKey combinations at the top.
     if (event.ctrlKey && event.key === "c") {
-      handleOnCopy(columnIdx, rowIdx);
+      handleOnCopy({ rowIdx, columnIdx });
       closeContextMenu();
       return;
     }
 
     if (event.ctrlKey && event.key === "x") {
-      handleOnCut(columnIdx, rowIdx);
+      handleOnCut({ rowIdx, columnIdx });
       closeContextMenu();
       return;
     }
 
     if (event.ctrlKey && event.key === "v") {
-      handleOnPaste(columnIdx, rowIdx);
+      handleOnPaste({ rowIdx, columnIdx });
       closeContextMenu();
       return;
     }
@@ -540,6 +545,16 @@ const Spreadsheet = ({
       moveFocusTo(columnIdx + 1, rowIdx);
       closeContextMenu();
     }
+
+    if (event.key === "Backspace") { 
+      event.preventDefault();
+      changeCellState({
+        rowIdx,
+        columnIdx,
+        cellUpdate: { isEditing: true, isFocused: true, value: "" },
+      });
+      closeContextMenu();
+    }
   };
 
   const handleOnMouseDown = ({
@@ -560,7 +575,11 @@ const Spreadsheet = ({
 
     if (event.button === 2) {
       // Right-click detected
-      setContextMenu({ ...contextMenu, isContextMenuOpen: true });
+      setContextMenu({
+        isContextMenuOpen: true,
+        locationX: event.clientX,
+        locationY: event.clientY,
+      });
       if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
         return;
       }
@@ -958,24 +977,54 @@ const Spreadsheet = ({
     columnIdx: number;
     rowIdx: number;
   }) => {
-    setIsSelecting(false);
+    if (isSelecting) {
+      setIsSelecting(false);
+    }
   };
 
-  const handleOnCopy = (columnIdx: number, rowIdx: number) => {
+  const handleOnCopy = ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     // Check if any text is selected using getSelection() method.
     // If text is selected, copy only the selected text.
     // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
     const selection = window.getSelection();
+    console.log("selection --->", selection);
+    console.log("spreadsheet state -->", spreadsheetState);
+    console.log("rowIdx -->", rowIdx, "columnIdx --> ", columnIdx);
+    console.log(
+      "spreadsheetstate[rowIdx][columnIdx] -->",
+      spreadsheetState[rowIdx][columnIdx].value
+    );
+
     if (selection?.type === "Range") {
       navigator.clipboard.writeText(selection.toString());
+      console.log("part of text selected -->", selection.toString());
       return;
     }
 
+    //If the type property is set to "Caret", this indicates that no text has been selected, and the entire cell value should be copied instead.
+    if (selection?.type === "Caret") {
+      // console.log(
+      //   "whole cell selected",
+      //   spreadsheetState[rowIdx][columnIdx].value!
+      // );
+    }
     // Copy the whole cell value.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
 
-  const handleOnCut = async (columnIdx: number, rowIdx: number) => {
+  const handleOnCut = async ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     await navigator.clipboard.writeText(
       spreadsheetState[rowIdx][columnIdx].value!
     );
@@ -986,7 +1035,13 @@ const Spreadsheet = ({
     });
   };
 
-  const handleOnPaste = (columnIdx: number, rowIdx: number) => {
+  const handleOnPaste = ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => {
     // If isEditing is false, then paste the clipboard text to the cell.
     if (!spreadsheetState[rowIdx][columnIdx].isEditing) {
       navigator.clipboard.readText().then((clipText) => {
@@ -1280,11 +1335,11 @@ const Spreadsheet = ({
                       }}
                       onCopy={() => {
                         console.log("<Cell> onCopy called");
-                        handleOnCopy(columnIdx, rowIdx);
+                        handleOnCopy({ rowIdx, columnIdx });
                       }}
                       onCut={() => {
                         console.log("<Cell> onCut called");
-                        handleOnCut(columnIdx, rowIdx);
+                        handleOnCut({ rowIdx, columnIdx });
                       }}
                       onDoubleClick={() =>
                         handleDoubleClick({ rowIdx, columnIdx })
@@ -1329,7 +1384,7 @@ const Spreadsheet = ({
                       }}
                       onPaste={() => {
                         console.log("<Cell> onPaste called");
-                        handleOnPaste(columnIdx, rowIdx);
+                        handleOnPaste({ rowIdx, columnIdx });
                       }}
                       ref={(element: HTMLInputElement) =>
                         handleAddRef(element, columnIdx, rowIdx)
@@ -1354,6 +1409,9 @@ const Spreadsheet = ({
                       }}
                       left={contextMenu.locationX}
                       top={contextMenu.locationY}
+                      onCopy={handleOnCopy}
+                      onCut={handleOnCut}
+                      onPaste={handleOnPaste}
                     />
                   )}
                 </>
