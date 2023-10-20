@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { ReactComponent as IconAdd } from "../../assets/icons/add.svg";
 import { ReactComponent as IconDelete } from "../../assets/icons/delete.svg";
+import { ReactComponent as IconCopy } from "../../assets/icons/copy.svg";
 import {
   calculateColumnCount,
   calculateColumnRange,
@@ -34,6 +35,13 @@ interface ContextMenuProps {
   selectionEndCell: SelectedCells["selectionEndCell"];
   left: number;
   top: number;
+  onCopy: ({
+    rowIdx,
+    columnIdx,
+  }: {
+    rowIdx: number;
+    columnIdx: number;
+  }) => void;
 }
 
 const ContextMenu = ({
@@ -46,7 +54,15 @@ const ContextMenu = ({
   selectionEndCell,
   left,
   top,
+  onCopy,
 }: ContextMenuProps) => {
+  console.log(
+    "%ccontextmenu left -->",
+    "color: yellow",
+    left,
+    "contextmenu top -->",
+    top
+  );
   let { columnIdx: columnIdxStart, rowIdx: rowIdxStart } = selectionStartCell;
   let { columnIdx: columnIdxEnd, rowIdx: rowIdxEnd } = selectionEndCell;
   const iconAdd = (
@@ -55,6 +71,7 @@ const ContextMenu = ({
   const iconDelete = (
     <IconDelete color="#1d2c37" height={10} width={10} title="delete-icon" />
   );
+  const iconCopy = (<IconCopy color="#1d2c37" height={10} width={10} title="copy-icon" />);
 
   // If columnIdxStart is larger than columnIdxEnd, then swap the values.
   if (columnIdxStart! > columnIdxEnd!) {
@@ -64,6 +81,23 @@ const ContextMenu = ({
     [rowIdxStart, rowIdxEnd] = [rowIdxEnd, rowIdxStart];
   }
 
+  const copyMenuItem = () => {
+    return (
+      <MenuItem
+        icon={iconCopy}
+        onMouseDown={() => {
+          console.log("<MenuItem> onClick (copy)");
+          console.log("selectionStartCell -->", selectionStartCell);
+          onCopy({
+            rowIdx: selectionStartCell.rowIdx!,
+            columnIdx: selectionStartCell.columnIdx!,
+          });
+        }}
+      >
+        <ContextMenuItemTextStyled>Copy</ContextMenuItemTextStyled>
+      </MenuItem>
+    );
+  };
 
   const addColumnsMenuItem = () => {
     const columnsCount = calculateColumnCount({ columnIdxStart, columnIdxEnd });
@@ -170,6 +204,8 @@ const ContextMenu = ({
       onContextMenu={(event: React.MouseEvent) => event.preventDefault()}
       top={top}
     >
+      {copyMenuItem()}
+      {horizontalLine({ color: "lightgray", margin: "2px 4px" })}
       {addColumnsMenuItem()}
       {addRowsMenuItem()}
       {horizontalLine({ color: "lightgray", margin: "2px 4px" })}

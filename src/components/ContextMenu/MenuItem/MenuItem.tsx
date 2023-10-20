@@ -5,6 +5,7 @@ interface MenuItemProps {
   icon?: React.ReactNode;
   iconMarginRight?: string;
   onClick?: () => void;
+  onMouseDown?: () => void;
 }
 
 const MenuItem = ({
@@ -12,9 +13,10 @@ const MenuItem = ({
   icon,
   iconMarginRight = "10px",
   onClick,
+  onMouseDown
 }: MenuItemProps) => {
   return (
-    <MenuItemStyled onClick={onClick}>
+    <MenuItemStyled onClick={onClick} onMouseDown={onMouseDown}>
       <div style={{ marginRight: iconMarginRight }}>{icon}</div>
       {children}
     </MenuItemStyled>
