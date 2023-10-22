@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 interface CellWrapperProps {
   children: React.ReactNode;
+  isSelected: boolean;
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
   onDrag?: (event: React.DragEvent<HTMLDivElement>) => void;
@@ -18,6 +19,7 @@ interface CellWrapperProps {
 
 const CellWrapper = ({
   children,
+  isSelected,
   onClick,
   onContextMenu,
   onDrag,
@@ -33,6 +35,7 @@ const CellWrapper = ({
 }: CellWrapperProps) => {
   return (
     <CellWrapperStyledOne
+      isSelected={isSelected}
       onClick={onClick}
       onContextMenu={onContextMenu}
       onDrag={onDrag}
@@ -54,23 +57,19 @@ const CellWrapper = ({
 
 export default CellWrapper;
 
-const CellWrapperStyledOne = styled.div`
-  // border-right: 1px solid var(--color-border-spreadsheet);
-  // border-bottom: 1px solid var(--color-border-spreadsheet);
-  // border-left: 1px solid transparent;
-  // border-top: 1px solid transparent;
+const CellWrapperStyledOne = styled.div<{ isSelected: boolean }>`
+  background-color: ${(props) => (props.isSelected ? "#630DA7 !important" : "")};
   color: var(--color-text-cell-not-focused);
   cursor: default;
   padding: 3px;
-  // Remove the border below.
   border: 1px solid green;
 
   &:focus-within {
     border-radius: 2px;
     color: var(--color-white);
     cursor: grab;
-    outline: 3px solid var(--color-text-cell);
-    outline-offset: -3px;
+    outline: 2px solid var(--color-text-cell);
+    outline-offset: -2px;
     z-index: 10;
   }
 `;

@@ -102,7 +102,7 @@ export type { ICell };
 
 const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
   background-color: ${(props) => (props.isSelected ? "#630DA7" : "")};
-  border: 1px solid transparent;
+  border: none;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
   min-width: 60px;
