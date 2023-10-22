@@ -328,8 +328,10 @@ const Spreadsheet = ({
     dt.setData("text/plain", spreadsheetState[rowIdx][columnIdx].value!);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.dropEffect = "move";
-    // console.log("drag start");
-    // console.log("onDragStart event.dataTransfer ---->", event.dataTransfer);
+
+    // Add styling to the cell being dragged.
+    const cellWrapper = event.currentTarget;
+    cellWrapper.style.backgroundColor = "var(--color-background)";
   };
 
   const handleCellWrapperDragEnd = ({
@@ -358,6 +360,7 @@ const Spreadsheet = ({
       columnIdx,
       cellUpdate: { isEditing: false, isFocused: false, value: "" },
     });
+    setIsSelecting(false);
   };
 
   const handleCellWrapperDrop = ({
@@ -546,7 +549,7 @@ const Spreadsheet = ({
       closeContextMenu();
     }
 
-    if (event.key === "Backspace") { 
+    if (event.key === "Backspace") {
       event.preventDefault();
       changeCellState({
         rowIdx,
@@ -1255,6 +1258,10 @@ const Spreadsheet = ({
                   {/* Add the rest of row items.  */}
                   <CellWrapper
                     key={`cell-wrapper-${rowIdx}/${columnIdx}`}
+                    isSelected={arrayIncludesObject(
+                      selectedCells.allSelectedCells,
+                      { rowIdx, columnIdx }
+                    )}
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                       console.log(
                         "<CellWrapper> %conClick called",
