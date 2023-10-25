@@ -102,7 +102,7 @@ const Spreadsheet = ({
     rowIdx: null,
     columnIdx: null,
   });
-  const formatKeyOfSpreadsheetRefMap = (columnIdx: number, rowIdx: number) =>
+  const formatKeyOfSpreadsheetRefMap = (rowIdx: number, columnIdx: number) =>
     `${rowIdx}/${columnIdx}`;
   // This is a ref container to hold all the spreadsheet cells refs. We populate this Map with the
   // cell refs as we create them below(<Cell />) using ref prop and passing it a ref callback.
@@ -119,7 +119,7 @@ const Spreadsheet = ({
   ) => {
     // Add the element to the Map.
     spreadSheetRefMap.current?.set(
-      formatKeyOfSpreadsheetRefMap(columnIdx, rowIdx),
+      formatKeyOfSpreadsheetRefMap(rowIdx, columnIdx),
       element
     );
   };
@@ -191,7 +191,6 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.FocusEvent<HTMLInputElement>;
   }) => {
-    console.log("%ccell onFocus got called", "color: #EA00C4");
     event.stopPropagation();
     changeCellState({
       columnIdx,
@@ -203,10 +202,9 @@ const Spreadsheet = ({
     const currentCell = { rowIdx, columnIdx };
     // If the current cell is already selected, then don't update the selectedCells state.
     if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-      console.log("current cell is already selected");
       return;
     }
-    console.log("current cell is not selected");
+
     setSelectedCells({
       previousCell: currentCell,
       selectionStartCell: currentCell,
@@ -232,10 +230,10 @@ const Spreadsheet = ({
     changeCellState({ columnIdx, rowIdx, cellUpdate: { value: newValue } });
   };
 
-  const moveFocusTo = (columnIdx: number, rowIdx: number) => {
+  const moveFocusTo = (rowIdx: number, columnIdx: number) => {
     const spreadSheetRefCellKey = formatKeyOfSpreadsheetRefMap(
-      columnIdx,
-      rowIdx
+      rowIdx,
+      columnIdx
     );
     if (spreadSheetRefMap.current?.has(spreadSheetRefCellKey)) {
       const nextCell = spreadSheetRefMap.current.get(spreadSheetRefCellKey);
@@ -267,7 +265,7 @@ const Spreadsheet = ({
     });
     handleDBUpdate(newSpreadSheetState);
     setSpreadsheetState(newSpreadSheetState);
-    moveFocusTo(columnIdx, rowIdx);
+    moveFocusTo(rowIdx, columnIdx);
     const currentCell = { rowIdx, columnIdx };
     setSelectedCells({
       previousCell: currentCell,
@@ -286,17 +284,11 @@ const Spreadsheet = ({
     //   event.clientX,
     //   event.clientY
     // );
-    // setContextMenu({
-    //   isContextMenuOpen: true,
-    //   locationX: event.clientX,
-    //   locationY: event.clientY,
-    // });
     // Add focus to the cell where the dragging started.
     moveFocusTo(
-      selectedCells.selectionStartCell.columnIdx!,
-      selectedCells.selectionStartCell.rowIdx!
+      selectedCells.selectionStartCell.rowIdx!,
+      selectedCells.selectionStartCell.columnIdx!
     );
-    // setIsSelecting(false);
   };
 
   const handleDoubleClick = ({
@@ -332,6 +324,26 @@ const Spreadsheet = ({
     // Add styling to the cell being dragged.
     const cellWrapper = event.currentTarget;
     cellWrapper.style.backgroundColor = "var(--color-background)";
+
+    // Call handleCellWrapperDragStart on all the other cells that are selected.
+    const allSelectedCells = selectedCells.allSelectedCells;
+    // console.log("allSelectedCells --->", allSelectedCells);
+    allSelectedCells.forEach((cell) => {
+      const spreadSheetRefCellKey = formatKeyOfSpreadsheetRefMap(
+        cell.rowIdx!,
+        cell.columnIdx!
+      );
+      // console.log("spreadSheetRefCellKey -->", spreadSheetRefCellKey);
+      // console.log("spreadSheetRefMap.current? -->", spreadSheetRefMap.current);
+      // Call handleCellWrapperDragStart on all the other cells that are selected.
+      // Access the selected cells using refsMap and call handleCellWrapperDragStart on them.
+      if (spreadSheetRefMap.current?.has(spreadSheetRefCellKey)) {
+        const cellWrapperRef = spreadSheetRefMap.current.get(
+          spreadSheetRefCellKey
+        );
+        console.log("cellWrapperRef --->", cellWrapperRef);
+      }
+    });
   };
 
   const handleCellWrapperDragEnd = ({
@@ -372,6 +384,7 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.DragEvent<HTMLDivElement>;
   }) => {
+    event.preventDefault();
     const data = event.dataTransfer.getData("text/plain");
     // console.log("onDrop columnIdx ---->", columnIdx);
     // console.log("onDrop rowIdx ---->", rowIdx);
@@ -382,7 +395,7 @@ const Spreadsheet = ({
       columnIdx,
       cellUpdate: { isEditing: false, isFocused: true, value: data },
     });
-    moveFocusTo(columnIdx, rowIdx);
+    moveFocusTo(rowIdx, columnIdx);
     const currentCell = { rowIdx, columnIdx };
     setSelectedCells({
       previousCell: currentCell,
@@ -483,7 +496,7 @@ const Spreadsheet = ({
           return;
         }
         // Add focus to the cell below. We need to use the spreadSheetRefMap to get the cell below.
-        moveFocusTo(columnIdx, rowIdx + 1);
+        moveFocusTo(rowIdx + 1, columnIdx);
         // Set the cell below state (isFocused to true).
         changeCellState({
           rowIdx: rowIdx + 1,
@@ -505,7 +518,7 @@ const Spreadsheet = ({
     if (event.key === "ArrowRight" && currentCell.isEditing === false) {
       // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowRight" focuses input field.
       event.preventDefault();
-      moveFocusTo(columnIdx + 1, rowIdx);
+      moveFocusTo(rowIdx, columnIdx + 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
       closeContextMenu();
     }
@@ -513,7 +526,7 @@ const Spreadsheet = ({
     if (event.key === "ArrowLeft" && currentCell.isEditing === false) {
       // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowLeft" focuses input field.
       event.preventDefault();
-      moveFocusTo(columnIdx - 1, rowIdx);
+      moveFocusTo(rowIdx, columnIdx - 1);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
       closeContextMenu();
     }
@@ -521,7 +534,7 @@ const Spreadsheet = ({
     if (event.key === "ArrowUp") {
       // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowUp" focuses input field.
       event.preventDefault();
-      moveFocusTo(columnIdx, rowIdx - 1);
+      moveFocusTo(rowIdx - 1, columnIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
       closeContextMenu();
     }
@@ -529,7 +542,7 @@ const Spreadsheet = ({
     if (event.key === "ArrowDown") {
       // Add preventDefault, so that the input field doesn't add animation when there is overflow of text and  "ArrowDown" focuses input field.
       event.preventDefault();
-      moveFocusTo(columnIdx, rowIdx + 1);
+      moveFocusTo(rowIdx + 1, columnIdx);
       // Note: we don't need to update the spreadsheetState here, because the onFocus callback will do that for us.
       closeContextMenu();
     }
@@ -537,7 +550,7 @@ const Spreadsheet = ({
     // Note: Make sure "Tab" + Shift is before "Tab" key. Otherwise, "Tab" key will be triggered first.
     if (event.key === "Tab" && event.shiftKey) {
       event.preventDefault();
-      moveFocusTo(columnIdx - 1, rowIdx);
+      moveFocusTo(rowIdx, columnIdx - 1);
       closeContextMenu();
       return;
     }
@@ -545,7 +558,7 @@ const Spreadsheet = ({
     if (event.key === "Tab") {
       // Add preventDefault, so that the input field doesn't add animation when "Tab" focuses input field.
       event.preventDefault();
-      moveFocusTo(columnIdx + 1, rowIdx);
+      moveFocusTo(rowIdx, columnIdx + 1);
       closeContextMenu();
     }
 
@@ -595,7 +608,7 @@ const Spreadsheet = ({
       return;
     }
 
-    moveFocusTo(columnIdx, rowIdx);
+    moveFocusTo(rowIdx, columnIdx);
 
     setSelectedCells({
       previousCell: currentCell,
@@ -1286,6 +1299,7 @@ const Spreadsheet = ({
                     /* Do not remove onDragOver. We need it. */
                     onDragOver={(event: React.DragEvent<HTMLDivElement>) => {
                       event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
                     }}
                     onDrop={(event) => {
                       handleCellWrapperDrop({ rowIdx, columnIdx, event });
@@ -1323,6 +1337,7 @@ const Spreadsheet = ({
                       onFocus={(
                         event: React.FocusEvent<HTMLInputElement, Element>
                       ) => {
+                        console.log("<Cell> %conFocus called", "color: green");
                         handleCellFocus({ rowIdx, columnIdx, event });
                       }}
                       onChange={(newValue) => {

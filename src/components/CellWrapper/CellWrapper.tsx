@@ -72,4 +72,8 @@ const CellWrapperStyledOne = styled.div<{ isSelected: boolean }>`
     outline-offset: -2px;
     z-index: 10;
   }
+
+  &:hover {
+    cursor: pointer;
+  }
 `;

@@ -107,13 +107,10 @@ const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
   max-width: 90px;
   min-width: 60px;
   width: 100%;
+  cursor: ${(props) => (props.readOnly ? "default" : "text")};
 
   &:focus {
     outline: 1px solid transparent;
-  }
-
-  &:hover {
-    cursor: default;
   }
 
   ::selection {
