@@ -1,5 +1,9 @@
 # Spreadsheet app written in TypeScript
 
+1. Run the web service: To run [`ts-spreadsheet` app](https://github.com/NadiaIdris/ts-spreadsheet) locally, first clone the [`ts-spreadsheet-api` repo](https://github.com/NadiaIdris/ts-spreadsheet-api) and run it by calling `npm run start`.
+2. Then clone this repo and run it by calling `npm run start`.
+3. Open `http://localhost:3000` in your browser.
+
 ## Features
 
 - [x] Flexible grid cells
