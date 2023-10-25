@@ -3,17 +3,58 @@
 ## Features
 
 - [x] Flexible grid cells
+    <video width="640" height="360" controls>
+  <source src="docs/media/responsive-design.mp4" type="video/mp4">
+</video>
+
+- [x] Change spreadsheet name.
+    <video width="640" height="360" controls>
+  <source src="docs/media/rename-spreadsheet.mp4" type="video/mp4">
+</video>
+
+- [x] Copy/paste/cut one cell using keyboard or context menu
+    <video width="640" height="360" controls>
+  <source src="docs/media/copy-paste-cut.mp4" type="video/mp4">
+</video>
 
 ## Features using mouse
 
 - [x] Single select cell and multi-select cells
-- [x] Add/remove rows and columns
-- [x] Drag and drop one or more cells using mouse
+    <video width="640" height="360" controls>
+  <source src="docs/media/single-and-multi-cell-select.mp4" type="video/mp4">
+</video>
+
+- [x] Add/delete one column
+    <video width="640" height="360" controls>
+  <source src="docs/media/add-and-delete-one-column.mp4" type="video/mp4">
+</video>
+
+- [x] Add/delete multiple columns
+    <video width="640" height="360" controls>
+  <source src="docs/media/add-and-delete-multiple-columns.mp4" type="video/mp4">
+</video>
+
+- [x] Add/delete one row
+    <video width="640" height="360" controls>
+  <source src="docs/media/add-delete-one-row.mp4" type="video/mp4">
+</video>
+
+- [x] Add/delete multiple rows
+    <video width="640" height="360" controls>
+  <source src="docs/media/add-delete-multiple-rows.mp4" type="video/mp4">
+</video>
+
+- [x] Drag and drop one cell using mouse
+    <video width="640" height="360" controls>
+  <source src="docs/media/drag-drop-one-cell.mp4" type="video/mp4">
+</video>
+
+- [ ] Drag and drop multiple cells using mouse
 - [ ] Undo/redo (version history)
 - [ ] Resize columns and rows
 - [ ] Freeze columns and rows
 - [ ] Sort columns
-- 
+-
 - [ ] Add comments to cells. Comments are displayed in a tooltip when hovering over a cell. Add images to comments.
   - [ ] Option to edit comments in a modal dialog
   - [ ] Option to delete comment
@@ -23,9 +64,12 @@
 ## Features using keyboard
 
 - [ ] Single select cell and multi-select cells
-- [x] Copy/paste one or more cells
-- [x] Move up, down, left, right
-- [x] Drag and drop one or more cells using keyboard
+- [x] Keyboard navigation: move up, down, left, right
+    <video width="640" height="360" controls>
+  <source src="docs/media/keyboard-navigation.mp4" type="video/mp4">
+</video>
+
+- [ ] Drag and drop one or more cells using keyboard
 - [ ] Undo/redo (version history)
 
 ## Icons
@@ -121,7 +165,7 @@ Then use CSS to style the svg element.
 
 ## Select/multi-select cells
 
-- First we check direction: if the user selected a cell in the same row as `selectionStartCell.rowIdx` or cell in a row down from `selectionStartCell.rowIdx`. If yes, then in that row add all the columns from `selectionStartCell.columnIdx` to `currentCell.columnIdx` to `selectedCells` array. 
+- First we check direction: if the user selected a cell in the same row as `selectionStartCell.rowIdx` or cell in a row down from `selectionStartCell.rowIdx`. If yes, then in that row add all the columns from `selectionStartCell.columnIdx` to `currentCell.columnIdx` to `selectedCells` array.
 - If the user selected a cell in a row above `selectionStartCell.rowIdx`, then loop over all the rows from `selectionStartCell.rowIdx` to `currentCell.rowIdx` and add all the columns from `selectionStartCell.columnIdx` to `currentCell.columnIdx` to `selectedCells` array.
 
 ### Selection data structure
