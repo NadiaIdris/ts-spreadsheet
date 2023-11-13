@@ -7,51 +7,42 @@
 ## Features
 
 - [x] Flexible grid cells
-    <video width="640" height="360" controls>
-  <source src="docs/media/responsive-design.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/d1aaad31-5632-4bde-adf4-9caf2b6beeee
 
 - [x] Change spreadsheet name.
-    <video width="640" height="360" controls>
-  <source src="docs/media/rename-spreadsheet.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/9e2426b2-7fc0-42ab-aa00-02b759879885
 
 - [x] Copy/paste/cut one cell using keyboard or context menu
-    <video width="640" height="360" controls>
-  <source src="docs/media/copy-paste-cut.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/cbed2f8e-6dc0-483e-a5b1-2f306cc6b29a
 
 ## Features using mouse
 
 - [x] Single select cell and multi-select cells
-    <video width="640" height="360" controls>
-  <source src="docs/media/single-and-multi-cell-select.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/1d54b06f-0ae9-4f21-96ac-7f8ef680dddd
 
 - [x] Add/delete one column
-    <video width="640" height="360" controls>
-  <source src="docs/media/add-and-delete-one-column.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/ec5f42df-9954-4b1c-a3f9-833fa15a6ea0
 
 - [x] Add/delete multiple columns
-    <video width="640" height="360" controls>
-  <source src="docs/media/add-and-delete-multiple-columns.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/32f488e1-bf3f-423c-888c-7d18f2fca0d6
 
 - [x] Add/delete one row
-    <video width="640" height="360" controls>
-  <source src="docs/media/add-delete-one-row.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/ee8d6541-dcf6-4dda-8126-49c9ee9f47f6
 
 - [x] Add/delete multiple rows
-    <video width="640" height="360" controls>
-  <source src="docs/media/add-delete-multiple-rows.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/a8fd57bc-a0fc-4610-8e1d-f71de0b671c3
 
 - [x] Drag and drop one cell using mouse
-    <video width="640" height="360" controls>
-  <source src="docs/media/drag-drop-one-cell.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/a9d8f4e0-8b2f-4170-a169-f673466cd117
 
 - [ ] Drag and drop multiple cells using mouse
 - [ ] Undo/redo (version history)
@@ -69,9 +60,8 @@
 
 - [ ] Single select cell and multi-select cells
 - [x] Keyboard navigation: move up, down, left, right
-    <video width="640" height="360" controls>
-  <source src="docs/media/keyboard-navigation.mp4" type="video/mp4">
-</video>
+
+https://github.com/NadiaIdris/ts-spreadsheet/assets/22040032/b222aa0a-3b78-4711-9856-6f83b76a8035
 
 - [ ] Drag and drop one or more cells using keyboard
 - [ ] Undo/redo (version history)
@@ -188,7 +178,7 @@ interface SelectedCells {
 }
 ```
 
-  <img src="./docs/images/select-mental-model.svg" alt="Image description" width="500"/>
+  <img src="https://raw.githubusercontent.com/NadiaIdris/ts-spreadsheet/main/docs/media/select-mental-model.svg" alt="Image description" width="500"/>
 
 ## Code style guide
 
