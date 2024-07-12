@@ -2,7 +2,6 @@ import {
   Dispatch,
   MutableRefObject,
   SetStateAction,
-  useEffect,
   useRef,
   useState,
 } from "react";
@@ -13,6 +12,7 @@ import Cell from "../Cell";
 import CellHeader from "../CellHeader";
 import CellWrapper from "../CellWrapper";
 import ContextMenu from "../ContextMenu";
+import { sampleData } from "../../data/sampleData";
 
 interface SpreadsheetProps {
   rows?: number;
@@ -79,18 +79,28 @@ const Spreadsheet = ({
   setIsSelecting,
   setContextMenu,
 }: SpreadsheetProps) => {
-  const grid: ICellData[][] = Array.from({ length: rows }, (v, rowI) =>
-    Array.from({ length: columns }, (v, columnI) => {
-      return {
-        columnIdx: columnI,
-        isFocused: false,
-        isEditing: false,
-        rowIdx: rowI,
-        value: "",
-      } as ICellData;
-    })
-  );
-  const [ spreadsheetState, setSpreadsheetState ] = useState<ICellData[][]>(grid);
+  const localStorageData = localStorage.getItem("spreadsheetData");
+  // const emptyDefaultData: ICellData[][] = Array.from(
+  //   { length: rows },
+  //   (v, rowI) =>
+  //     Array.from({ length: columns }, (v, columnI) => {
+  //       return {
+  //         columnIdx: columnI,
+  //         isFocused: false,
+  //         isEditing: false,
+  //         rowIdx: rowI,
+  //         value: "",
+  //       } as ICellData;
+  //     })
+  // );
+
+  const defaultExampleData: ICellData[][] = sampleData;
+
+  const grid: ICellData[][] = localStorageData
+    ? JSON.parse(localStorageData)
+    : defaultExampleData;
+
+  const [spreadsheetState, setSpreadsheetState] = useState<ICellData[][]>(grid);
   const [selectedCells, setSelectedCells] = useState<SelectedCells>({
     previousCell: { rowIdx: null, columnIdx: null },
     selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -146,7 +156,7 @@ const Spreadsheet = ({
         newRow,
         ...spreadsheet.slice(rowIdx + 1),
       ];
-      handleDBUpdate(newSpreadsheet);
+      updateDataInLocalStorage(newSpreadsheet);
       return newSpreadsheet;
     });
   };
@@ -167,7 +177,7 @@ const Spreadsheet = ({
       return newRow;
     });
     setSpreadsheetState(newSpreadsheet);
-    handleDBUpdate(newSpreadsheet);
+    updateDataInLocalStorage(newSpreadsheet);
 
     if (contextMenu.isContextMenuOpen) return;
 
@@ -259,7 +269,7 @@ const Spreadsheet = ({
       });
       return newRow;
     });
-    handleDBUpdate(newSpreadSheetState);
+    updateDataInLocalStorage(newSpreadSheetState);
     setSpreadsheetState(newSpreadSheetState);
     moveFocusTo(columnIdx, rowIdx);
     const currentCell = { rowIdx, columnIdx };
@@ -366,22 +376,26 @@ const Spreadsheet = ({
   };
 
   // Update the whole spreadsheet in the database.
-  const handleDBUpdate = async (spreadsheetState: ICellData[][]) => {
-    try {
-      const responseBody = await fetch("/sp/set", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(spreadsheetState),
-      });
-      if (!responseBody.ok)
-        throw new Error(
-          `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
-        );
-    } catch (error) {
-      console.error("error in updating db ---->", error);
-    }
+  // const handleDBUpdate = async (spreadsheetState: ICellData[][]) => {
+  //   try {
+  //     const responseBody = await fetch("/sp/set", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(spreadsheetState),
+  //     });
+  //     if (!responseBody.ok)
+  //       throw new Error(
+  //         `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
+  //       );
+  //   } catch (error) {
+  //     console.error("error in updating db ---->", error);
+  //   }
+  // };
+
+  const updateDataInLocalStorage = (spreadsheetState: ICellData[][]) => {
+    localStorage.setItem("spreadsheetData", JSON.stringify(spreadsheetState));
   };
 
   const closeContextMenu = () => {
@@ -753,7 +767,7 @@ const Spreadsheet = ({
       return newRow;
     });
     setSpreadsheetState(newSpreadSheetState);
-    handleDBUpdate(newSpreadSheetState);
+    updateDataInLocalStorage(newSpreadSheetState);
     closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
@@ -782,7 +796,7 @@ const Spreadsheet = ({
       return newRow;
     });
     setSpreadsheetState(newSpreadSheetState);
-    handleDBUpdate(newSpreadSheetState);
+    updateDataInLocalStorage(newSpreadSheetState);
     closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
@@ -826,7 +840,7 @@ const Spreadsheet = ({
       ...endChunkOfRows,
     ];
     setSpreadsheetState(newSpreadsheet);
-    handleDBUpdate(newSpreadsheet);
+    updateDataInLocalStorage(newSpreadsheet);
     closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
@@ -853,7 +867,7 @@ const Spreadsheet = ({
     }
     const newSpreadsheet = [...firstChunkOfRows, ...endChunkOfRows];
     setSpreadsheetState(newSpreadsheet);
-    handleDBUpdate(newSpreadsheet);
+    updateDataInLocalStorage(newSpreadsheet);
     closeContextMenu();
     setSelectedCells({
       previousCell: { rowIdx: null, columnIdx: null },
@@ -862,33 +876,6 @@ const Spreadsheet = ({
       allSelectedCells: [],
     });
   };
-
-  useEffect(() => {
-    // TODO: this code fetches data every time we reload the page. Update this to use cache, so
-    // TODO: we don't make a call to our API unnecessarily.
-    // Fetch for the data from the server.
-    let spreadsheetData;
-    const fetchData = async () => {
-      const responseBody = await fetch("/sp/get", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      // Check if the response is not ok.
-      if (!responseBody.ok)
-        throw new Error(
-          `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
-        );
-      const data = await responseBody.json();
-      spreadsheetData = data;
-      // Empty array means there is no data in the database.
-      if (data.length === 0) return;
-      setSpreadsheetState(spreadsheetData);
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <Flex>
