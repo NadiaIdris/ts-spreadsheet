@@ -37,3 +37,27 @@ input {
 div#root {
   height: 100%;
 }
+
+/* Global scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: #0e151abd;
+  border-bottom-right-radius: 100px;
+  border-top-right-radius: 100px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #455865ae; /* color of the scroll thumb */
+  border-radius: 100px; /* roundness of the scroll thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(
+    --color-text-cell
+  ); /* color of the scroll thumb on hover */
+}
