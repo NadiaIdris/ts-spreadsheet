@@ -10,7 +10,7 @@ export interface IContextMenu {
 }
 
 function App() {
-  const [heading, setHeading] = useState(setInitialHeading("Spreadsheet"));
+  const [heading, setHeading] = useState(setInitialHeading("Untitled spreadsheet"));
   const [isSelecting, setIsSelecting] = useState(false);
   // TODO: change contextMenu state to useContextMenu custom hook?
   const [contextMenu, setContextMenu] = useState<IContextMenu>({

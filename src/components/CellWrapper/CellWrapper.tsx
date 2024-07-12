@@ -58,11 +58,16 @@ const CellWrapper = ({
 export default CellWrapper;
 
 const CellWrapperStyledOne = styled.div<{ isSelected: boolean }>`
-  background-color: ${(props) => (props.isSelected ? "#630DA7 !important" : "")};
+  background-color: ${(props) => (props.isSelected ? "var(--color-cell-focused-bg) !important" : "")};
   color: var(--color-text-cell-not-focused);
   cursor: default;
   padding: 3px;
-  border: 1px solid green;
+  border: 1px solid var(--color-border-spreadsheet);
+
+  // Add background color to all the elements inside the cell
+  & * {
+    background-color: ${(props) => (props.isSelected ? "var(--color-cell-focused-bg) !important" : "")};
+  }
 
   &:focus-within {
     border-radius: 2px;

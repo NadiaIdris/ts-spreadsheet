@@ -9,12 +9,14 @@ html {
 }
 
 :root {
+  --font-primary: "Inter", "Helvetica", sans-serif;
   --border-radius-medium: 4px;
-  --color-background: #1d2c37;
+  --color-background: #151f26;
   --color-border-spreadsheet: #334958;
   --color-text-header: #4e6c82;
   --color-text-cell-not-focused: #8ca4b3;
-  --color-text-cell: #05ec00;
+  --color-text-cell: #149820;
+  --color-cell-focused-bg: #1e0e3a; /* 4f1377c6 */
   --color-white: #fff;
   --color-hover-cell: #17222b;
   --color-hover-over-white: #dfdfdf;
@@ -23,10 +25,13 @@ html {
 body {
   background-color: var(--color-background);
   height: 100%;
+  font-family: var(--font-primary);
+  font-weight: 400;
 }
 
 input {
   background-color: var(--color-background);
+  font-family: var(--font-primary);
 }
 
 div#root {

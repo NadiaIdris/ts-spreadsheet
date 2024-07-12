@@ -101,7 +101,6 @@ export default Cell;
 export type { ICell };
 
 const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
-  background-color: ${(props) => (props.isSelected ? "#630DA7" : "")};
   border: none;
   color: var(--color-text-cell-not-focused);
   max-width: 90px;
@@ -117,7 +116,7 @@ const CellStyled = styled.input<{ isFocused?: boolean; isSelected?: boolean }>`
   }
 
   ::selection {
-    background-color: orange;
-    color: purple;
+    background-color: #27f939;
+    color: #260526;
   }
 `;

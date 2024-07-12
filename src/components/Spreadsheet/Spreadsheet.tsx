@@ -90,7 +90,7 @@ const Spreadsheet = ({
       } as ICellData;
     })
   );
-  const [spreadsheetState, setSpreadsheetState] = useState<ICellData[][]>(grid);
+  const [ spreadsheetState, setSpreadsheetState ] = useState<ICellData[][]>(grid);
   const [selectedCells, setSelectedCells] = useState<SelectedCells>({
     previousCell: { rowIdx: null, columnIdx: null },
     selectionStartCell: { rowIdx: null, columnIdx: null },
@@ -152,8 +152,6 @@ const Spreadsheet = ({
   };
 
   const handleCellBlur = ({
-    rowIdx,
-    columnIdx,
     event,
   }: {
     rowIdx: number;
@@ -191,7 +189,6 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.FocusEvent<HTMLInputElement>;
   }) => {
-    console.log("%ccell onFocus got called", "color: #EA00C4");
     event.stopPropagation();
     changeCellState({
       columnIdx,
@@ -203,10 +200,8 @@ const Spreadsheet = ({
     const currentCell = { rowIdx, columnIdx };
     // If the current cell is already selected, then don't update the selectedCells state.
     if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-      console.log("current cell is already selected");
       return;
     }
-    console.log("current cell is not selected");
     setSelectedCells({
       previousCell: currentCell,
       selectionStartCell: currentCell,
@@ -224,7 +219,6 @@ const Spreadsheet = ({
     columnIdx: number;
     newValue: string;
   }) => {
-    console.log("cell value changed --->", newValue);
     const currentCell = spreadsheetState[rowIdx][columnIdx];
     // If the new value is the same as the current value, then don't update the cell value.
     if (currentCell.value === newValue) return;
@@ -280,23 +274,10 @@ const Spreadsheet = ({
   const handleCellOnContextMenu = ({ event }: { event: React.MouseEvent }) => {
     event.preventDefault();
     event.stopPropagation();
-    // console.log(
-    //   "%ccontextmenu event.clientX, event.clientY --->",
-    //   "color: #09B7EE",
-    //   event.clientX,
-    //   event.clientY
-    // );
-    // setContextMenu({
-    //   isContextMenuOpen: true,
-    //   locationX: event.clientX,
-    //   locationY: event.clientY,
-    // });
-    // Add focus to the cell where the dragging started.
     moveFocusTo(
       selectedCells.selectionStartCell.columnIdx!,
       selectedCells.selectionStartCell.rowIdx!
     );
-    // setIsSelecting(false);
   };
 
   const handleDoubleClick = ({
@@ -343,15 +324,9 @@ const Spreadsheet = ({
     columnIdx: number;
     event: React.DragEvent<HTMLDivElement>;
   }) => {
-    // console.log(`onDragEnd ---> columnIdx: ${columnIdx} rowIdx: ${rowIdx}`);
-    // console.log(
-    //   `onDragEnd event.dataTransfer.dropEffect ---->`,
-    //   event.dataTransfer.dropEffect
-    // );
     // If cell was dragged to a cell that is not droppable, then early return.
     if (event.dataTransfer.dropEffect === "none") return;
     // If the cell was dropped on the same cell, then don't change the cell state.
-    // console.log("currentCell on DragEnd ---->", currentCell);
     if (currentCell.columnIdx === columnIdx && currentCell.rowIdx === rowIdx)
       return;
 
@@ -373,9 +348,6 @@ const Spreadsheet = ({
     event: React.DragEvent<HTMLDivElement>;
   }) => {
     const data = event.dataTransfer.getData("text/plain");
-    // console.log("onDrop columnIdx ---->", columnIdx);
-    // console.log("onDrop rowIdx ---->", rowIdx);
-    // console.log("onDrop data ---->", data);
     setCurrentCell({ columnIdx, rowIdx });
     changeCellState({
       rowIdx,
@@ -408,7 +380,7 @@ const Spreadsheet = ({
           `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
         );
     } catch (error) {
-      console.log("error in updating db ---->", error);
+      console.error("error in updating db ---->", error);
     }
   };
 
@@ -423,7 +395,6 @@ const Spreadsheet = ({
     event: React.KeyboardEvent<HTMLInputElement>,
     rowIdx: number
   ) => {
-    console.log("onKeyDown got called");
     const currentCell = spreadsheetState[rowIdx][columnIdx];
 
     // Keep ctrlKey combinations at the top.
@@ -449,7 +420,6 @@ const Spreadsheet = ({
     if (event.key.length === 1) {
       if (currentCell.isFocused && !currentCell.isEditing) {
         // Clear the cell value.
-        // console.log("isEditing is false and event.key is --->", event.key);
         changeCellState({
           rowIdx,
           columnIdx,
@@ -591,7 +561,6 @@ const Spreadsheet = ({
     setIsSelecting(true);
 
     if (arrayIncludesObject(selectedCells.allSelectedCells, currentCell)) {
-      console.log(" OnMouseDown current cell is already selected");
       return;
     }
 
@@ -604,292 +573,6 @@ const Spreadsheet = ({
       allSelectedCells: [currentCell],
     });
   };
-
-  // Below is more perfomant section algorithm.
-  /** Learn more about selection mental model from README.md. */
-  // const handleOnMouseOver = (
-  //   columnIdx: number,
-  //   event: React.MouseEvent,
-  //   rowIdx: number
-  // ) => {
-  //   event.preventDefault();
-  //   event.stopPropagation();
-
-  //   if (selecting) {
-  //     console.log("is selecting and mouse over called");
-  //     /**
-  //      * Selection start cell is the cell where the user started the selection.
-  //      * @example
-  //      * | selectionStartCell | cell | cell             |
-  //      * | cell               | cell | cell             |
-  //      * | cell               | cell | selectionEndCell |
-  //      */
-  //     let newSelectionStartCell: SelectedCell = {
-  //       rowIdx: selectedCells.selectionStartCell.rowIdx,
-  //       columnIdx: selectedCells.selectionStartCell.columnIdx,
-  //     };
-
-  //     /**
-  //      * Selection end cell is the cell where the user ended the selection.
-  //      * @example
-  //      * | selectionStartCell | cell | cell             |
-  //      * | cell               | cell | cell             |
-  //      * | cell               | cell | selectionEndCell |
-  //      */
-  //     let newSelectionEndCell: SelectedCell = {
-  //       rowIdx: selectedCells.selectionEndCell.rowIdx,
-  //       columnIdx: selectedCells.selectionEndCell.columnIdx,
-  //     };
-
-  //     const {
-  //       previousCell,
-  //       selectionStartCell,
-  //       selectionEndCell,
-  //       allSelectedCells,
-  //     } = selectedCells;
-
-  //     const currentCell = { rowIdx, columnIdx };
-  //     const newAllSelectedCells = [...allSelectedCells];
-  //     const currentCellIsSelected = arrayIncludesObject(
-  //       newAllSelectedCells,
-  //       currentCell
-  //     );
-
-  //     const movedUp = selectedCells.previousCell.rowIdx! > rowIdx;
-  //     const movedDown = selectedCells.previousCell.rowIdx! < rowIdx;
-  //     const movedLeft = selectedCells.previousCell.columnIdx! > columnIdx;
-  //     const movedRight = selectedCells.previousCell.columnIdx! < columnIdx;
-
-  //     /**
-  //      * Selected cells to the right of the previous cell.
-  //      * @example
-  //      * | previousCell | selectedCell | selectedCell |
-  //      */
-  //     const cellsToTheRight = newAllSelectedCells.filter((cell) =>
-  //       selectedCellToTheRightOfPrevCell(cell, previousCell)
-  //     );
-
-  //     /**
-  //      * Selected cells to the left of the previous cell.
-  //      * @example
-  //      * | selectedCell | selectedCell | previousCell |
-  //      * */
-  //     const cellsToTheLeft = newAllSelectedCells.filter((cell) =>
-  //       selectedCellToTheLeftOfPrevCell(cell, previousCell)
-  //     );
-
-  //     /**
-  //      * Selected cells above previous cell.
-  //      * @example
-  //      * | selectedCell |
-  //      * | selectedCell |
-  //      * | previousCell |
-  //      */
-  //     const cellsAbove = newAllSelectedCells.filter((cell) =>
-  //       selectedCellAbovePrevCell(cell, previousCell)
-  //     );
-
-  //     /**
-  //      * Selected cells below previous cell.
-  //      * @example
-  //      * | previousCell |
-  //      * | selectedCell |
-  //      * | selectedCell |
-  //      */
-  //     const cellsBelow = newAllSelectedCells.filter((cell) =>
-  //       selectedCellBelowPrevCell(cell, previousCell)
-  //     );
-
-  //     // SELECT cell or cells (currCell + cells on right of currCell or currCell + cells on left of currCell).
-  //     if (movedUp && !currentCellIsSelected) {
-  //       newAllSelectedCells.push(currentCell);
-
-  //       if (cellsToTheRight.length > 0) {
-  //         cellsToTheRight.forEach((cell) =>
-  //           addCellAboveToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       } else if (cellsToTheLeft.length > 0) {
-  //         cellsToTheLeft.forEach((cell) =>
-  //           addCellAboveToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       }
-
-  //       newSelectionStartCell = {
-  //         rowIdx: currentCell.rowIdx,
-  //         columnIdx: selectionStartCell.columnIdx,
-  //       };
-  //     }
-
-  //     // UNSELECT cell or cells (prevCell + cells right of prevCell or prevCell + cells left of prevCell).
-  //     if (movedUp && currentCellIsSelected) {
-  //       if (cellsToTheRight.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsToTheRight, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else if (cellsToTheLeft.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsToTheLeft, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else {
-  //         // Single column selection.
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       }
-
-  //       newSelectionEndCell = {
-  //         rowIdx: currentCell.rowIdx,
-  //         columnIdx: selectionEndCell.columnIdx,
-  //       };
-  //     }
-
-  //     // SELECT cell or cells (currCell + cells right of currCell or currCell + cells left of currCell).
-  //     if (movedDown && !currentCellIsSelected) {
-  //       newAllSelectedCells.push(currentCell);
-
-  //       if (cellsToTheRight.length > 0) {
-  //         cellsToTheRight.forEach((cell) =>
-  //           addCellBelowToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       } else if (cellsToTheLeft.length > 0) {
-  //         cellsToTheLeft.forEach((cell) =>
-  //           addCellBelowToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       }
-
-  //       newSelectionEndCell = {
-  //         rowIdx: currentCell.rowIdx,
-  //         columnIdx: selectionEndCell.columnIdx,
-  //       };
-  //     }
-
-  //     // UNSELECT cell or cells (prevCell + cells right of prevCell or prevCell + cells left of prevCell).
-  //     if (movedDown && currentCellIsSelected) {
-  //       if (cellsToTheRight.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsToTheRight, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else if (cellsToTheLeft.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsToTheLeft, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else {
-  //         // Single column selection.
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       }
-
-  //       newSelectionStartCell = {
-  //         rowIdx: currentCell.rowIdx,
-  //         columnIdx: selectionStartCell.columnIdx,
-  //       };
-  //     }
-
-  //     // SELECT cell or cells (currCell + cells above currCell or currCell + cells below currCell).
-  //     if (movedLeft && !currentCellIsSelected) {
-  //       newAllSelectedCells.push(currentCell);
-
-  //       if (cellsAbove.length > 0) {
-  //         cellsAbove.forEach((cell) =>
-  //           addCellInLeftColumnToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       } else if (cellsBelow.length > 0) {
-  //         cellsBelow.forEach((cell) =>
-  //           addCellInLeftColumnToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       }
-
-  //       const currentCellIsInSameRowAsStartCell =
-  //         currentCell.rowIdx === selectionStartCell.rowIdx!;
-  //       const currentCellIsBelowStartCell =
-  //         currentCell.rowIdx > selectionStartCell.rowIdx!;
-
-  //       if (currentCellIsInSameRowAsStartCell) {
-  //         newSelectionStartCell = currentCell;
-  //       }
-
-  //       if (currentCellIsBelowStartCell) {
-  //         newSelectionStartCell = {
-  //           rowIdx: selectionStartCell.rowIdx,
-  //           columnIdx: currentCell.columnIdx,
-  //         };
-  //       }
-  //     }
-
-  //     // UNSELECT cell or cells (prevCell + cells above prevCell or prevCell + cells below prevCell).
-  //     if (movedLeft && currentCellIsSelected) {
-  //       if (cellsAbove.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsAbove, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else if (cellsBelow.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsBelow, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else {
-  //         // Single row selection.
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       }
-
-  //       newSelectionEndCell = {
-  //         rowIdx: selectionEndCell.rowIdx,
-  //         columnIdx: currentCell.columnIdx,
-  //       };
-  //     }
-
-  //     // SELECT cell or cells (currCell + cells above currCell or currCell + cells below currCell).
-  //     if (movedRight && !currentCellIsSelected) {
-  //       newAllSelectedCells.push(currentCell);
-
-  //       if (cellsAbove.length > 0) {
-  //         cellsAbove.forEach((cell) =>
-  //           addCellInRightColumnToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       } else if (cellsBelow.length > 0) {
-  //         cellsBelow.forEach((cell) =>
-  //           addCellInRightColumnToAllSelectedCells(cell, newAllSelectedCells)
-  //         );
-  //       }
-
-  //       const currentCellIsInSameRowAsEndCell =
-  //         currentCell.rowIdx === selectionEndCell.rowIdx!;
-  //       const currentCellIsAboveEndCell =
-  //         currentCell.rowIdx < selectionEndCell.rowIdx!;
-
-  //       if (currentCellIsInSameRowAsEndCell) {
-  //         newSelectionEndCell = currentCell;
-  //       }
-
-  //       if (currentCellIsAboveEndCell) {
-  //         newSelectionEndCell = {
-  //           rowIdx: selectionEndCell.rowIdx,
-  //           columnIdx: currentCell.columnIdx,
-  //         };
-  //       }
-  //     }
-
-  //     // UNSELECT cell or cells (prevCell + cells above prevCell or prevCell + cells below prevCell).
-  //     if (movedRight && currentCellIsSelected) {
-  //       if (cellsAbove.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsAbove, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else if (cellsBelow.length > 0) {
-  //         removeCellsFromAllSelectedCells(cellsBelow, newAllSelectedCells);
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       } else {
-  //         // Single row selection.
-  //         removeCellFromAllSelectedCells(previousCell, newAllSelectedCells);
-  //       }
-
-  //       newSelectionStartCell = {
-  //         rowIdx: selectionStartCell.rowIdx,
-  //         columnIdx: currentCell.columnIdx,
-  //       };
-  //     }
-
-  //     allSelectedCells.forEach((cell) => {
-  //       // Change the cell's background color to blue.
-  //     });
-
-  //     setSelectedCells({
-  //       previousCell: currentCell,
-  //       selectionStartCell: newSelectionStartCell,
-  //       selectionEndCell: newSelectionEndCell,
-  //       allSelectedCells: newAllSelectedCells,
-  //     });
-  //   }
-  // };
 
   function handleMouseMove(currentCell: SelectedCell) {
     const { selectionStartCell, previousCell } = selectedCells;
@@ -996,27 +679,12 @@ const Spreadsheet = ({
     // If text is selected, copy only the selected text.
     // Info on JS selection: https://stackoverflow.com/a/53052928/10029397
     const selection = window.getSelection();
-    console.log("selection --->", selection);
-    console.log("spreadsheet state -->", spreadsheetState);
-    console.log("rowIdx -->", rowIdx, "columnIdx --> ", columnIdx);
-    console.log(
-      "spreadsheetstate[rowIdx][columnIdx] -->",
-      spreadsheetState[rowIdx][columnIdx].value
-    );
 
     if (selection?.type === "Range") {
       navigator.clipboard.writeText(selection.toString());
-      console.log("part of text selected -->", selection.toString());
       return;
     }
 
-    //If the type property is set to "Caret", this indicates that no text has been selected, and the entire cell value should be copied instead.
-    if (selection?.type === "Caret") {
-      // console.log(
-      //   "whole cell selected",
-      //   spreadsheetState[rowIdx][columnIdx].value!
-      // );
-    }
     // Copy the whole cell value.
     navigator.clipboard.writeText(spreadsheetState[rowIdx][columnIdx].value!);
   };
@@ -1207,14 +875,12 @@ const Spreadsheet = ({
           "Content-Type": "application/json",
         },
       });
-      // console.log("response ---> ", responseBody);
       // Check if the response is not ok.
       if (!responseBody.ok)
         throw new Error(
           `🪷🪷🪷 Error fetching data from the server. HTTP status ${responseBody.status}`
         );
       const data = await responseBody.json();
-      // console.log("data ----> ", data);
       spreadsheetData = data;
       // Empty array means there is no data in the database.
       if (data.length === 0) return;
@@ -1263,24 +929,15 @@ const Spreadsheet = ({
                       { rowIdx, columnIdx }
                     )}
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      console.log(
-                        "<CellWrapper> %conClick called",
-                        "color: yellow"
-                      );
                       handleCellClick({ rowIdx, columnIdx, event });
                     }}
                     onContextMenu={(event: React.MouseEvent) => {
-                      console.log(
-                        "<CellWrapper> %conContextMenu called",
-                        "color: #0084c8"
-                      );
                       handleCellOnContextMenu({ event });
                     }}
                     onDragEnd={(event: React.DragEvent<HTMLDivElement>) =>
                       handleCellWrapperDragEnd({ rowIdx, columnIdx, event })
                     }
                     onDragStart={(event: React.DragEvent<HTMLDivElement>) => {
-                      console.log("<CellWrapper> onDragStart called");
                       handleCellWrapperDragStart({ rowIdx, columnIdx, event });
                     }}
                     /* Do not remove onDragOver. We need it. */
@@ -1291,10 +948,6 @@ const Spreadsheet = ({
                       handleCellWrapperDrop({ rowIdx, columnIdx, event });
                     }}
                     onMouseDown={(event: React.MouseEvent) => {
-                      console.log(
-                        "<CellWrapper> %conMouseDown called",
-                        "color: orange"
-                      );
                       handleOnMouseDown({ rowIdx, columnIdx, event });
                     }}
                     onMouseOver={(event: any) => {
@@ -1317,7 +970,6 @@ const Spreadsheet = ({
                       }}
                       key={`cell-${rowIdx}/${columnIdx}`}
                       onBlur={(event: React.FocusEvent) => {
-                        console.log("<Cell> %conBlur called", "color: red");
                         handleCellBlur({ rowIdx, columnIdx, event });
                       }}
                       onFocus={(
@@ -1326,26 +978,18 @@ const Spreadsheet = ({
                         handleCellFocus({ rowIdx, columnIdx, event });
                       }}
                       onChange={(newValue) => {
-                        console.log("<Cell> onChange called");
                         handleCellValueChange({ rowIdx, columnIdx, newValue });
                       }}
                       onClick={(event: React.MouseEvent) => {
-                        console.log("<Cell> %conClick called", "color: yellow");
                         handleCellClick({ rowIdx, columnIdx, event });
                       }}
                       onContextMenu={(event: React.MouseEvent) => {
-                        console.log(
-                          "<Cell> %conContextMenu called",
-                          "color: #0084c8"
-                        );
                         handleCellOnContextMenu({ event });
                       }}
                       onCopy={() => {
-                        console.log("<Cell> onCopy called");
                         handleOnCopy({ rowIdx, columnIdx });
                       }}
                       onCut={() => {
-                        console.log("<Cell> onCut called");
                         handleOnCut({ rowIdx, columnIdx });
                       }}
                       onDoubleClick={() =>
@@ -1361,36 +1005,20 @@ const Spreadsheet = ({
                       onKeyDown={(
                         event: React.KeyboardEvent<HTMLInputElement>
                       ) => {
-                        console.log("<Cell> onKeyDown called");
                         handleKeyDown(columnIdx, event, rowIdx);
                       }}
                       onMouseDown={(event: React.MouseEvent) => {
-                        console.log(
-                          "<Cell> %conMouseDown called",
-                          "color: orange"
-                        );
                         handleOnMouseDown({ rowIdx, columnIdx, event });
                       }}
                       onMouseMove={() => {
-                        // console.log("<Cell> onMouseMove called");
                         handleMouseMove({ rowIdx, columnIdx });
-                      }}
-                      onMouseOver={(
-                        event: React.MouseEvent<HTMLInputElement>
-                      ) => {
-                        // handleOnMouseOver(columnIdx, event, rowIdx);
                       }}
                       onMouseUp={(
                         event: React.MouseEvent<HTMLInputElement>
                       ) => {
-                        console.log(
-                          "<Cell> %conMouseUp called",
-                          "color: purple"
-                        );
                         handleOnMouseUp({ rowIdx, columnIdx });
                       }}
                       onPaste={() => {
-                        console.log("<Cell> onPaste called");
                         handleOnPaste({ rowIdx, columnIdx });
                       }}
                       ref={(element: HTMLInputElement) =>
