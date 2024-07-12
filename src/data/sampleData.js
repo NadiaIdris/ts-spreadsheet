@@ -78,34 +78,6 @@ export const sampleData = [
       isEditing: false,
       value: "Jul 11",
     },
-    {
-      columnIdx: 12,
-      rowIdx: 0,
-      isFocused: false,
-      isEditing: false,
-      value: "Jul 12",
-    },
-    {
-      columnIdx: 13,
-      rowIdx: 0,
-      isFocused: false,
-      isEditing: false,
-      value: "Jul 13",
-    },
-    {
-      columnIdx: 14,
-      rowIdx: 0,
-      isFocused: false,
-      isEditing: false,
-      value: "Jul 14",
-    },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 0,
-      value: "Jul 15",
-    },
   ],
   [
     {
@@ -192,34 +164,6 @@ export const sampleData = [
       isEditing: false,
       value: "903,502.72",
     },
-    {
-      columnIdx: 12,
-      rowIdx: 1,
-      isFocused: false,
-      isEditing: false,
-      value: "903,502.72",
-    },
-    {
-      columnIdx: 13,
-      rowIdx: 1,
-      isFocused: false,
-      isEditing: false,
-      value: "903,502.72",
-    },
-    {
-      columnIdx: 14,
-      rowIdx: 1,
-      isFocused: false,
-      isEditing: false,
-      value: "903,502.72",
-    },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 1,
-      value: "909,663.22",
-    },
   ],
   [
     {
@@ -246,16 +190,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 2, value: "" },
     { columnIdx: 10, rowIdx: 2, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 2, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 2, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 2, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 2, isFocused: false, isEditing: false, value: "" },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 2,
-      value: "6,160.5",
-    },
   ],
   [
     { columnIdx: 0, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
@@ -270,10 +204,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 3, value: "" },
     { columnIdx: 10, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 3, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 3, value: "" },
   ],
   [
     {
@@ -300,10 +230,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 4, value: "" },
     { columnIdx: 10, rowIdx: 4, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 4, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 4, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 4, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 4, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 4, value: "" },
   ],
   [
     {
@@ -330,10 +256,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 5, value: "" },
     { columnIdx: 10, rowIdx: 5, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 5, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 5, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 5, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 5, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 5, value: "" },
   ],
   [
     {
@@ -360,10 +282,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 6, value: "" },
     { columnIdx: 10, rowIdx: 6, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 6, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 6, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 6, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 6, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 6, value: "" },
   ],
   [
     {
@@ -390,10 +308,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 7, value: "" },
     { columnIdx: 10, rowIdx: 7, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 7, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 7, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 7, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 7, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 7, value: "" },
   ],
   [
     { columnIdx: 0, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
@@ -408,10 +322,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
     { columnIdx: 10, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
     { columnIdx: 11, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
-    { columnIdx: 12, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
-    { columnIdx: 13, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
-    { columnIdx: 14, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 8, value: "" },
   ],
   [
     {
@@ -432,10 +342,6 @@ export const sampleData = [
     { columnIdx: 9, isFocused: false, isEditing: false, rowIdx: 9, value: "" },
     { columnIdx: 10, rowIdx: 9, isFocused: false, isEditing: false, value: "" },
     { columnIdx: 11, rowIdx: 9, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 12, rowIdx: 9, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 13, rowIdx: 9, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 14, rowIdx: 9, isFocused: false, isEditing: false, value: "" },
-    { columnIdx: 15, isFocused: false, isEditing: false, rowIdx: 9, value: "" },
   ],
   [
     {
@@ -463,34 +369,6 @@ export const sampleData = [
     },
     {
       columnIdx: 11,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 10,
-      value: "",
-    },
-    {
-      columnIdx: 12,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 10,
-      value: "",
-    },
-    {
-      columnIdx: 13,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 10,
-      value: "",
-    },
-    {
-      columnIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 10,
-      value: "",
-    },
-    {
-      columnIdx: 15,
       isFocused: false,
       isEditing: false,
       rowIdx: 10,
@@ -528,34 +406,6 @@ export const sampleData = [
       rowIdx: 11,
       value: "",
     },
-    {
-      columnIdx: 12,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 11,
-      value: "",
-    },
-    {
-      columnIdx: 13,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 11,
-      value: "",
-    },
-    {
-      columnIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 11,
-      value: "",
-    },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 11,
-      value: "",
-    },
   ],
   [
     {
@@ -588,34 +438,6 @@ export const sampleData = [
       rowIdx: 12,
       value: "",
     },
-    {
-      columnIdx: 12,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 12,
-      value: "",
-    },
-    {
-      columnIdx: 13,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 12,
-      value: "",
-    },
-    {
-      columnIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 12,
-      value: "",
-    },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 12,
-      value: "",
-    },
   ],
   [
     { columnIdx: 0, isFocused: false, isEditing: false, rowIdx: 13, value: "" },
@@ -637,34 +459,6 @@ export const sampleData = [
     },
     {
       columnIdx: 11,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 13,
-      value: "",
-    },
-    {
-      columnIdx: 12,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 13,
-      value: "",
-    },
-    {
-      columnIdx: 13,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 13,
-      value: "",
-    },
-    {
-      columnIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 13,
-      value: "",
-    },
-    {
-      columnIdx: 15,
       isFocused: false,
       isEditing: false,
       rowIdx: 13,
@@ -700,34 +494,6 @@ export const sampleData = [
       rowIdx: 14,
       isFocused: false,
       isEditing: false,
-      value: "",
-    },
-    {
-      columnIdx: 12,
-      rowIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      value: "",
-    },
-    {
-      columnIdx: 13,
-      rowIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      value: "",
-    },
-    {
-      columnIdx: 14,
-      rowIdx: 14,
-      isFocused: false,
-      isEditing: false,
-      value: "",
-    },
-    {
-      columnIdx: 15,
-      isFocused: false,
-      isEditing: false,
-      rowIdx: 14,
       value: "",
     },
   ],
